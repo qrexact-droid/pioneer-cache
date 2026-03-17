@@ -345,6 +345,8 @@ select:focus{border-color:var(--gold)}
 </div>
 
 <script>
+
+
 const MN=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const RN={pacific:'Pacific Coast',southwest:'Southwest Desert',mountain:'Mountain West',midwest:'Midwest/Plains',southeast:'Southeast',northeast:'Northeast',midatlantic:'Mid-Atlantic',texas:'Texas/Gulf',alaska:'Alaska',hawaii:'Hawaii'};
 
@@ -1212,8 +1214,8 @@ tools:(r,m)=>`
 
 updateCtx();
 
-</script>
-<script>
+
+
 function showHome(){
   document.getElementById('navgrid').style.display='flex';
   document.getElementById('content').classList.remove('show');
@@ -2997,7 +2999,6 @@ ${detailHtml}
 
 <div class="tip" style="margin-top:16px"><strong>How to use:</strong> Click any state on the map or use the dropdown to see rivers, mountains, and key landmarks. Drag to pan. Use +/− to zoom. Rivers are blue lines — follow them downhill to find water and navigation corridors. Mountain triangles show major ranges.</div>
 
-<script>
 (function(){
   var vb = [80,95,640,400];
   var dragging=false, lastX=0, lastY=0, scale=1, tx=0, ty=0;
@@ -3049,7 +3050,7 @@ ${detailHtml}
     go('map');
   };
 })();
-</script>`;
+<\/script>`;
 };
 
 // ================================================================
@@ -3240,7 +3241,6 @@ ${sel.map(k=>STATE_INFO[k]?`<div class="card"><div class="ct">📍 ${STATE_INFO[
 <tr><td>High ground</td><td>Observation, signaling, communication, flood safety, usually drier and warmer at night</td></tr>
 </table></div>
 
-<script>
 (function(){
   // Try to load Leaflet from CDN
   if(typeof L !== 'undefined'){
@@ -3316,7 +3316,7 @@ ${sel.map(k=>STATE_INFO[k]?`<div class="card"><div class="ct">📍 ${STATE_INFO[
   // Init on load
   setTimeout(function(){ initMap(); }, 200);
 })();
-</script>`;
+<\/script>`;
 };
 
 function getLandmarks(r){
@@ -3552,6 +3552,9 @@ ${diseaseTable(horseDiseases)}</div>
 };
 
 
+
+
 </script>
+
 </body>
 </html>
