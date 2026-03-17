@@ -326,7 +326,9 @@ select:focus{border-color:var(--gold)}
         <p>Seasonal disease prevention by month</p>
       </div>
       <div class="catbox-items">
-        <div class="ci-btn" onclick="go('livestock')"><span class="ico">📅</span><span class="lbl">Seasonal Health Tasks</span></div>
+        <div class="ci-btn" onclick="go('animalhealth')"><span class="ico">📅</span><span class="lbl">Seasonal Health Tasks</span></div>
+        <div class="ci-btn" onclick="go('animalhealth')"><span class="ico">🌿</span><span class="lbl">Natural Treatments</span></div>
+        <div class="ci-btn" onclick="go('livestock')"><span class="ico">🐓</span><span class="lbl">All Livestock Guide</span></div>>📅</span><span class="lbl">Seasonal Health Tasks</span></div>
         <div class="ci-btn" onclick="go('livestock')"><span class="ico">🌿</span><span class="lbl">Natural Treatments</span></div>
         <div class="ci-btn" onclick="go('livestock')"><span class="ico">🐓</span><span class="lbl">All Livestock Guide</span></div>
       </div>
@@ -345,6 +347,10 @@ select:focus{border-color:var(--gold)}
 </div>
 
 <script>
+
+
+
+
 
 
 
@@ -2894,370 +2900,8 @@ function initMapControls(){
     if(sel) sel.value = code;
     go('mapview');
   };
+
 }
-
-PAGES.mapview = function(r,m){
-  const selectedState = (window._selectedState) || null;
-  const sd = selectedState ? STATE_DATA[selectedState] : null;
-
-  const stateOptions = Object.entries(STATE_DATA)
-    .sort((a,b)=>a[1].name.localeCompare(b[1].name))
-    .map(([code,d])=>`<option value="${code}" ${code===selectedState?'selected':''}>${d.name}</option>`)
-    .join('');
-
-  const detailHtml = sd ? `
-    <div class="kb" style="margin-top:20px">
-      <h3>📍 ${sd.name} — Geographic Reference</h3>
-      <div class="cg" style="margin-bottom:0">
-        <div class="card">
-          <div class="ct">💧 Major Rivers</div>
-          ${sd.rivers.map(r=>`<p style="margin-bottom:4px">• ${r}</p>`).join('')}
-        </div>
-        <div class="card">
-          <div class="ct">🏔️ Mountains &amp; High Points</div>
-          ${sd.mountains.map(m=>`<p style="margin-bottom:4px">• ${m}</p>`).join('')}
-        </div>
-        <div class="card">
-          <div class="ct">🌲 Key Landmarks &amp; Forests</div>
-          ${sd.landmarks.map(l=>`<p style="margin-bottom:4px">• ${l}</p>`).join('')}
-        </div>
-      </div>
-      <div class="tip" style="margin-top:14px"><strong>Survival note:</strong> Rivers are your primary navigation corridor and water source. Follow any drainage downhill to find the next river. Major national forests on this map are your best resource zones for foraging, game, water, and shelter.</div>
-    </div>` : `<div class="tip" style="margin-top:16px"><strong>Select a state above</strong> to see its rivers, mountains, and key landmarks.</div>`;
-
-  return `
-<div class="ph"><span class="pi">🗺️</span><h2>US Geographic Map</h2>
-<p class="sub">Rivers, mountains, and key landmarks for every state. Select your state for detailed geography.</p></div>
-
-<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
-  <select id="stateSelect" onchange="selectState(this.value)" style="font-size:.95rem;padding:8px 14px;min-width:200px">
-    <option value="">— Select a State —</option>
-    ${stateOptions}
-  </select>
-  ${selectedState?`<span style="font-family:Cinzel,serif;font-size:.75rem;color:var(--gold);letter-spacing:.1em">VIEWING: ${sd.name.toUpperCase()}</span>`:''}
-</div>
-
-<div id="mapwrap" style="background:#0a1628;border:1px solid rgba(100,150,220,.2);border-radius:4px;overflow:hidden;position:relative;user-select:none">
-  <div id="mapcontrols" style="position:absolute;top:10px;right:10px;z-index:10;display:flex;flex-direction:column;gap:6px">
-    <button onclick="mapZoom(1.25)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:6px 12px;cursor:pointer;border-radius:3px;font-size:1rem">+</button>
-    <button onclick="mapZoom(0.8)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:6px 12px;cursor:pointer;border-radius:3px;font-size:1rem">−</button>
-    <button onclick="mapReset()" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:4px 8px;cursor:pointer;border-radius:3px;font-size:.65rem;font-family:Cinzel,serif;letter-spacing:.05em">RESET</button>
-  </div>
-  <svg id="usmap" viewBox="80 95 640 400" style="width:100%;height:480px;cursor:grab" 
-       xmlns="http://www.w3.org/2000/svg"
-       onmousedown="mapDragStart(event)" onmousemove="mapDragMove(event)" onmouseup="mapDragEnd()" onmouseleave="mapDragEnd()"
-       ontouchstart="mapTouchStart(event)" ontouchmove="mapTouchMove(event)" ontouchend="mapDragEnd()">
-    <defs>
-      <filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    </defs>
-    <rect width="100%" height="100%" fill="#0a1628"/>
-    <!-- Grid lines (lat/lng approximation) -->
-    <g stroke="rgba(100,150,220,.07)" stroke-width=".5">
-      <line x1="80" y1="150" x2="720" y2="150"/><line x1="80" y1="200" x2="720" y2="200"/>
-      <line x1="80" y1="250" x2="720" y2="250"/><line x1="80" y1="300" x2="720" y2="300"/>
-      <line x1="80" y1="350" x2="720" y2="350"/><line x1="80" y1="400" x2="720" y2="400"/>
-      <line x1="150" y1="95" x2="150" y2="495"/><line x1="220" y1="95" x2="220" y2="495"/>
-      <line x1="290" y1="95" x2="290" y2="495"/><line x1="360" y1="95" x2="360" y2="495"/>
-      <line x1="430" y1="95" x2="430" y2="495"/><line x1="500" y1="95" x2="500" y2="495"/>
-      <line x1="570" y1="95" x2="570" y2="495"/><line x1="640" y1="95" x2="640" y2="495"/>
-      <line x1="710" y1="95" x2="710" y2="495"/>
-    </g>
-    <!-- Major rivers overlay -->
-    <g stroke="#3a6fa8" stroke-width="1.2" fill="none" opacity=".6" stroke-linecap="round">
-      <!-- Mississippi River -->
-      <path d="M 515,130 C 510,160 507,200 505,240 C 503,270 500,300 502,330 C 504,355 512,380 510,410 L 508,430"/>
-      <!-- Missouri River -->
-      <path d="M 240,172 C 280,175 320,180 360,185 C 400,188 440,192 475,200 C 495,205 508,215 510,225"/>
-      <!-- Ohio River -->
-      <path d="M 575,228 C 590,245 605,255 618,260 C 630,264 638,268 648,268"/>
-      <!-- Colorado River -->
-      <path d="M 220,230 C 215,260 210,290 195,320 C 185,340 170,355 160,365"/>
-      <!-- Rio Grande -->
-      <path d="M 280,295 C 310,320 330,345 345,380 C 355,400 365,420 375,440"/>
-      <!-- Columbia River -->
-      <path d="M 95,130 C 120,135 150,138 175,140 C 190,142 200,145 205,148"/>
-      <!-- Snake River -->
-      <path d="M 195,180 C 210,185 225,190 240,195 C 255,200 265,208 278,210"/>
-      <!-- Arkansas River -->
-      <path d="M 335,285 C 370,290 410,295 450,295 C 480,295 505,298 512,300"/>
-      <!-- Tennessee River -->
-      <path d="M 527,305 C 540,308 560,308 578,305 C 590,303 605,300 615,302"/>
-      <!-- Yukon River (AK) -->
-      <path d="M 130,445 C 160,448 185,452 210,455 C 225,457 240,458 255,456"/>
-    </g>
-    <!-- Mountain ranges (triangles) -->
-    <g fill="rgba(140,180,120,.18)" stroke="rgba(140,180,120,.4)" stroke-width=".8">
-      <!-- Rockies -->
-      <polygon points="240,130 250,110 260,130"/><polygon points="260,140 270,120 280,140"/>
-      <polygon points="280,150 290,130 300,150"/><polygon points="300,160 310,140 320,160"/>
-      <polygon points="320,170 330,150 340,170"/><polygon points="240,175 250,155 260,175"/>
-      <polygon points="260,185 270,165 280,185"/><polygon points="280,200 290,180 300,200"/>
-      <!-- Sierra Nevada -->
-      <polygon points="115,180 125,160 135,180"/><polygon points="130,200 140,180 150,200"/>
-      <polygon points="115,220 125,200 135,220"/><polygon points="120,240 130,220 140,240"/>
-      <!-- Cascades -->
-      <polygon points="115,105 125,90 135,105"/><polygon points="135,115 145,100 155,115"/>
-      <polygon points="115,130 125,115 135,130"/>
-      <!-- Appalachians -->
-      <polygon points="575,165 582,150 589,165"/><polygon points="589,175 596,160 603,175"/>
-      <polygon points="575,195 582,180 589,195"/><polygon points="562,215 569,200 576,215"/>
-      <polygon points="575,240 582,225 589,240"/><polygon points="568,260 575,245 582,260"/>
-      <polygon points="568,280 575,265 582,280"/><polygon points="570,300 577,285 584,300"/>
-      <!-- Alaska Range -->
-      <polygon points="155,442 165,425 175,442"/><polygon points="175,447 185,430 195,447"/>
-      <polygon points="195,450 205,433 215,450"/>
-      <!-- Ozarks -->
-      <polygon points="490,270 497,258 504,270"/><polygon points="500,280 507,268 514,280"/>
-      <!-- Black Hills -->
-      <polygon points="400,165 407,153 414,165"/>
-    </g>
-    <!-- State paths -->
-    <g id="states">
-      ${Object.entries(US_SVG_PATHS).map(([code, path])=>{
-        const isSel = code===selectedState;
-        const region = STATE_DATA[code]?.region||'midwest';
-        const rColors = {pacific:'#2d5a3d',southwest:'#5a3d1a',mountain:'#1a3a5a',midwest:'#2d3a1a',southeast:'#3a2d1a',northeast:'#1a2d3a',midatlantic:'#2d2d3a',texas:'#3a2d2d',alaska:'#1a3a4a',hawaii:'#2d1a3a'};
-        const fill = isSel ? '#b8922a' : (rColors[region]||'#1a2d2d');
-        const stroke = isSel ? '#ffd700' : 'rgba(150,200,255,.35)';
-        const sw = isSel ? '2' : '0.8';
-        return `<path d="${path}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" opacity="${isSel?1:.85}" data-state="${code}" onclick="selectState('${code}')" style="cursor:pointer;transition:all .15s" onmouseover="this.setAttribute('opacity','1');this.style.filter='brightness(1.4)'" onmouseout="this.setAttribute('opacity','${isSel?1:.85}');this.style.filter=''">${isSel?`<title>${STATE_DATA[code].name}</title>`:''}</path>`;
-      }).join('')}
-    </g>
-    <!-- State labels (abbreviations) -->
-    <g font-family="sans-serif" font-size="6" fill="rgba(200,225,255,.7)" text-anchor="middle">
-      ${Object.entries(STATE_DATA).filter(([c])=>c!=='AK'&&c!=='HI'&&c!=='DC').map(([code,d])=>{
-        const path = US_SVG_PATHS[code];
-        if(!path) return '';
-        // Parse center from path bounding box approximation
-        const nums = path.match(/[\d.]+/g)||[];
-        const xs=[],ys=[];
-        for(let i=0;i<nums.length;i+=2){xs.push(+nums[i]);ys.push(+nums[i+1]);}
-        const cx=(Math.min(...xs)+Math.max(...xs))/2;
-        const cy=(Math.min(...ys)+Math.max(...ys))/2;
-        return `<text x="${cx}" y="${cy+2}" style="pointer-events:none">${code}</text>`;
-      }).join('')}
-      <text x="175" y="465">AK</text>
-      <text x="250" y="518">HI</text>
-    </g>
-    <!-- Legend -->
-    <g transform="translate(85,455)">
-      <rect x="0" y="0" width="180" height="38" fill="rgba(10,22,40,.85)" rx="3"/>
-      <text x="6" y="12" font-family="sans-serif" font-size="7" fill="#a0c4f0">~ Rivers</text>
-      <line x1="40" y1="9" x2="70" y2="9" stroke="#3a6fa8" stroke-width="1.5"/>
-      <text x="6" y="24" font-family="sans-serif" font-size="7" fill="#a0c4f0">▲ Mountains</text>
-      <polygon points="50,18 54,11 58,18" fill="rgba(140,180,120,.3)" stroke="rgba(140,180,120,.6)" stroke-width=".8"/>
-      <text x="6" y="36" font-family="sans-serif" font-size="7" fill="rgba(184,146,42,.8)">■ Selected state</text>
-      <rect x="47" y="30" width="8" height="6" fill="#b8922a" opacity=".8"/>
-    </g>
-    <!-- Compass rose -->
-    <g transform="translate(690,118)">
-      <circle r="14" fill="rgba(10,22,40,.7)" stroke="rgba(100,150,220,.3)" stroke-width="1"/>
-      <polygon points="0,-12 -3,-4 3,-4" fill="#c8d8f0"/>
-      <polygon points="0,12 -3,4 3,4" fill="rgba(100,150,220,.4)"/>
-      <polygon points="-12,0 -4,-3 -4,3" fill="rgba(100,150,220,.4)"/>
-      <polygon points="12,0 4,-3 4,3" fill="rgba(100,150,220,.4)"/>
-      <text y="-15" text-anchor="middle" font-size="7" fill="#c8d8f0" font-family="sans-serif">N</text>
-    </g>
-  </svg>
-</div>
-
-${detailHtml}
-
-<div class="tip" style="margin-top:16px"><strong>How to use:</strong> Click any state on the map or use the dropdown to see rivers, mountains, and key landmarks. Drag to pan. Use +/− to zoom. Rivers are blue lines — follow them downhill to find water and navigation corridors. Mountain triangles show major ranges.</div>
-
-`;
-};
-
-// ================================================================
-// LIVESTOCK SEASONAL HEALTH CALENDAR — deepened disease content
-// ================================================================
-PAGES.animalhealth = function(r,m){
-  const season = [12,1,2].includes(m)?'winter':[3,4,5].includes(m)?'spring':[6,7,8].includes(m)?'summer':'fall';
-  const tasks = {
-    winter:{
-      chickens:["Check for frostbite on combs/wattles — apply petroleum jelly or tallow","Ensure liquid water 3x daily or use heated waterer","Add extra protein (mealworms, black oil sunflower seeds) — cold burns calories","Ventilate coop without drafts — moisture causes respiratory disease, not cold","Monitor for mites/lice — bugs concentrate in dry winter bedding"],
-      rabbits:["Protect from wind and wet — rabbits handle cold well if dry","Check water 3x daily — freezes quickly","Increase hay proportion — gut movement slows in cold, needs fiber","Monitor for snuffles (runny nose) — cold stress triggers it","Move does with kits indoors if below 20°F"],
-      goats:["Provide extra hay — 2x summer amount in cold","Check hooves — hoof rot thrives in mud and wet winter conditions","Watch for lice — part the hair near the spine to check","Ensure fresh water — goats refuse cold water and dehydrate","Selenium/vitamin E supplement if not on mineral","Pregnant does: increase grain to 1.5 lbs/day last 6 weeks of pregnancy"],
-      cattle:["Body condition scoring monthly — add feed if ribs become visible","Wind protection is non-negotiable — a windbreak reduces feed needs 20%","Check feet for foot rot (foul smell, swelling) — wet winter mud is prime time","Watch for respiratory disease in calves — cold stress plus crowding","Provide 30 lbs hay per 1,000 lb cow per cold day"],
-      horses:["Increase hay dramatically — horses generate heat by fermenting hay","Check weight weekly — blanketing masks body condition loss","Pick hooves daily — thrush (black rot) thrives in wet winter","Watch for colic — horses drink less cold water, impaction risk rises","Body clip or don't — either is fine but be consistent"]
-    },
-    spring:{
-      chickens:["Deworm with pumpkin seeds ground in feed — parasite eggs hatch in spring warmth","Deep clean coop — remove all bedding, scrub, dry completely","Check molt status — some birds may still be in late molt","Introduce new chicks if needed — spring is best hatch time","Watch for Marek's disease if introducing new birds"],
-      rabbits:["Breeding season beginning — check does are in good weight before breeding","Coccidiosis risk rises with warmth and wet — apple cider vinegar in water ongoing","Expand cage ventilation — heat stress kills rabbits faster than cold","Watch for GI stasis in newly green-grass-grazing rabbits — transition slowly"],
-      goats:["Hoof trim — growth accelerates in spring","Deworm if needed — fecal test first; resistance is a major problem with chemical dewormers","Breeding records — know who is due when","Freshen does (kidding) — provide privacy, clean pen, iodine for umbilical","Watch for white muscle disease in kids — selenium injection at birth if deficient region","CAE testing if bringing in new animals"],
-      cattle:["Spring pasture turnout — transition slowly (2 hrs/day increasing) or risk bloat on lush grass","Deworm calves","Brucellosis and IBR vaccination if not on annual program","Fly control starting — face flies spread pinkeye","Check for hardware disease (swallowed metal causes stomach puncture)"],
-      horses:["Gradual pasture introduction — laminitis risk on lush spring grass","First deworming of year","Dental float if not done in 12 months — sharp teeth cause weight loss","Shed winter coat — curry daily, improves circulation","Watch for rain rot — wet spring coat develops bacterial skin infections"]
-    },
-    summer:{
-      chickens:["Heat kills chickens faster than cold — shade and ventilation are critical","Provide frozen treats (frozen watermelon, ice water)","Move waterers to shade","Reduce corn in summer — generates more body heat than other grains","Watch for heat stress: panting, wings spread, pale comb = danger"],
-      rabbits:["CRITICAL: Rabbits die easily above 85°F. Frozen water bottles in cage saves lives.","Move cages to shadiest spot","Reduce breeding — pregnant does and newborn kits most vulnerable to heat","Wet a towel and drape over cage (evaporative cooling)","Provide unlimited fresh hay and water"],
-      goats:["Internal parasite peak — FAMACHA scoring monthly (check eyelid color for anemia)","Hoof rot peak — trim and inspect hooves every 6 weeks","Mastitis watch — check milk for chunks before every milking","Pinkeye (infectious conjunctivitis) spreads in summer — isolate any runny eye immediately","Provide shade — goats pant and stress in direct sun"],
-      cattle:["Face flies and horn flies peak — affect weight gain and spread pinkeye","Watch for summer mastitis in dry cows","Grass tetany risk if cattle on lush fast-growing pasture — magnesium supplement","Pinkeye peak — isolate affected animals, shade reduces spread","Heat stress reduces conception rates — shade near water"],
-      horses:["Bot fly eggs on legs — remove with bot knife or warm wet cloth","West Nile vaccination if in endemic area","Check for rain rot and fungal skin issues in sweaty horses","Ensure salt block always available — horses sweat heavily in heat","Watch for laminitis in easy keepers on summer grass"]
-    },
-    fall:{
-      chickens:["Molt begins — reduced egg production is normal, increase protein","Pre-winter coop repairs and weatherproofing","Stock up feed — builds winter reserves","Reduce or eliminate roosters if not breeding — saves feed","Mites and lice spike in fall — treat bedding with diatomaceous earth"],
-      rabbits:["Breed now for winter meat if needed — kits born in fall are ready Jan-Feb","Pre-winter hutch weatherproofing — block north and west wind","Stock extra hay — rabbits eat more in cold","Note: Pregnant does need extra nutrition — add black oil sunflower seeds"],
-      goats:["Breeding season — bucks become very active and aggressive","Does come into heat every 21 days — watch for standing behavior","Pre-breeding body condition — does should be in good flesh but not fat","Hoof trim before winter wet conditions","Deworming if FAMACHA scores indicate — do fecal count first","Pre-breeding vaccination booster"],
-      cattle:["Weaning calves","Pre-winter body condition check — add feed now if thin, cheaper than winter emergency feeding","Pre-breeding pregnancy check","Pre-winter vaccination booster","Build hay inventory — know your winter needs before snow falls"],
-      horses:["Fall deworming — tapeworms most effectively treated in fall","Pre-winter dental float","Body condition assessment — add weight before winter, much harder to add weight when cold","Check shoes or barefoot trim","Begin blanketing protocol if you blanket — be consistent"]
-    }
-  };
-
-  const st = tasks[season];
-  return `
-<div class="ph"><span class="pi">📅</span><h2>Livestock Health Calendar</h2>
-<p class="sub">${MN[m]} — ${season.charAt(0).toUpperCase()+season.slice(1)} health tasks and disease prevention for your animals.</p></div>
-
-<div class="rn">&#127758; Currently showing <strong>${season.toUpperCase()}</strong> health protocols (${MN[m]}). Change the month above to see a different season.</div>
-
-${Object.entries(st).map(([animal, tasks])=>`
-<div class="kb"><h3>${{chickens:'🐓 Chickens',rabbits:'🐇 Rabbits',goats:'🐐 Goats',cattle:'🐄 Cattle',horses:'🐴 Horses'}[animal]||animal} — ${season.charAt(0).toUpperCase()+season.slice(1)} Tasks</h3>
-<ul>${tasks.map(t=>`<li>${t}</li>`).join('')}</ul>
-</div>`).join('')}
-
-<div class="kb"><h3>🌿 Natural Antibiotic &amp; Treatment Reference</h3>
-<table class="tbl">
-<tr><th>Condition</th><th>Animals</th><th>Natural Treatment</th><th>Notes</th></tr>
-<tr><td>Bacterial infection (general)</td><td>All</td><td>Raw garlic (crushed, in water or feed). Oregano oil diluted. Colloidal silver if available.</td><td>Isolation is as important as treatment — stop spread first.</td></tr>
-<tr><td>Internal parasites (worms)</td><td>All</td><td>Pumpkin seeds ground into feed (cucurbitacin paralyzes worms). Black walnut hull tea. Diatomaceous earth in feed (food grade only). Rotate pastures — most effective prevention.</td><td>Resistance to chemical dewormers is widespread. Natural rotation is long-term solution.</td></tr>
-<tr><td>Respiratory infection</td><td>Chickens, rabbits, goats</td><td>Oregano oil in water. Eucalyptus steam in enclosed space. Improve ventilation first — most respiratory disease is humidity/ammonia related.</td><td>Isolate immediately. Most respiratory bugs spread rapidly through a flock.</td></tr>
-<tr><td>Mastitis (inflamed udder)</td><td>Goats, cattle</td><td>Frequent milking out. Cabbage leaf compress on udder (anti-inflammatory). Dilute oregano oil massage. Strip affected quarter every 2 hours.</td><td>Chunk or blood in milk = mastitis. Early treatment prevents chronic cases.</td></tr>
-<tr><td>Wound / laceration</td><td>All</td><td>Clean with boiled water. Pack with raw honey (proven antimicrobial). Pine pitch as sealant. Keep flies off — maggots in wounds are serious.</td><td>Clean irrigation is the most important step. Most wounds that fail are inadequately cleaned.</td></tr>
-<tr><td>Eye infection / pinkeye</td><td>Cattle, goats</td><td>Dilute raw honey eyewash. Aloe vera juice as eyewash. Strong black tea compress. Isolate — pinkeye spreads by flies.</td><td>Shade reduces spread dramatically. Fly control = pinkeye prevention.</td></tr>
-<tr><td>Bloat</td><td>Cattle, goats</td><td>Walk continuously (movement breaks gas bubble). Drench with 1 cup vegetable oil or mineral oil. Massage left flank where rumen is. Simethicone (Gas-X) works on ruminants.</td><td>Frothy bloat from lush legumes is most dangerous. Prevention: transition slowly to new pasture.</td></tr>
-<tr><td>Diarrhea / scours (young animals)</td><td>Calves, kids, chicks</td><td>Oral electrolytes (1 tsp salt + 1 tsp baking soda + 1 qt warm water). Kaolin-pectin (natural clay). Yogurt with live cultures. Withhold milk 12 hrs, replace with electrolytes.</td><td>Dehydration kills faster than the infection. Electrolytes first, always.</td></tr>
-</table></div>
-
-<div class="kb"><h3>📅 Annual Health Calendar Summary</h3>
-<table class="tbl">
-<tr><th>Month</th><th>Key Tasks (All Animals)</th></tr>
-<tr><td>January–February</td><td>Cold weather checks. Water daily. Extra nutrition. Watch for frostbite (chickens), respiratory stress (rabbits).</td></tr>
-<tr><td>March–April</td><td>Deep clean all housing. Spring parasite prevention begins. Slow pasture introduction. First breeding cycle check.</td></tr>
-<tr><td>May–June</td><td>Internal parasite peak — monthly FAMACHA (goats). Fly control starting. Heat stress preparation.</td></tr>
-<tr><td>July–August</td><td>Heat protection critical. Frozen water bottles for rabbits. Bot fly egg removal (horses). Mastitis vigilance.</td></tr>
-<tr><td>September–October</td><td>Breeding season (goats, cattle). Fall deworming. Body condition assessment. Pre-winter feed inventory.</td></tr>
-<tr><td>November–December</td><td>Winter prep. Weatherproof housing. Extra hay stockpile. Molt management (chickens). Hoof care before mud season.</td></tr>
-</table></div>`;
-};
-
-
-// ================================================================
-// INTERACTIVE MAP PAGE — Leaflet.js with online tiles + offline SVG fallback
-// ================================================================
-
-PAGES.map = function(r,m){
-
-// State coordinates and info
-const STATE_INFO = {
-  AL:{name:"Alabama",lat:32.8,lng:-86.8,z:7,features:"Appalachian foothills (NE), Tennessee River valley, Gulf Coast lowlands, longleaf pine forests, Mobile-Tensaw Delta (one of largest river deltas in US)"},
-  AK:{name:"Alaska",lat:64.2,lng:-153.0,z:4,features:"Alaska Range (Denali 20,310 ft), Brooks Range, Kenai Peninsula, Inside Passage, Yukon River, Arctic tundra, Tongass National Forest"},
-  AZ:{name:"Arizona",lat:34.3,lng:-111.1,z:6,features:"Grand Canyon, Sonoran Desert, Colorado River, Mogollon Rim, Painted Desert, Petrified Forest, Sky Island mountains"},
-  AR:{name:"Arkansas",lat:34.8,lng:-92.2,z:7,features:"Ozark Mountains (NW), Ouachita Mountains, Arkansas River, Mississippi River lowlands, Crowley's Ridge"},
-  CA:{name:"California",lat:37.2,lng:-119.5,z:6,features:"Sierra Nevada (Mt Whitney 14,505 ft), Coast Ranges, Central Valley, Mojave Desert, Sacramento/San Joaquin Rivers, Redwood forests"},
-  CO:{name:"Colorado",lat:39.0,lng:-105.5,z:6,features:"Rocky Mountains (53 fourteeners), Continental Divide, Colorado River headwaters, San Juan Mountains, Great Plains (east), Mesa Verde"},
-  CT:{name:"Connecticut",lat:41.6,lng:-72.7,z:9,features:"Connecticut River valley, Housatonic River, Long Island Sound coastline, Taconic Mountains (NW)"},
-  DE:{name:"Delaware",lat:39.0,lng:-75.5,z:9,features:"Coastal plain, Delaware Bay, Delaware River, flat terrain, Chesapeake & Delaware Canal"},
-  FL:{name:"Florida",lat:28.1,lng:-81.6,z:7,features:"Everglades, Lake Okeechobee, Florida Keys, Gulf Coast, Atlantic Coast, St Johns River, Okefenokee Swamp (N), karst springs"},
-  GA:{name:"Georgia",lat:32.9,lng:-83.4,z:7,features:"Blue Ridge Mountains (N), Piedmont plateau, Coastal Plain, Okefenokee Swamp, Savannah River, Chattahoochee River"},
-  HI:{name:"Hawaii",lat:20.5,lng:-157.4,z:7,features:"Mauna Kea (13,796 ft), Mauna Loa (active volcano), Na Pali Coast (Kauai), Waimea Canyon, coral reefs, tropical rainforest"},
-  ID:{name:"Idaho",lat:44.4,lng:-114.5,z:6,features:"Sawtooth Mountains, Snake River Plain, Hells Canyon (deepest gorge in NA), Salmon River, Coeur d'Alene Lake, Craters of the Moon"},
-  IL:{name:"Illinois",lat:40.0,lng:-89.2,z:7,features:"Mississippi River (W), Illinois River, Ohio River (S), flat glaciated plains, Shawnee Hills (S), Lake Michigan (NE)"},
-  IN:{name:"Indiana",lat:39.9,lng:-86.3,z:7,features:"Lake Michigan (NW), Ohio River (S), Wabash River, flat till plains, Hoosier National Forest, sand dunes"},
-  IA:{name:"Iowa",lat:42.1,lng:-93.5,z:7,features:"Mississippi River (E), Missouri River (W), flat glaciated plains, Loess Hills (W), Driftless Area (NE)"},
-  KS:{name:"Kansas",lat:38.5,lng:-98.4,z:7,features:"Great Plains, Arkansas River, Kansas River (Kaw), Smoky Hills, Flint Hills tallgrass prairie, Cimarron National Grassland"},
-  KY:{name:"Kentucky",lat:37.7,lng:-84.9,z:7,features:"Appalachian Mountains (E), Kentucky River, Ohio River (N), Mammoth Cave (longest cave system in world), Bluegrass Region, Land Between the Lakes"},
-  LA:{name:"Louisiana",lat:30.9,lng:-91.8,z:7,features:"Mississippi River Delta, Gulf Coast, Atchafalaya Basin (largest wetland in US), bayous, Lake Pontchartrain, Red River"},
-  ME:{name:"Maine",lat:45.4,lng:-69.0,z:7,features:"Appalachian Mountains, Mount Katahdin (5,269 ft), rocky coastline, Penobscot River, Moosehead Lake, Acadia National Park"},
-  MD:{name:"Maryland",lat:39.0,lng:-76.8,z:8,features:"Chesapeake Bay, Appalachian Mountains (W), Potomac River, Assateague Island, Eastern Shore coastal plain"},
-  MA:{name:"Massachusetts",lat:42.2,lng:-71.6,z:8,features:"Cape Cod, Martha's Vineyard, Berkshire Mountains (W), Connecticut River valley, Atlantic coastline, Boston Harbor"},
-  MI:{name:"Michigan",lat:44.3,lng:-85.5,z:7,features:"Great Lakes shoreline (longest freshwater coastline in world), Upper Peninsula (Porcupine Mountains), Sleeping Bear Dunes, Pictured Rocks"},
-  MN:{name:"Minnesota",lat:46.4,lng:-93.1,z:6,features:"Boundary Waters (10,000+ lakes), Boundary Waters Canoe Area, Mississippi River headwaters, North Shore of Lake Superior, Iron Range, Big Woods"},
-  MS:{name:"Mississippi",lat:32.7,lng:-89.7,z:7,features:"Mississippi River (W), Gulf Coast, Yazoo-Mississippi Delta, Pearl River, Natchez Trace, pine forests"},
-  MO:{name:"Missouri",lat:38.5,lng:-92.5,z:7,features:"Ozark Plateau, Missouri River, Mississippi River, Mark Twain National Forest, Current River, meramec River"},
-  MT:{name:"Montana",lat:47.0,lng:-110.0,z:6,features:"Rocky Mountains (W), Glacier National Park, Continental Divide, Yellowstone River, Missouri River headwaters, Great Plains (E)"},
-  NE:{name:"Nebraska",lat:41.5,lng:-99.9,z:7,features:"Sandhills (largest dune formation in Western Hemisphere), Platte River, Missouri River (E), Pine Ridge (NW), Chimney Rock"},
-  NV:{name:"Nevada",lat:39.5,lng:-116.9,z:6,features:"Great Basin Desert, Sierra Nevada (W), Lake Tahoe, Mojave Desert (S), Humboldt River, Basin and Range topography"},
-  NH:{name:"New Hampshire",lat:43.9,lng:-71.6,z:8,features:"White Mountains, Mount Washington (6,288 ft — highest wind ever recorded), Connecticut River (W), Lake Winnipesaukee, short coastline"},
-  NJ:{name:"New Jersey",lat:40.1,lng:-74.5,z:8,features:"Delaware River, Hudson River, Pine Barrens (largest coastal plain forest in NE), Jersey Shore, Kittatinny Ridge (NW)"},
-  NM:{name:"New Mexico",lat:34.5,lng:-106.0,z:6,features:"Rio Grande, Sangre de Cristo Mountains, White Sands, Carlsbad Caverns, Jemez Mountains, Chihuahuan Desert"},
-  NY:{name:"New York",lat:42.9,lng:-75.5,z:7,features:"Adirondack Mountains, Catskill Mountains, Lake Champlain, Finger Lakes, Hudson River, Niagara Falls, Long Island"},
-  NC:{name:"North Carolina",lat:35.5,lng:-79.4,z:7,features:"Blue Ridge Parkway, Great Smoky Mountains, Outer Banks barrier islands, Cape Hatteras, piedmont plateau, Cape Fear River"},
-  ND:{name:"North Dakota",lat:47.5,lng:-100.4,z:7,features:"Theodore Roosevelt National Park (badlands), Missouri River, Red River of the North, Pembina Hills, Drift Prairie"},
-  OH:{name:"Ohio",lat:40.4,lng:-82.8,z:7,features:"Lake Erie shoreline, Ohio River (S), Cuyahoga River, Hocking Hills (SE), Wayne National Forest, Mohican Country"},
-  OK:{name:"Oklahoma",lat:35.6,lng:-96.9,z:7,features:"Ouachita Mountains (SE), Ozarks (NE), Arkansas River, Red River (S), Arbuckle Mountains, Oklahoma Panhandle High Plains"},
-  OR:{name:"Oregon",lat:43.9,lng:-120.6,z:6,features:"Cascade Range (Mt Hood 11,239 ft), Coast Range, Columbia River, Crater Lake (deepest US lake), high desert (E), Willamette Valley"},
-  PA:{name:"Pennsylvania",lat:40.9,lng:-77.8,z:7,features:"Appalachian Mountains, Delaware River (E), Ohio River (W), Susquehanna River, Delaware Water Gap, Lake Erie (NW)"},
-  RI:{name:"Rhode Island",lat:41.7,lng:-71.5,z:10,features:"Narragansett Bay, Atlantic coastline, Blackstone River, Aquidneck Island, coastal ponds"},
-  SC:{name:"South Carolina",lat:33.8,lng:-80.9,z:7,features:"Blue Ridge Mountains (NW), Piedmont, ACE Basin, coastal islands/Sea Islands, Grand Strand, Santee-Cooper Lakes"},
-  SD:{name:"South Dakota",lat:44.3,lng:-100.2,z:7,features:"Black Hills (Harney Peak), Badlands National Park, Missouri River, Custer State Park, Wind Cave"},
-  TN:{name:"Tennessee",lat:35.9,lng:-86.4,z:7,features:"Great Smoky Mountains, Tennessee River, Cumberland Plateau, Reelfoot Lake, Land Between the Lakes, Mississippi River (W)"},
-  TX:{name:"Texas",lat:31.5,lng:-99.3,z:5,features:"Big Bend (Chisos Mountains), Rio Grande, Gulf Coast, Edwards Plateau/Hill Country, Llano Estacado, Piney Woods, Guadalupe Mountains"},
-  UT:{name:"Utah",lat:39.4,lng:-111.1,z:6,features:"Colorado River, Canyonlands, Zion Canyon, Bryce Canyon, Great Salt Lake, Uinta Mountains (Kings Peak 13,528 ft), Arches"},
-  VT:{name:"Vermont",lat:44.0,lng:-72.7,z:8,features:"Green Mountains, Connecticut River (E), Lake Champlain (W), Northeast Kingdom, Taconic Mountains (SW)"},
-  VA:{name:"Virginia",lat:37.8,lng:-79.5,z:7,features:"Blue Ridge Mountains, Shenandoah Valley, Chesapeake Bay, Potomac River, Virginia Beach, Dismal Swamp, New River"},
-  WA:{name:"Washington",lat:47.4,lng:-120.5,z:6,features:"Cascade Range (Mt Rainier 14,411 ft), Olympic Peninsula, Columbia River, Puget Sound, Olympic rainforest, Eastern Washington Columbia Plateau"},
-  WV:{name:"West Virginia",lat:38.7,lng:-80.6,z:7,features:"Allegheny Mountains, New River Gorge, Monongahela River, Ohio River (W), Dolly Sods wilderness, Potomac Highlands"},
-  WI:{name:"Wisconsin",lat:44.3,lng:-89.8,z:7,features:"Lake Superior, Lake Michigan, Mississippi River (W), Dells, Apostle Islands, Door Peninsula, Kettle Moraine"},
-  WY:{name:"Wyoming",lat:43.1,lng:-107.6,z:6,features:"Yellowstone (first national park, supervolcano), Grand Teton, Wind River Range (Gannett Peak 13,804 ft), Continental Divide, Green River"}
-};
-
-const sel = r==='pacific'?['CA','OR','WA']:r==='southwest'?['AZ','NM','NV','UT']:r==='mountain'?['CO','WY','MT','ID']:r==='midwest'?['MN','WI','MI','IA','IL','IN','MO','ND','SD','NE','KS']:r==='southeast'?['FL','GA','AL','SC','MS']:r==='northeast'?['ME','VT','NH','NY','MA','CT','RI']:r==='midatlantic'?['VA','MD','NC','WV','PA','DE','NJ']:r==='texas'?['TX','OK','AR','LA']:r==='alaska'?['AK']:['HI'];
-
-return `
-<div class="ph"><span class="pi">🗺️</span><h2>Interactive Map</h2>
-<p class="sub">Zoom, pan, and explore geographic landmarks for your region and every US state.</p></div>
-
-<div class="rn">🌎 Showing key states for <strong>${RN[r]}</strong>. Select any state below or use the full US map. Change region above to highlight different states.</div>
-
-<!-- State selector -->
-<div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-  <span style="font-family:Cinzel,serif;font-size:.7rem;color:var(--ash);letter-spacing:.12em;text-transform:uppercase">Jump to state:</span>
-  <select id="stateSelect" onchange="loadStateMap()" style="flex:1;max-width:280px">
-    <option value="">— Select a state —</option>
-    ${Object.entries(STATE_INFO).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([k,v])=>`<option value="${k}" ${sel.includes(k)?'style="font-weight:bold"':''}>${v.name}${sel.includes(k)?' ★':''}</option>`).join('')}
-  </select>
-  <button onclick="resetMap()" style="background:rgba(184,146,42,.15);border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:5px 12px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.1em;cursor:pointer;border-radius:2px">RESET</button>
-</div>
-
-<!-- State info panel -->
-<div id="stateInfo" style="display:none;background:linear-gradient(135deg,#1e1710,#160f08);border:1px solid rgba(184,146,42,.3);border-left:3px solid var(--gold);border-radius:3px;padding:14px 18px;margin-bottom:16px">
-  <div style="font-family:Cinzel,serif;font-size:1rem;color:var(--gold);margin-bottom:6px" id="stateName"></div>
-  <div style="font-size:.88rem;color:rgba(242,232,213,.82);line-height:1.7" id="stateFeatures"></div>
-</div>
-
-<!-- Map container -->
-<div id="mapWrap" style="border:1px solid rgba(184,146,42,.2);border-radius:4px;overflow:hidden;height:520px;background:#0a0f15;position:relative">
-  <div id="leafMap" style="height:100%;width:100%"></div>
-  <div id="mapOffline" style="display:none;height:100%;width:100%;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--ash);font-family:Cinzel,serif;font-size:.8rem;letter-spacing:.1em;text-align:center;padding:40px">
-    <div style="font-size:3rem">🗺️</div>
-    <div>Map tiles require internet connection</div>
-    <div style="font-size:.7rem;opacity:.6">Use the state selector above to view geographic features for any state</div>
-  </div>
-</div>
-
-<!-- Regional landmarks summary -->
-<div class="kb" style="margin-top:20px"><h3>📍 Key Geographic Features — ${RN[r]}</h3>
-<div class="cg">
-${sel.map(k=>STATE_INFO[k]?`<div class="card"><div class="ct">📍 ${STATE_INFO[k].name}</div><p style="font-size:.82rem">${STATE_INFO[k].features}</p></div>`:'').join('')}
-</div></div>
-
-<!-- Survival geography notes -->
-<div class="kb"><h3>🧭 Reading the Land for Survival</h3>
-<table class="tbl">
-<tr><th>Geographic Feature</th><th>Survival Significance</th></tr>
-<tr><td>River valleys</td><td>Water, game, travel corridors, fertile soil for planting, shelter from wind, historically where settlements formed</td></tr>
-<tr><td>Mountain ridgelines</td><td>Navigation reference, signal fire locations, wind exposure risk, elevation change means different plant species every 1,000 ft</td></tr>
-<tr><td>South-facing slopes</td><td>Warmer, drier, earlier snow melt — best foraging locations in spring, best shelter sites in cold regions</td></tr>
-<tr><td>North-facing slopes</td><td>Cooler, more moisture — better water sources in dry months, mosses, mushrooms, shade plants</td></tr>
-<tr><td>Wetlands/marshes</td><td>Cattail, waterfowl, fish, frogs, insects (water = life), but also flood risk and mosquito breeding ground</td></tr>
-<tr><td>Forest edges</td><td>Most productive wildlife habitat — deer, turkey, rabbits concentrate where open meets closed. Best hunting and trapping locations.</td></tr>
-<tr><td>Rock outcrops</td><td>Shelter from wind and rain, rattlesnake habitat, flint/chert sources for fire-making, often near water seeps</td></tr>
-<tr><td>High ground</td><td>Observation, signaling, communication, flood safety, usually drier and warmer at night</td></tr>
-</table></div>
-
-;
-};
 
 function getLandmarks(r){
   var lm = {
@@ -3496,7 +3140,192 @@ ${diseaseTable(horseDiseases)}</div>
 
 
 
+
+
+
+
+PAGES.mapview = function(r,m){
+  const selectedState = (window._selectedState) || null;
+  const sd = selectedState ? STATE_DATA[selectedState] : null;
+
+  const stateOptions = Object.entries(STATE_DATA)
+    .sort((a,b)=>a[1].name.localeCompare(b[1].name))
+    .map(([code,d])=>`<option value="${code}" ${code===selectedState?'selected':''}>${d.name}</option>`)
+    .join('');
+
+  const detailHtml = sd ? `
+    <div class="kb" style="margin-top:20px">
+      <h3>&#128205; ${sd.name} &mdash; Geographic Reference</h3>
+      <div class="cg">
+        <div class="card"><div class="ct">&#128167; Major Rivers</div>
+          ${sd.rivers.map(r=>`<p style="margin-bottom:4px">&bull; ${r}</p>`).join('')}
+        </div>
+        <div class="card"><div class="ct">&#127956;&#65039; Mountains &amp; High Points</div>
+          ${sd.mountains.map(m=>`<p style="margin-bottom:4px">&bull; ${m}</p>`).join('')}
+        </div>
+        <div class="card"><div class="ct">&#127795; Key Landmarks &amp; Forests</div>
+          ${sd.landmarks.map(l=>`<p style="margin-bottom:4px">&bull; ${l}</p>`).join('')}
+        </div>
+      </div>
+      <div class="tip" style="margin-top:14px"><strong>Survival note:</strong> Rivers are your primary navigation corridor and water source. Follow any drainage downhill to find the next river. National forests are your best resource zones for foraging, game, water, and shelter.</div>
+    </div>` : `<div class="tip" style="margin-top:16px"><strong>Select a state above</strong> to see its rivers, mountains, and key landmarks.</div>`;
+
+  return `
+<div class="ph"><span class="pi">&#128506;&#65039;</span><h2>US Geographic Map</h2>
+<p class="sub">Rivers, mountains, and key landmarks for every state. Select your state for detailed geography.</p></div>
+
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+  <select id="stateSelect" onchange="window.selectState(this.value)" style="font-size:.95rem;padding:8px 14px;min-width:200px">
+    <option value="">&#8212; Select a State &#8212;</option>
+    ${stateOptions}
+  </select>
+  <button onclick="window.mapReset()" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:6px 14px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.1em">RESET MAP</button>
+  <button onclick="window.mapZoom(1.3)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:6px 12px;cursor:pointer;border-radius:3px;font-size:1rem">+</button>
+  <button onclick="window.mapZoom(0.75)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:6px 12px;cursor:pointer;border-radius:3px;font-size:1rem">&#8722;</button>
+  ${selectedState?`<span style="font-family:Cinzel,serif;font-size:.75rem;color:var(--gold);letter-spacing:.1em">VIEWING: ${sd.name.toUpperCase()}</span>`:''}
+</div>
+
+<div id="mapwrap" style="background:#0a1628;border:1px solid rgba(100,150,220,.2);border-radius:4px;overflow:hidden;position:relative;touch-action:none">
+  <svg id="usmap" viewBox="80 95 640 400" style="width:100%;height:480px;cursor:grab;display:block"
+       xmlns="http://www.w3.org/2000/svg"
+       onmousedown="window.mapDragStart(event)" onmousemove="window.mapDragMove(event)"
+       onmouseup="window.mapDragEnd()" onmouseleave="window.mapDragEnd()">
+    <rect width="100%" height="100%" fill="#0a1628"/>
+    <g stroke="rgba(100,150,220,.07)" stroke-width=".5">
+      <line x1="80" y1="150" x2="720" y2="150"/><line x1="80" y1="200" x2="720" y2="200"/>
+      <line x1="80" y1="250" x2="720" y2="250"/><line x1="80" y1="300" x2="720" y2="300"/>
+      <line x1="80" y1="350" x2="720" y2="350"/><line x1="80" y1="400" x2="720" y2="400"/>
+      <line x1="150" y1="95" x2="150" y2="495"/><line x1="220" y1="95" x2="220" y2="495"/>
+      <line x1="290" y1="95" x2="290" y2="495"/><line x1="360" y1="95" x2="360" y2="495"/>
+      <line x1="430" y1="95" x2="430" y2="495"/><line x1="500" y1="95" x2="500" y2="495"/>
+      <line x1="570" y1="95" x2="570" y2="495"/><line x1="640" y1="95" x2="640" y2="495"/>
+    </g>
+    <g stroke="#3a6fa8" stroke-width="1.2" fill="none" opacity=".6" stroke-linecap="round">
+      <path d="M515,130 C510,160 507,200 505,240 C503,270 500,300 502,330 C504,355 512,380 510,410"/>
+      <path d="M240,172 C280,175 360,185 400,188 C440,192 475,200 510,225"/>
+      <path d="M575,228 C590,245 618,260 648,268"/>
+      <path d="M220,230 C215,260 195,320 160,365"/>
+      <path d="M280,295 C330,345 365,420 375,440"/>
+      <path d="M95,130 C150,138 175,140 205,148"/>
+      <path d="M195,180 C225,190 255,200 278,210"/>
+    </g>
+    <g fill="rgba(140,180,120,.18)" stroke="rgba(140,180,120,.4)" stroke-width=".8">
+      <polygon points="240,130 250,110 260,130"/><polygon points="260,140 270,120 280,140"/>
+      <polygon points="280,150 290,130 300,150"/><polygon points="300,160 310,140 320,160"/>
+      <polygon points="115,180 125,160 135,180"/><polygon points="130,200 140,180 150,200"/>
+      <polygon points="115,105 125,90 135,105"/><polygon points="135,115 145,100 155,115"/>
+      <polygon points="575,165 582,150 589,165"/><polygon points="575,195 582,180 589,195"/>
+      <polygon points="562,215 569,200 576,215"/><polygon points="568,260 575,245 582,260"/>
+      <polygon points="568,280 575,265 582,280"/><polygon points="400,165 407,153 414,165"/>
+      <polygon points="155,442 165,425 175,442"/><polygon points="175,447 185,430 195,447"/>
+    </g>
+    <g id="states">
+      ${Object.entries(US_SVG_PATHS).map(([code,path])=>{
+        const isSel = code===selectedState;
+        const reg = (STATE_DATA[code]||{}).region||'midwest';
+        const rc = {pacific:'#1a3d2a',southwest:'#3d2a0a',mountain:'#0a2a3d',midwest:'#1a2a0a',southeast:'#2a1a0a',northeast:'#0a1a2a',midatlantic:'#1a1a2a',texas:'#2a1a1a',alaska:'#0a2a3a',hawaii:'#1a0a2a'};
+        const fill = isSel?'#b8922a':(rc[reg]||'#1a2020');
+        const sw = isSel?'2':'0.8';
+        const stroke = isSel?'#ffd700':'rgba(150,200,255,.4)';
+        return `<path d="${path}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" data-state="${code}" onclick="window.selectState('${code}')" style="cursor:pointer" onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'"/>`;
+      }).join('')}
+    </g>
+    <g font-family="sans-serif" font-size="6" fill="rgba(200,225,255,.75)" text-anchor="middle" style="pointer-events:none">
+      ${Object.entries(US_SVG_PATHS).filter(([c])=>c!=='AK'&&c!=='HI'&&c!=='DC').map(([code,path])=>{
+        const nums = (path.match(/[\d.]+/g)||[]).map(Number);
+        const xs=[],ys=[];
+        for(let i=0;i<nums.length-1;i+=2){xs.push(nums[i]);ys.push(nums[i+1]);}
+        if(!xs.length) return '';
+        const cx=(Math.min(...xs)+Math.max(...xs))/2;
+        const cy=(Math.min(...ys)+Math.max(...ys))/2;
+        return `<text x="${cx.toFixed(1)}" y="${(cy+2).toFixed(1)}">${code}</text>`;
+      }).join('')}
+      <text x="175" y="465">AK</text>
+      <text x="250" y="518">HI</text>
+    </g>
+    <g transform="translate(690,118)">
+      <circle r="14" fill="rgba(10,22,40,.8)" stroke="rgba(100,150,220,.3)" stroke-width="1"/>
+      <polygon points="0,-12 -3,-4 3,-4" fill="#c8d8f0"/>
+      <polygon points="0,12 -3,4 3,4" fill="rgba(100,150,220,.35)"/>
+      <polygon points="-12,0 -4,-3 -4,3" fill="rgba(100,150,220,.35)"/>
+      <polygon points="12,0 4,-3 4,3" fill="rgba(100,150,220,.35)"/>
+      <text y="-15" text-anchor="middle" font-size="7" fill="#c8d8f0" font-family="sans-serif">N</text>
+    </g>
+  </svg>
+</div>
+
+${detailHtml}
+
+<div class="tip" style="margin-top:16px"><strong>How to use:</strong> Click any state on the map or use the dropdown to see rivers, mountains, and landmarks. Use +/&#8722; to zoom. Drag to pan. Blue lines are major rivers. Green triangles are mountain ranges.</div>`;
+};
+
+
+
+
+PAGES.animalhealth = function(r,m){
+  const season = [12,1,2].includes(m)?'winter':[3,4,5].includes(m)?'spring':[6,7,8].includes(m)?'summer':'fall';
+  const sName = season.charAt(0).toUpperCase()+season.slice(1);
+  const tasks = {
+    winter:{
+      '🐓 Chickens':['Check combs/wattles for frostbite — apply tallow or petroleum jelly','Ensure liquid water 3x daily or use a heated waterer','Add extra protein (mealworms, sunflower seeds) — cold weather burns more calories','Ventilate coop without drafts — moisture causes respiratory disease, not cold alone','Check for mites/lice — bugs concentrate in dry winter bedding'],
+      '🐇 Rabbits':['Protect from wind and wet — rabbits tolerate cold well if completely dry','Check water 3x daily — freezes quickly','Increase hay proportion — gut needs fiber to keep moving in cold','Watch for snuffles (runny nose) — cold stress triggers respiratory infection','Move does with newborn kits indoors if below 20°F'],
+      '🐐 Goats':['Provide extra hay — 2x summer amount in cold weather','Check hooves — hoof rot thrives in mud and wet winter conditions','Inspect for lice — part hair near the spine to check skin','Ensure fresh water — goats refuse cold water and will dehydrate rather than drink it','Supplement selenium/vitamin E if not on a mineral block','Pregnant does: increase grain to 1.5 lbs/day in the last 6 weeks before kidding'],
+      '🐄 Cattle':['Body condition score monthly — add feed immediately if ribs become visible','Wind protection is non-negotiable — a windbreak reduces feed needs by 20%','Check feet for foot rot (foul smell + swelling) — wet winter mud is prime time','Watch for respiratory disease in calves — cold stress plus crowding is dangerous','Plan 30 lbs of hay per 1,000 lb cow per cold day'],
+      '🐴 Horses':['Increase hay dramatically — horses generate heat by fermenting hay, not grain','Check weight weekly — blanketing hides body condition loss','Pick hooves daily — thrush (black rot) thrives in wet winter conditions','Watch for impaction colic — horses drink less cold water, risk rises','Be consistent with blanketing — blanket all winter or none at all']
+    },
+    spring:{
+      '🐓 Chickens':['Deep clean coop — remove all bedding, scrub walls, dry completely before re-bedding','Deworm naturally: grind pumpkin seeds into feed — cucurbitacin paralyzes worms','Watch for Marek's disease if introducing new birds to the flock','Spring is best time to hatch new chicks','Check molt status — some birds may still be in late molt from winter'],
+      '🐇 Rabbits':['Breeding season beginning — verify does are at good weight before breeding','Coccidiosis risk rises with warmth and wet — add apple cider vinegar to water daily','Expand cage ventilation — heat stress kills rabbits faster than cold','Transition to fresh grass slowly — sudden green grass causes GI stasis'],
+      '🐐 Goats':['Hoof trim — hoof growth accelerates in spring','Deworm if FAMACHA score indicates anemia — check eyelid color','Kidding season — provide clean private pen, iodine for umbilical cord','Watch for white muscle disease in kids — selenium injection at birth if in deficient region','Test for CAE if bringing in any new animals'],
+      '🐄 Cattle':['Slow pasture introduction — 2 hrs/day increasing over 2 weeks or risk frothy bloat','Deworm calves','Begin fly control program — face flies spread pinkeye','Check for hardware disease (swallowed metal) if cattle seem off','Spring vaccination boosters if on annual program'],
+      '🐴 Horses':['Introduce spring pasture gradually — laminitis risk is high on lush fast-growing grass','First deworming of the year','Dental float if not done in 12+ months — sharp teeth cause weight loss','Shed winter coat — daily currying improves circulation and skin health','Watch for rain rot — wet spring coat develops bacterial skin infections easily']
+    },
+    summer:{
+      '🐓 Chickens':['Heat kills chickens faster than cold — shade and ventilation are critical','Provide frozen treats (frozen watermelon, ice water bowls)','Move waterers into shade and refresh frequently','Reduce corn in feed — it generates more body heat than other grains','Signs of heat stress: panting, wings spread, pale comb — act immediately'],
+      '🐇 Rabbits':['CRITICAL: Rabbits die rapidly above 85°F — place frozen water bottles in cages','Move cages to the shadiest location available','Suspend breeding — pregnant does and newborn kits are most vulnerable to heat','Drape a wet towel over cage for evaporative cooling','Provide unlimited fresh water and hay at all times'],
+      '🐐 Goats':['FAMACHA scoring monthly — check lower eyelid color for anemia (internal parasites peak)','Hoof rot peaks in summer — trim and inspect hooves every 6 weeks','Check milk for chunks before every milking — mastitis watch','Pinkeye spreads rapidly in summer — isolate any animal with runny or cloudy eye','Provide shade — goats pant and go off feed in direct sun'],
+      '🐄 Cattle':['Horn flies and face flies peak — affect weight gain significantly','Watch for summer mastitis in dry cows','Pinkeye peak season — shade dramatically reduces spread','Heat stress reduces conception rates in breeding cattle','Grass tetany risk on lush fast-growing pasture — magnesium supplement helps'],
+      '🐴 Horses':['Remove bot fly eggs from legs — yellow dots on hair, use bot knife or warm cloth','Ensure salt block always available — horses sweat heavily','Check for laminitis in easy-keeper breeds on summer grass','Rain rot and fungal skin issues increase in sweaty horses — keep groomed and dry when possible','West Nile vaccination if in endemic area (most of US)']
+    },
+    fall:{
+      '🐓 Chickens':['Molt begins — reduced egg production is completely normal, increase protein in feed','Pre-winter coop repairs and weatherproofing before first hard freeze','Stock extra feed — winter reserves','Treat for mites/lice now — they spike in fall and are easier to eliminate before cold','Cull non-productive birds before winter if feed is limited'],
+      '🐇 Rabbits':['Breed now if you want winter/early spring meat — kits born in fall ready Jan–Feb','Winterize hutch — block north and west winds with tarps or solid barriers','Stock extra hay now — rabbits eat significantly more in cold','Pregnant and nursing does need extra nutrition: add black oil sunflower seeds to feed'],
+      '🐐 Goats':['Buck season — bucks become aggressive and noisy, separate from does until breeding time','Does come into heat every 21 days — watch for standing behavior','Pre-breeding body condition: does should be in good flesh but not fat','Hoof trim before winter mud season','Pre-breeding vaccination booster (CD&T)'],
+      '🐄 Cattle':['Wean calves','Pre-winter body condition assessment — add feed NOW, much cheaper than emergency winter feeding','Pre-breeding or pregnancy check','Build your hay inventory — know your full winter needs before snow falls','Pre-winter vaccination booster'],
+      '🐴 Horses':['Fall deworming — tapeworms most effectively treated in fall with praziquantel','Pre-winter dental float','Body condition assessment — add weight before winter sets in','Last barefoot trim or shoeing before ground freezes','Begin blanketing protocol if you blanket — be consistent all winter']
+    }
+  };
+
+  const st = tasks[season];
+  return `
+<div class="ph"><span class="pi">&#128197;</span><h2>Livestock Health Calendar</h2>
+<p class="sub">${MN[m]} &mdash; ${sName} health tasks and disease prevention for your animals.</p></div>
+<div class="rn">&#127758; Currently showing <strong>${sName.toUpperCase()}</strong> protocols for <strong>${MN[m]}</strong>. Change the month selector above to see a different season.</div>
+
+${Object.entries(st).map(([animal,taskList])=>`
+<div class="kb"><h3>${animal} &mdash; ${sName} Tasks</h3>
+<ul>${taskList.map(t=>`<li>${t}</li>`).join('')}</ul>
+</div>`).join('')}
+
+<div class="kb"><h3>&#127807; Natural Treatment Reference</h3>
+<table class="tbl">
+<tr><th>Condition</th><th>Animals</th><th>Natural Treatment</th><th>Notes</th></tr>
+<tr><td>Bacterial infection</td><td>All</td><td>Crushed raw garlic in water or feed. Oregano oil diluted in water. Raw honey on wounds.</td><td>Isolate the sick animal immediately — stopping spread is as important as treating.</td></tr>
+<tr><td>Internal parasites (worms)</td><td>All</td><td>Ground pumpkin seeds in feed (cucurbitacin paralyzes worms). Rotate pastures — most effective long-term prevention. Diatomaceous earth (food grade) in feed.</td><td>Resistance to chemical dewormers is widespread. Pasture rotation is the lasting solution.</td></tr>
+<tr><td>Respiratory infection</td><td>Chickens, rabbits, goats</td><td>Oregano oil in water. Improve ventilation first — most respiratory disease is caused by ammonia and moisture, not cold. Isolate immediately.</td><td>Spreads rapidly through a flock or herd. Isolation is treatment step one.</td></tr>
+<tr><td>Mastitis (udder)</td><td>Goats, cattle</td><td>Milk out the affected quarter frequently (every 2 hours). Cabbage leaf compress on udder. Dilute oregano oil massaged in.</td><td>Chunks or blood in milk = mastitis. Early treatment prevents chronic infection.</td></tr>
+<tr><td>Wounds</td><td>All</td><td>Irrigate thoroughly with boiled water. Pack with raw honey. Pine pitch as sealant. Keep flies off — maggots in wounds are serious.</td><td>Thorough irrigation is the most important step. Most wound infections start from contamination that could have been washed out.</td></tr>
+<tr><td>Pinkeye</td><td>Cattle, goats</td><td>Dilute raw honey eyewash. Strong black tea compress. Isolate — pinkeye spreads by flies.</td><td>Shade reduces spread dramatically. Fly control = pinkeye prevention.</td></tr>
+<tr><td>Bloat</td><td>Cattle, goats</td><td>Walk continuously (movement breaks gas bubble). Drench with 1 cup vegetable oil. Massage left flank. Simethicone (Gas-X) works on ruminants.</td><td>Frothy bloat from lush legumes is most dangerous. Slow pasture introduction prevents it.</td></tr>
+<tr><td>Scours / diarrhea (young)</td><td>Calves, kids, chicks</td><td>Oral electrolytes: 1 tsp salt + 1 tsp baking soda + 1 qt warm water. Kaolin clay. Yogurt with live cultures. Withhold milk 12 hrs, replace with electrolytes.</td><td>Dehydration kills faster than the infection. Electrolytes first, always.</td></tr>
+</table></div>`;
+};
+
 </script>
+
+
+
+
 
 
 
