@@ -355,14 +355,23 @@ document.getElementById('mSel').value = new Date().getMonth()+1;
 function R(){return document.getElementById('rSel').value}
 function M(){return parseInt(document.getElementById('mSel').value)}
 
+var _currentPage = null;
+
 function updateCtx(){
   document.getElementById('ctx').textContent = RN[R()]+' · '+MN[M()];
+  // Re-render the current page with new region/month
+  if(_currentPage && PAGES[_currentPage]){
+    var scrollY = window.scrollY;
+    document.getElementById('content').innerHTML = PAGES[_currentPage](R(),M());
+    window.scrollTo({top:scrollY});
+  }
 }
 updateCtx();
 
 function go(p){
   const fn = PAGES[p];
   if(!fn) return;
+  _currentPage = p;
   document.getElementById('navgrid').style.display='none';
   document.getElementById('content').innerHTML = fn(R(),M());
   document.getElementById('content').classList.add('show');
@@ -1217,6 +1226,7 @@ updateCtx();
 
 
 function showHome(){
+  _currentPage = null;
   document.getElementById('navgrid').style.display='flex';
   document.getElementById('content').classList.remove('show');
   document.getElementById('content').innerHTML='';
