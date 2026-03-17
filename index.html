@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Pioneer Cache — Offline Survival Knowledge</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+:root{--ink:#1a1209;--parchment:#f2e8d5;--moss:#3d5c2e;--ember:#c4622d;--ash:#8c7b68;--gold:#b8922a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--ink);color:var(--parchment);font-family:'Crimson Pro',Georgia,serif;min-height:100vh}
+
+/* HEADER */
+#hdr{background:linear-gradient(180deg,#0d0a05,#1a1209);border-bottom:2px solid var(--gold);position:sticky;top:0;z-index:100;box-shadow:0 4px 30px rgba(0,0,0,.8)}
+.hi{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:13px 24px}
+.lt h1{font-family:'Cinzel',serif;font-size:1.45rem;font-weight:900;color:var(--gold);letter-spacing:.08em;line-height:1}
+.lt p{font-size:.67rem;color:var(--ash);letter-spacing:.2em;text-transform:uppercase;margin-top:3px}
+.ob{margin-left:auto;background:var(--moss);color:#a8d48a;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;padding:4px 10px;border-radius:2px;font-family:'Cinzel',serif;border:1px solid #3d7c2e;white-space:nowrap}
+
+/* CONTEXT BAR */
+#cb{background:#120e07;border-bottom:1px solid rgba(184,146,42,.2);padding:8px 24px}
+.ci{max-width:1100px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.cl{font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ash);font-family:'Cinzel',serif}
+select{background:#1e1710;color:var(--parchment);border:1px solid rgba(184,146,42,.35);padding:5px 10px;font-family:'Crimson Pro',serif;font-size:.88rem;border-radius:2px;cursor:pointer;outline:none}
+select:focus{border-color:var(--gold)}
+
+/* BACK BUTTON */
+#backbar{display:none;background:#120e07;border-bottom:1px solid rgba(184,146,42,.15);padding:8px 24px}
+#backbar.show{display:block}
+#backbtn{display:inline-flex;align-items:center;gap:8px;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);cursor:pointer;padding:5px 0;opacity:.8;transition:opacity .2s}
+#backbtn:hover{opacity:1}
+
+/* MAIN */
+#main{max-width:1100px;margin:0 auto;padding:32px 24px 60px}
+
+/* HOME — category nav boxes */
+#navgrid{display:flex;flex-direction:column;gap:20px}
+
+.catbox{border:1px solid rgba(184,146,42,.25);border-radius:5px;overflow:hidden;background:linear-gradient(180deg,#1a1209,#130e07)}
+.catbox-hdr{display:flex;align-items:center;gap:12px;padding:13px 20px;background:rgba(184,146,42,.1);border-bottom:1px solid rgba(184,146,42,.2)}
+.catbox-hdr .chi{font-size:1.3rem;line-height:1}
+.catbox-hdr h2{font-family:'Cinzel',serif;font-size:.95rem;font-weight:600;color:var(--gold);letter-spacing:.1em;text-transform:uppercase}
+.catbox-hdr p{font-size:.8rem;color:var(--ash);margin-left:auto;font-style:italic}
+.catbox-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.ci-btn{display:flex;align-items:center;gap:12px;padding:14px 20px;cursor:pointer;transition:all .18s;border-right:1px solid rgba(184,146,42,.07);border-bottom:1px solid rgba(184,146,42,.07);color:rgba(242,232,213,.75);font-size:.95rem}
+.ci-btn:hover{background:rgba(184,146,42,.1);color:var(--parchment)}
+.ci-btn .ico{font-size:1.3rem;width:26px;text-align:center;flex-shrink:0;line-height:1}
+.ci-btn span.lbl{line-height:1.3}
+
+/* CONTENT PAGE */
+#content{display:none}
+#content.show{display:block;animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE INTERNALS */
+.ph{margin-bottom:26px;padding-bottom:16px;border-bottom:1px solid rgba(184,146,42,.2)}
+.pi{font-size:2rem;margin-bottom:6px;display:block}
+.ph h2{font-family:'Cinzel',serif;font-size:1.75rem;color:var(--gold);font-weight:600;letter-spacing:.05em}
+.ph .sub{color:var(--ash);font-size:.93rem;font-style:italic;margin-top:3px}
+.rn{background:rgba(61,92,46,.15);border:1px solid rgba(61,92,46,.4);border-left:3px solid var(--moss);padding:10px 14px;border-radius:2px;font-size:.87rem;color:#b8d4a0;margin-bottom:20px}
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-bottom:22px}
+.card{background:linear-gradient(135deg,#1e1710,#160f08);border:1px solid rgba(184,146,42,.2);border-radius:3px;padding:16px;transition:all .25s}
+.card:hover{border-color:rgba(184,146,42,.5);transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.4)}
+.ct{font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px}
+.card p,.card li{font-size:.88rem;line-height:1.7;color:rgba(242,232,213,.82)}
+.kb{margin-bottom:26px}
+.kb h3{font-family:'Cinzel',serif;font-size:.97rem;color:var(--gold);letter-spacing:.08em;margin-bottom:13px;padding-bottom:7px;border-bottom:1px solid rgba(184,146,42,.15);display:flex;align-items:center;gap:8px}
+.kb p{line-height:1.85;font-size:.95rem;color:rgba(242,232,213,.86);margin-bottom:10px}
+.kb ul,.kb ol{padding-left:18px;margin-bottom:10px}
+.kb li{line-height:1.8;font-size:.93rem;color:rgba(242,232,213,.83);margin-bottom:3px}
+.kb li::marker{color:var(--gold)}
+.warn{background:rgba(196,98,45,.12);border:1px solid rgba(196,98,45,.35);border-left:3px solid var(--ember);padding:10px 14px;border-radius:2px;font-size:.85rem;color:#e8b090;margin:14px 0}
+.warn strong{color:var(--ember)}
+.tip{background:rgba(184,146,42,.08);border:1px solid rgba(184,146,42,.25);border-left:3px solid var(--gold);padding:10px 14px;border-radius:2px;font-size:.85rem;color:rgba(242,232,213,.8);margin:14px 0}
+.tip strong{color:var(--gold)}
+.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:.83rem}
+.tbl th{background:rgba(184,146,42,.15);color:var(--gold);font-family:'Cinzel',serif;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;padding:9px 11px;text-align:left;border-bottom:1px solid rgba(184,146,42,.3)}
+.tbl td{padding:9px 11px;border-bottom:1px solid rgba(184,146,42,.08);color:rgba(242,232,213,.82);vertical-align:top;line-height:1.55}
+.tbl tr:hover td{background:rgba(184,146,42,.04)}
+.dg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.dc{background:linear-gradient(135deg,#1e1710,#160f08);border:1px solid rgba(184,146,42,.2);border-radius:3px;padding:16px;cursor:pointer;transition:all .25s;text-align:center}
+.dc:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 10px 35px rgba(0,0,0,.5)}
+.di{font-size:1.9rem;margin-bottom:7px;display:block}
+.dtitle{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:4px}
+.ddesc{font-size:.78rem;color:var(--ash);line-height:1.4}
+.pb{background:linear-gradient(90deg,rgba(196,98,45,.15),rgba(184,146,42,.1));border:1px solid rgba(196,98,45,.3);border-radius:3px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.pb h3{font-family:'Cinzel',serif;font-size:.8rem;color:var(--ember);letter-spacing:.1em;margin-bottom:3px}
+.pb p{font-size:.82rem;color:rgba(242,232,213,.7);line-height:1.5}
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0}
+.mc{background:#160f08;border:1px solid rgba(184,146,42,.15);border-radius:2px;overflow:hidden}
+.mh{background:rgba(184,146,42,.12);padding:6px 9px;font-family:'Cinzel',serif;font-size:.67rem;letter-spacing:.1em;color:var(--gold);text-transform:uppercase}
+.mh.now{background:rgba(184,146,42,.3)}
+.mb{padding:8px 9px;font-size:.73rem;line-height:1.55;color:rgba(242,232,213,.72)}
+.star-sky{background:#04080f;border:1px solid rgba(100,150,220,.2);border-radius:3px;padding:20px;font-family:monospace;font-size:.78rem;line-height:2.2;color:#c8d8f0;text-align:center;margin:14px 0;white-space:pre}
+
+/* FOOTER */
+#ftr{border-top:1px solid rgba(184,146,42,.15);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;background:#0d0a05}
+.ft{font-size:.72rem;color:var(--ash);font-style:italic}
+.fm{font-family:'Cinzel',serif;font-size:.6rem;color:rgba(184,146,42,.4);letter-spacing:.14em}
+
+@media(max-width:700px){
+  .catbox-items{grid-template-columns:1fr 1fr}
+  .dg{grid-template-columns:1fr 1fr}
+  .mg{grid-template-columns:1fr 1fr}
+  .hi{padding:10px 16px}
+  #main{padding:20px 16px 40px}
+}
+</style>
+</head>
+<body>
+
+<div id="hdr"><div class="hi">
+  <svg width="46" height="46" viewBox="0 0 52 52" fill="none">
+    <circle cx="26" cy="26" r="24" stroke="#b8922a" stroke-width="1.5" fill="none" opacity=".5"/>
+    <path d="M26 4L30 15L26 13L22 15Z" fill="#b8922a"/>
+    <path d="M26 4L26 48M8 26L44 26" stroke="#b8922a" stroke-width=".8" opacity=".3"/>
+    <circle cx="26" cy="26" r="4" fill="#b8922a" opacity=".8"/>
+    <circle cx="26" cy="26" r="9" stroke="#b8922a" stroke-width=".5" fill="none" opacity=".3"/>
+  </svg>
+  <div class="lt"><h1>THE PIONEER CACHE</h1><p>Complete Offline Survival Knowledge</p></div>
+  <div class="ob">&#x2B23; Offline Ready</div>
+</div></div>
+
+<div id="cb"><div class="ci">
+  <span class="cl">Region</span>
+  <select id="rSel" onchange="updateCtx()">
+    <option value="pacific">Pacific Coast (CA/OR/WA)</option>
+    <option value="southwest">Southwest (AZ/NM/NV/UT)</option>
+    <option value="mountain">Mountain West (CO/WY/MT/ID)</option>
+    <option value="midwest">Midwest / Plains</option>
+    <option value="southeast">Southeast (FL/GA/AL/SC)</option>
+    <option value="northeast">Northeast (NY/ME/VT/NH)</option>
+    <option value="midatlantic">Mid-Atlantic (VA/MD/NC)</option>
+    <option value="texas">Texas / Gulf Coast</option>
+    <option value="alaska">Alaska</option>
+    <option value="hawaii">Hawaii / Tropics</option>
+  </select>
+  <span style="color:rgba(184,146,42,.3)">|</span>
+  <span class="cl">Month</span>
+  <select id="mSel" onchange="updateCtx()">
+    <option value="1">January</option><option value="2">February</option>
+    <option value="3">March</option><option value="4">April</option>
+    <option value="5">May</option><option value="6">June</option>
+    <option value="7">July</option><option value="8">August</option>
+    <option value="9">September</option><option value="10">October</option>
+    <option value="11">November</option><option value="12">December</option>
+  </select>
+  <span style="color:rgba(184,146,42,.3)">|</span>
+  <span id="ctx" style="font-size:.78rem;color:var(--gold);font-style:italic"></span>
+</div></div>
+
+<div id="backbar">
+  <div id="backbtn" onclick="showHome()">&#8592; &nbsp;Back to All Categories</div>
+</div>
+
+<div id="main">
+
+  <!-- HOME NAV — shown by default -->
+  <div id="navgrid">
+
+    <div class="catbox">
+      <div class="catbox-hdr">
+        <span class="chi">&#9889;</span>
+        <h2>The Essentials</h2>
+        <p>Start here — survival basics</p>
+      </div>
+      <div class="catbox-items">
+        <div class="ci-btn" onclick="go('water')"><span class="ico">&#128167;</span><span class="lbl">Water</span></div>
+        <div class="ci-btn" onclick="go('fire')"><span class="ico">&#128293;</span><span class="lbl">Fire</span></div>
+        <div class="ci-btn" onclick="go('shelter')"><span class="ico">&#9978;&#65039;</span><span class="lbl">Shelter</span></div>
+        <div class="ci-btn" onclick="go('mindset')"><span class="ico">&#129504;</span><span class="lbl">Mindset &amp; Dangers</span></div>
+      </div>
+    </div>
+
+    <div class="catbox">
+      <div class="catbox-hdr">
+        <span class="chi">&#127807;</span>
+        <h2>Food &amp; Garden</h2>
+        <p>Growing, hunting, foraging</p>
+      </div>
+      <div class="catbox-items">
+        <div class="ci-btn" onclick="go('foraging')"><span class="ico">&#127807;</span><span class="lbl">Foraging &amp; Plants</span></div>
+        <div class="ci-btn" onclick="go('trapping')"><span class="ico">&#129332;</span><span class="lbl">Trapping &amp; Hunting</span></div>
+        <div class="ci-btn" onclick="go('fishing')"><span class="ico">&#127907;</span><span class="lbl">Fishing</span></div>
+        <div class="ci-btn" onclick="go('planting')"><span class="ico">&#127793;</span><span class="lbl">Planting Calendar</span></div>
+        <div class="ci-btn" onclick="go('compost')"><span class="ico">&#9851;&#65039;</span><span class="lbl">Compost &amp; Soil</span></div>
+      </div>
+    </div>
+
+    <div class="catbox">
+      <div class="catbox-hdr">
+        <span class="chi">&#129517;</span>
+        <h2>Navigation</h2>
+        <p>Find your way anywhere</p>
+      </div>
+      <div class="catbox-items">
+        <div class="ci-btn" onclick="go('stars')"><span class="ico">&#11088;</span><span class="lbl">Stars &amp; Sky</span></div>
+        <div class="ci-btn" onclick="go('mapcompass')"><span class="ico">&#129517;</span><span class="lbl">Map &amp; Compass</span></div>
+        <div class="ci-btn" onclick="go('terrain')"><span class="ico">&#128506;&#65039;</span><span class="lbl">Reading Terrain</span></div>
+      </div>
+    </div>
+
+    <div class="catbox">
+      <div class="catbox-hdr">
+        <span class="chi">&#128062;</span>
+        <h2>Wildlife</h2>
+        <p>Identification, tracking, threats</p>
+      </div>
+      <div class="catbox-items">
+        <div class="ci-btn" onclick="go('tracks')"><span class="ico">&#128062;</span><span class="lbl">Animal Tracks</span></div>
+        <div class="ci-btn" onclick="go('leafid')"><span class="ico">&#127810;</span><span class="lbl">Leaf &amp; Tree ID</span></div>
+        <div class="ci-btn" onclick="go('snakes')"><span class="ico">&#128013;</span><span class="lbl">Snakes: Safe vs Deadly</span></div>
+        <div class="ci-btn" onclick="go('predators')"><span class="ico">&#128059;</span><span class="lbl">Predators &amp; Bears</span></div>
+        <div class="ci-btn" onclick="go('bugs')"><span class="ico">🦟</span><span class="lbl">Bugs &amp; Insects</span></div>
+      </div>
+    </div>
+
+    <div class="catbox">
+      <div class="catbox-hdr">
+        <span class="chi">&#129306;</span>
+        <h2>Sanitation &amp; Health</h2>
+        <p>Stay clean, stay alive</p>
+      </div>
+      <div class="catbox-items">
+        <div class="ci-btn" onclick="go('sanitation')"><span class="ico">&#128701;</span><span class="lbl">Waste &amp; Sanitation</span></div>
+        <div class="ci-btn" onclick="go('medicine')"><span class="ico">&#127806;</span><span class="lbl">Natural Medicine</span></div>
+        <div class="ci-btn" onclick="go('firstaid')"><span class="ico">&#129306;</span><span class="lbl">Field First Aid</span></div>
+      </div>
+    </div>
+
+    <div class="catbox">
+      <div class="catbox-hdr">
+        <span class="chi">&#127961;&#65039;</span>
+        <h2>Urban &amp; Tools</h2>
+        <p>Grid-down, gear, security</p>
+      </div>
+      <div class="catbox-items">
+        <div class="ci-btn" onclick="go('urban')"><span class="ico">&#127961;&#65039;</span><span class="lbl">Urban Survival</span></div>
+        <div class="ci-btn" onclick="go('tools')"><span class="ico">&#128295;</span><span class="lbl">Tools &amp; Gear</span></div>
+      </div>
+    </div>
+
+  </div><!-- /navgrid -->
+
+  <!-- CONTENT — hidden until a page is selected -->
+  <div id="content"></div>
+
+</div><!-- /main -->
+
+<div id="ftr">
+  <span class="ft">"The prepared mind is the greatest survival tool ever carried."</span>
+  <span class="fm">THE PIONEER CACHE &middot; OFFLINE EDITION &middot; V1.0</span>
+</div>
+
+<script src="app.js"></script>
+<script>
+function showHome(){
+  document.getElementById('navgrid').style.display='flex';
+  document.getElementById('content').classList.remove('show');
+  document.getElementById('content').innerHTML='';
+  document.getElementById('backbar').classList.remove('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
