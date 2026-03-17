@@ -222,6 +222,7 @@ select:focus{border-color:var(--gold)}
   <span class="fm">THE PIONEER CACHE &middot; OFFLINE EDITION &middot; V1.0</span>
 </div>
 <script>
+
 const MN=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const RN={pacific:'Pacific Coast',southwest:'Southwest Desert',mountain:'Mountain West',midwest:'Midwest/Plains',southeast:'Southeast',northeast:'Northeast',midatlantic:'Mid-Atlantic',texas:'Texas/Gulf',alaska:'Alaska',hawaii:'Hawaii'};
 
@@ -1428,7 +1429,7 @@ r==='alaska'?`<ul><li><strong>Crowberries:</strong> Common on tundra and forest 
 <li><strong>Water Hemlock:</strong> Most violently toxic plant in North America. White flower clusters near water. Even small amounts cause convulsions and death. Often confused with wild carrot or edible cow parsnip.</li>
 <li><strong>Poison Hemlock:</strong> Hollow purple-spotted stems. Deadly systemic poison. Socrates was executed with this plant.</li>
 <li><strong>Deadly Nightshade:</strong> Small dark berries, bell-shaped purple flowers. Fatal especially in children.</li>
-<li><strong>White Snakeroot:</strong> Caused "milk sickness" that killed Abraham Lincoln's mother. Toxic through livestock's milk.</li>
+<li><strong>White Snakeroot:</strong> Caused "milk sickness" that killed Abraham Lincoln\'s mother. Toxic through livestock\'s milk.</li>
 <li><strong>Poison Ivy / Oak / Sumac:</strong> "Leaves of three, let it be." Severe allergic skin reaction. Never burn these plants — the smoke causes severe lung injury.</li>
 </ul></div>`,
 
@@ -1447,14 +1448,14 @@ trapping:(r,m)=>`
 <ol>
 <li>Use wire (best), paracord inner strand, or twisted plant fiber cordage</li>
 <li>Form a loop: 4 inches diameter for rabbits, 2.5 inches for squirrels, 8–10 inches for larger game</li>
-<li>Position the loop height: 4 inches off ground for rabbits, 6–8 inches for larger animals — centered where the animal's head will pass through</li>
+<li>Position the loop height: 4 inches off ground for rabbits, 6–8 inches for larger animals — centered where the animal\'s head will pass through</li>
 <li>Anchor the far end firmly to a root or deeply driven stake</li>
 <li>Use a one-way slip mechanism — the loop tightens as the animal struggles but cannot loosen</li>
 <li>Mask your scent: rub snare with dirt or charred wood. Wear gloves while handling.</li>
 </ol>
 <div class="tip"><strong>Channelization:</strong> Build a natural-looking funnel of sticks narrowing toward the snare loop. Animals follow the path of least resistance — guide them through your trap without triggering alarm.</div></div>
 <div class="kb"><h3>&#9878;&#65039; Figure-4 Deadfall</h3>
-<p>Three notched sticks form the shape of the number 4. A heavy rock or log (at least 3× the target animal's weight) is balanced on the trigger system. When the animal takes the bait, the mechanism releases and weight falls:</p>
+<p>Three notched sticks form the shape of the number 4. A heavy rock or log (at least 3× the target animal\'s weight) is balanced on the trigger system. When the animal takes the bait, the mechanism releases and weight falls:</p>
 <ol>
 <li>Carve three sticks: a vertical upright post, a diagonal brace, and a horizontal toggle/bait stick</li>
 <li>Notch all three so they interlock and support the deadfall weight</li>
@@ -1491,7 +1492,7 @@ fishing:(r,m)=>`
 <div class="kb"><h3>&#9971; Passive Fishing — Work While You Sleep</h3>
 <ul>
 <li><strong>Trotline:</strong> String a line across or along a creek with multiple hooks at varying depths. Anchor both ends. Bait all hooks. Check every few hours. Works passively overnight.</li>
-<li><strong>Fish weir / trap:</strong> Build a funnel of sticks and rocks in a stream narrowing to a dead-end corral. Fish follow the current into the funnel and can't find the exit. Check daily.</li>
+<li><strong>Fish weir / trap:</strong> Build a funnel of sticks and rocks in a stream narrowing to a dead-end corral. Fish follow the current into the funnel and can\'t find the exit. Check daily.</li>
 <li><strong>Set lines:</strong> Tie individual baited hooks to overhanging branches so hooks hang just at water surface. Set several along a productive bank simultaneously.</li>
 </ul>
 <div class="tip"><strong>Passive fishing works while you do other survival tasks.</strong> Set 5–10 rigs simultaneously rather than actively fishing from one spot.</div></div>
@@ -1511,7 +1512,7 @@ fishing:(r,m)=>`
 </ul></div>`,
 
 planting:(r,m)=>`
-<div class="ph"><span class="pi">&#127793;</span><h2>Planting Calendar</h2><p class="sub">Knowing what to plant and when turns a patch of dirt into a food supply. Timing your region's frost dates is everything.</p></div>
+<div class="ph"><span class="pi">&#127793;</span><h2>Planting Calendar</h2><p class="sub">Knowing what to plant and when turns a patch of dirt into a food supply. Timing your region\'s frost dates is everything.</p></div>
 <div class="rn">&#127758; <strong>${RN[r]}</strong> &mdash; Month: <strong>${MN[m]}</strong></div>
 <div class="kb"><h3>&#128197; Monthly Planting Guide &mdash; ${RN[r]}</h3>
 <div class="mg">
@@ -1556,9 +1557,9 @@ ${Array.from({length:12},(_,i)=>{
 </ul></div>`,
 
 compost:(r,m)=>`
-<div class="ph"><span class="pi">&#9851;&#65039;</span><h2>Composting &amp; Soil Building</h2><p class="sub">Living soil is the foundation of all food security. You can build extraordinarily productive soil from nothing using what's immediately around you.</p></div>
+<div class="ph"><span class="pi">&#9851;&#65039;</span><h2>Composting &amp; Soil Building</h2><p class="sub">Living soil is the foundation of all food security. You can build extraordinarily productive soil from nothing using what\'s immediately around you.</p></div>
 <div class="kb"><h3>&#127807; Why This Matters Off-Grid</h3>
-<p>Without access to commercial fertilizers and soil amendments, your garden's long-term productivity depends entirely on the biological health of your soil. Composting closes the nutrient loop permanently — your waste becomes your fertility. A homesteader who masters composting never runs out of growing capacity regardless of what's available commercially.</p></div>
+<p>Without access to commercial fertilizers and soil amendments, your garden\'s long-term productivity depends entirely on the biological health of your soil. Composting closes the nutrient loop permanently — your waste becomes your fertility. A homesteader who masters composting never runs out of growing capacity regardless of what\'s available commercially.</p></div>
 <div class="kb"><h3>&#128230; The Basic Compost Pile</h3>
 <p>Composting is controlled decomposition. The recipe is simple: carbon-rich "browns" plus nitrogen-rich "greens" plus moisture plus oxygen:</p>
 <ul>
@@ -1590,7 +1591,7 @@ compost:(r,m)=>`
 stars:(r,m)=>`
 <div class="ph"><span class="pi">&#11088;</span><h2>Stars &amp; Sky Navigation</h2><p class="sub">The stars guided human beings across continents and oceans for thousands of years before any instrument was invented. They will guide you too.</p></div>
 <div class="kb"><h3>&#11088; Finding Polaris — The North Star</h3>
-<p>Polaris sits almost directly above Earth's North Pole. It is the only star in the northern sky that appears completely stationary throughout the night. When you find it and drop an imaginary vertical line straight down to the horizon — that direction is true north.</p>
+<p>Polaris sits almost directly above Earth\'s North Pole. It is the only star in the northern sky that appears completely stationary throughout the night. When you find it and drop an imaginary vertical line straight down to the horizon — that direction is true north.</p>
 <div class="star-sky">        ★ POLARIS (North Star)
         ↑ extend line ~5x this gap
        ▲ ▲  ← Merak &amp; Dubhe
@@ -1605,27 +1606,27 @@ stars:(r,m)=>`
 <li>Find the <strong>Big Dipper</strong> — 7 bright stars forming a ladle shape. It never sets below the horizon in the northern US and is always visible on clear nights.</li>
 <li>Identify the two stars forming the outer edge of the cup — the side farthest from the handle. These are Dubhe (top) and Merak (bottom).</li>
 <li>Draw an imaginary line from Merak through Dubhe and extend it approximately 5 times the distance between them</li>
-<li>The moderately bright star at the end of that line is Polaris — the last and brightest star in the Little Dipper's handle</li>
+<li>The moderately bright star at the end of that line is Polaris — the last and brightest star in the Little Dipper\'s handle</li>
 <li>Drop a vertical line from Polaris straight down to the horizon — that direction is true north</li>
 </ol>
 <div class="tip"><strong>Confirm Polaris:</strong> Cassiopeia (shaped like a W or M) always appears on the opposite side of Polaris from the Big Dipper. The two constellations rotate around Polaris together throughout the night. If both are visible, Polaris is exactly between them.</div></div>
 <div class="kb"><h3>&#128207; Finding Your Latitude Using Polaris</h3>
 <p>Wherever you stand in the northern hemisphere, Polaris is the same number of degrees above the horizon as your latitude north of the equator. At Miami (25°N) it sits 25° up. At Seattle (48°N) it sits 48° up.</p>
-<p><strong>Measure with your fist:</strong> Extend your arm toward the horizon, closed fist. Each fist-width represents approximately 10 degrees. Stack fists from horizon to Polaris and multiply by 10 — that's your approximate latitude.</p></div>
+<p><strong>Measure with your fist:</strong> Extend your arm toward the horizon, closed fist. Each fist-width represents approximately 10 degrees. Stack fists from horizon to Polaris and multiply by 10 — that\'s your approximate latitude.</p></div>
 <div class="kb"><h3>&#11088; Cassiopeia — When the Big Dipper Is Low</h3>
 <p>Cassiopeia looks like a distinct W or M shape in the sky (changes appearance based on time and season). It rotates on the opposite side of Polaris from the Big Dipper. When the Big Dipper is near the horizon and partly obscured, use Cassiopeia — draw a line from the center star of the W straight outward. This line points toward Polaris.</p></div>
 <div class="kb"><h3>&#9733; Orion — Finding East &amp; West</h3>
 <p>Orion the Hunter is visible in the winter night sky across the entire Northern Hemisphere. His three-belt stars are one of the most useful navigation features in the entire sky:</p>
 <ul>
 <li>The middle belt star Alnilam rises almost exactly due east and sets almost exactly due west, regardless of your latitude anywhere on Earth</li>
-<li>Watch where Orion's belt first appears above the horizon — that is east</li>
+<li>Watch where Orion\'s belt first appears above the horizon — that is east</li>
 <li>Watch where it sets — that is west</li>
 <li>For the belt star to be useful for this, it needs to be near the horizon at rising or setting</li>
 </ul></div>
 <div class="kb"><h3>&#9728;&#65039; Daytime Navigation</h3>
 <ul>
 <li><strong>Shadow stick method:</strong> Push a straight stick vertically into flat ground. Mark the tip of its shadow with a stone. Wait 15 minutes, mark the new shadow tip. The line from first mark to second mark runs roughly west to east (first mark = west, second = east).</li>
-<li><strong>Analog watch method:</strong> Point the hour hand at the sun. The midpoint between the hour hand and 12 o'clock points roughly south in the Northern Hemisphere.</li>
+<li><strong>Analog watch method:</strong> Point the hour hand at the sun. The midpoint between the hour hand and 12 o\'clock points roughly south in the Northern Hemisphere.</li>
 <li><strong>Solar arc:</strong> The sun rises in the east and sets in the west. Note: This is exact only at the equinoxes. In summer it rises northeast and sets northwest across the US.</li>
 </ul></div>`,
 
@@ -1647,7 +1648,7 @@ mapcompass:(r,m)=>`
 <li>The RED end of the needle points to magnetic north — NOT exactly true north</li>
 <li><strong>Adjusting for declination:</strong> Western US add ~12–15° to get true north. Eastern US subtract ~10–15°. The exact value for your location is printed on most topo maps.</li>
 <li>To travel on a bearing: set the bearing on the degree dial, rotate the entire compass body until the needle aligns with the orienting arrow ("red in the shed"), then follow the direction of travel arrow on the baseplate</li>
-<li>Pick a landmark in the direction of travel and walk to it — don't stare at the compass while walking</li>
+<li>Pick a landmark in the direction of travel and walk to it — don\'t stare at the compass while walking</li>
 </ul></div>
 <div class="kb"><h3>&#128506;&#65039; Reading Topographic Lines</h3>
 <ul>
@@ -1785,7 +1786,7 @@ snakes:(r,m)=>`
 <li>Remove rings, watches, and tight clothing near bite site before swelling begins</li>
 <li>Get to medical care as quickly as possible — antivenom is the only definitive treatment</li>
 <li><strong>DO NOT:</strong> Cut and suck the wound, apply tourniquets, use ice, apply electrical shock, or give alcohol. All of these cause additional harm.</li>
-<li>Note the snake's description for medical staff — do NOT waste time or risk another bite trying to capture it</li>
+<li>Note the snake\'s description for medical staff — do NOT waste time or risk another bite trying to capture it</li>
 </ul>
 <div class="warn"><strong>Grid-down scenario:</strong> Without antivenom, rest the victim completely. Immobilize the limb. Keep the person hydrated and calm. Most rattlesnake bites are not immediately fatal in healthy adults — the greatest dangers are secondary infection, tissue necrosis, and blood clotting disorders over 24–48 hours. The less you panic and move, the better the outcome.</div></div>`,
 
@@ -1806,11 +1807,11 @@ predators:(r,m)=>`
 <li><strong>Defensive attack (most common — surprised bear):</strong> PLAY DEAD. Face down, hands laced behind neck, legs spread to make rolling difficult. Stay still and silent until the bear leaves and is out of sight.</li>
 <li><strong>Predatory attack (rare — bear approaching slowly and silently):</strong> Fight back with everything available. Target eyes and nose.</li>
 </ul>
-<div class="tip"><strong>Bear spray is more effective than firearms</strong> in stopping charging bears according to studies. Effective range 30–60 feet. Carry it on your belt, not in your pack where it's unreachable in a sudden encounter.</div></div>
+<div class="tip"><strong>Bear spray is more effective than firearms</strong> in stopping charging bears according to studies. Effective range 30–60 feet. Carry it on your belt, not in your pack where it\'s unreachable in a sudden encounter.</div></div>
 <div class="kb"><h3>&#129409; Mountain Lion / Cougar</h3>
 <p>Present across nearly all western states and increasingly in Texas and the Southeast. Rarely seen — but often watching. Most active at dawn and dusk.</p>
 <ul>
-<li><strong>Prevention:</strong> Don't hike alone in known cougar territory. Keep children close and within sight at all times. If you see one watching you — it has typically been watching much longer than you know.</li>
+<li><strong>Prevention:</strong> Don\'t hike alone in known cougar territory. Keep children close and within sight at all times. If you see one watching you — it has typically been watching much longer than you know.</li>
 <li><strong>Encounter:</strong> Do NOT run — this triggers the predatory chase response immediately. Make yourself large (raise arms, open jacket). Maintain direct eye contact. Speak loudly and firmly. Pick up small children without bending or crouching.</li>
 <li><strong>Attack:</strong> Fight back with full aggression. Target the eyes and nose. Mountain lions respond strongly to active resistance — they are ambush predators programmed to expect passive prey.</li>
 </ul></div>
@@ -1827,7 +1828,7 @@ predators:(r,m)=>`
 </table></div>`,
 
 bugs:(r,m)=>`
-<div class="ph"><span class="pi">🦟</span><h2>Insects, Ticks &amp; Bug Management</h2><p class="sub">Bugs aren't just annoying — mosquitoes and ticks transmit diseases that can disable or kill you. Daily protection is essential.</p></div>
+<div class="ph"><span class="pi">🦟</span><h2>Insects, Ticks &amp; Bug Management</h2><p class="sub">Bugs aren\'t just annoying — mosquitoes and ticks transmit diseases that can disable or kill you. Daily protection is essential.</p></div>
 <div class="kb"><h3>🦟 Mosquitoes — Disease &amp; Protection</h3>
 <p>Mosquitoes transmit West Nile virus, malaria (in some regions), dengue fever, Zika, and multiple forms of encephalitis. Most active at dawn and dusk. Attracted to dark clothing, body heat, and carbon dioxide.</p>
 <ul>
@@ -1836,14 +1837,14 @@ bugs:(r,m)=>`
 <li><strong>Natural repellents:</strong> Crushed fresh catnip leaves applied to skin and clothing (proven highly effective in studies). Crushed pineapple weed (Matricaria). Wax myrtle leaf extract. Citronella candles (50% protection nearby). All natural repellents require frequent reapplication — every 1–2 hours.</li>
 <li><strong>Light-colored clothing:</strong> Mosquitoes are attracted to dark colors. Wear light, neutral, and pastel colors in heavy bug areas.</li>
 <li><strong>Eliminate standing water:</strong> Any container holding still water breeds mosquitoes within 3–7 days. Eliminate every potential breeding site within your camp area.</li>
-<li><strong>Timing:</strong> Minimize outdoor exposure at dawn and dusk. Stay near smoke, indoors, or in breezy locations — mosquitoes are weak flyers and can't operate in wind.</li>
+<li><strong>Timing:</strong> Minimize outdoor exposure at dawn and dusk. Stay near smoke, indoors, or in breezy locations — mosquitoes are weak flyers and can\'t operate in wind.</li>
 </ul></div>
 <div class="kb"><h3>&#129361; Ticks — Disease &amp; Removal</h3>
-<p>Ticks are active whenever temperatures are consistently above freezing. They transmit Lyme disease, Rocky Mountain spotted fever, anaplasmosis, ehrlichiosis, tularemia, and other serious illnesses. They don't jump or fly — they wait on vegetation tips and grab passing hosts.</p>
+<p>Ticks are active whenever temperatures are consistently above freezing. They transmit Lyme disease, Rocky Mountain spotted fever, anaplasmosis, ehrlichiosis, tularemia, and other serious illnesses. They don\'t jump or fly — they wait on vegetation tips and grab passing hosts.</p>
 <ul>
 <li><strong>Prevention:</strong> Tuck pants into socks creating a sealed barrier. Wear light-colored clothing (ticks are visible against it). Walk in the center of trails — ticks wait on grass and brush edges within 18–24 inches of the ground.</li>
 <li><strong>Daily tick checks:</strong> Thoroughly examine entire body every day — head and hairline, behind ears, armpits, groin and inner thighs, behind knees, and between toes. Have a partner check your back and scalp. Ticks prefer thin-skinned, warm, hidden locations.</li>
-<li><strong>Removal:</strong> Use fine-tipped tweezers. Grasp the tick as close to the skin surface as possible. Pull upward with steady, even, continuous pressure — do NOT twist or jerk. Do NOT crush the tick's body. Clean bite area with soap and water. Do NOT use petroleum jelly, heat, nail polish, or other folk methods — these can cause the tick to regurgitate into the wound.</li>
+<li><strong>Removal:</strong> Use fine-tipped tweezers. Grasp the tick as close to the skin surface as possible. Pull upward with steady, even, continuous pressure — do NOT twist or jerk. Do NOT crush the tick\'s body. Clean bite area with soap and water. Do NOT use petroleum jelly, heat, nail polish, or other folk methods — these can cause the tick to regurgitate into the wound.</li>
 <li><strong>After removal:</strong> Save the tick in a sealed container with the date. Watch for the bullseye rash (erythema migrans) around the bite site in the following 3–30 days — a highly reliable early indicator of Lyme disease requiring prompt treatment.</li>
 </ul>
 <div class="warn"><strong>Lyme disease diagnoses have increased dramatically in recent decades</strong> due to expanding tick habitat. Early treatment with antibiotics is highly effective. Untreated Lyme disease becomes increasingly difficult to treat as it spreads through the body.</div></div>
@@ -1852,7 +1853,7 @@ bugs:(r,m)=>`
 <li>Yellow jackets nest in the ground — watch your step in late summer and fall around old tree stumps, rock piles, and any ground disturbance</li>
 <li>Wasps and hornets nest in trees, under eaves, and inside hollow logs — inspect before disturbing any wood</li>
 <li>If attacked by a swarm: run in a straight line immediately, cover your face, get inside any shelter or under water if available. Do NOT swat at them — this releases more alarm pheromones and increases the attack.</li>
-<li>Single sting: scrape out the stinger (don't pinch), cool the area. <strong>Watch for anaphylaxis</strong> — spreading hives beyond the sting site, throat tightening, difficulty breathing = life-threatening allergic emergency requiring immediate action</li>
+<li>Single sting: scrape out the stinger (don\'t pinch), cool the area. <strong>Watch for anaphylaxis</strong> — spreading hives beyond the sting site, throat tightening, difficulty breathing = life-threatening allergic emergency requiring immediate action</li>
 </ul></div>
 <div class="kb"><h3>&#129426; Other Significant Insects by Region</h3>
 <table class="tbl">
@@ -1958,7 +1959,7 @@ firstaid:(r,m)=>`
 <ul>
 <li>Mild: thirst, darker urine, mild headache, dry mouth</li>
 <li>Moderate: significant headache, dizziness when standing, very dark urine or none, fatigue, irritability, poor judgment</li>
-<li>Severe: confusion, rapid heart rate, sunken eyes, skin tenting (pinch skin — doesn't spring back), loss of consciousness</li>
+<li>Severe: confusion, rapid heart rate, sunken eyes, skin tenting (pinch skin — doesn\'t spring back), loss of consciousness</li>
 <li><strong>Treatment:</strong> Small frequent sips of clean water. Oral rehydration: 1 liter water + pinch of salt + pinch of sugar. This closely mimics commercial oral rehydration salts and aids absorption dramatically.</li>
 </ul></div>
 <div class="kb"><h3>&#128012; Improvised Pain Relief</h3>
@@ -1985,7 +1986,7 @@ urban:(r,m)=>`
 </ul></div>
 <div class="kb"><h3>&#128680; First 72 Hours When the Grid Goes Down</h3>
 <ol>
-<li><strong>Don't panic and don't rush.</strong> Most grid outages resolve within hours or days. Assess before acting.</li>
+<li><strong>Don\'t panic and don\'t rush.</strong> Most grid outages resolve within hours or days. Assess before acting.</li>
 <li><strong>Fill all containers with water immediately</strong> while municipal pressure lasts. A full bathtub holds 40–60 gallons. Fill every pot, bottle, and bucket available.</li>
 <li><strong>Assess food inventory.</strong> A closed refrigerator maintains safe food temperature for 4–6 hours without power. A full freezer stays safe for 48 hours.</li>
 <li><strong>Gather information.</strong> A battery or hand-crank radio is your most valuable information tool when the internet is down. Tune to emergency broadcast frequencies.</li>
@@ -2137,7 +2138,7 @@ const HEALTH_CALENDAR = {
     5:"Peak breeding season — watch roosters for over-mating stress on hens. Parasites increasing. Begin DE dusting in nest boxes. Check for scaly leg mites (raised crusty scales on legs).",
     6:"Heat stress begins. Ensure abundant shade and cool water. Reduce scratch grains (generates body heat). Freeze treats (watermelon, berries). Watch for pale combs in heat — can indicate internal issues.",
     7:"Peak heat stress month. Provide frozen treats and electrolytes (pinch of salt + sugar in water). Hens may slow or stop laying in extreme heat — this is normal. Watch for bumblefoot from hot dry ground.",
-    8:"Molt beginning for some birds. Normal — don't panic about feather loss. Increase protein during molt (18-20%). Eggs decline during molt — hens redirect nutrition to feather production.",
+    8:"Molt beginning for some birds. Normal — don\'t panic about feather loss. Increase protein during molt (18-20%). Eggs decline during molt — hens redirect nutrition to feather production.",
     9:"Fall molt in full swing for most birds. Supplement protein heavily. Prepare coop for winter — seal drafts, add extra bedding. Begin supplemental lighting if you want winter eggs.",
     10:"Prepare winter housing. Add deep litter method (never clean all bedding — layers generate heat). Worm before winter with pumpkin seeds. Stock up on ACV and garlic.",
     11:"Winter prep. Begin supplemental lighting (14 hrs total light). Stock up on oyster shell calcium. Watch for respiratory illness as birds spend more time indoors. Deep litter should be 6-12 inches.",
@@ -2147,7 +2148,7 @@ const HEALTH_CALENDAR = {
     1:"Kidding season for fall-bred does. Have kidding kit ready: iodine for navels, colostrum backup, thermometer. Normal kid temp 103°F. Cold stress — kid coats or heat lamp in extreme cold. Watch for hypoglycemia in kids (weak, cold, not nursing).",
     2:"Late kidding for some. Body condition scoring on all animals — add extra hay for thin does. Selenium deficiency common in winter — supplement or White Muscle Disease appears in kids. Worm check — FAMACHA score eyes (pale = anemia from barber pole worm).",
     3:"Breeding season ends. Milk production peaks in spring. Begin rotational grazing as pasture greens. Hoof trimming — hooves grow faster in spring wet conditions. Watch for hoof rot (foul smell, limping).",
-    4:"Pasture management critical. Don't graze below 4 inches — allows parasite larvae to be ingested. FAMACHA worm monitoring begins in earnest. Kids weaning. CAE testing if not done.",
+    4:"Pasture management critical. Don\'t graze below 4 inches — allows parasite larvae to be ingested. FAMACHA worm monitoring begins in earnest. Kids weaning. CAE testing if not done.",
     5:"Peak parasite season starts. Barber pole worm most dangerous — kills quickly via anemia. FAMACHA every 2 weeks on all animals. Only treat animals showing pale inner eyelids (score 3-5). Copper bolus if not given spring.",
     6:"Parasite pressure at maximum. Rotate pastures aggressively. Dry off does for next breeding if needed. Watch for mastitis in milk does (hot, hard udder, off milk, sick doe). Trim hooves monthly.",
     7:"Heat stress. Provide shade and fresh cool water at all times. Milk production drops in heat — normal. Continue FAMACHA monitoring. Watch for pinkeye (Moraxella) — isolate affected animals, treat with dilute honey eyewash or clean and flush.",
@@ -2167,7 +2168,7 @@ const HEALTH_CALENDAR = {
     7:"Heat stress. Shade and fresh water essential. Cattle need 35-45 gallons water per day in heat. Stop working cattle midday. Watch for heat stroke (standing in pond, excessive panting, staggering).",
     8:"Body condition scoring on all cattle — cows should be BCS 5-6 before winter. Flush thin animals with extra nutrition. Begin weaning calves. Foot rot more common in hot wet conditions.",
     9:"Fall breeding season for spring calves. Bull fertility check. Pregnancy check all cows via palpation or ultrasound 60-90 days after bulls removed. Vaccinate calves before weaning.",
-    10:"Wean calves. Ship stockers or backgrounders. Begin transitioning to hay as pasture quality declines. Watch for respiratory disease at weaning — most stressful time in cattle's life.",
+    10:"Wean calves. Ship stockers or backgrounders. Begin transitioning to hay as pasture quality declines. Watch for respiratory disease at weaning — most stressful time in cattle\'s life.",
     11:"Build hay reserves. Calculate winter feed needs: 1.5 tons per cow for 5-month winter. Test hay quality if possible. Treat any open cows or cull. Pre-calving vaccinations.",
     12:"Monitor body condition — maintain BCS 5+ through winter. Feed quality hay. Supplement protein if hay is low-quality (protein tub or distillers grains). Check heifer development for first calving."
   },
@@ -2179,7 +2180,7 @@ const HEALTH_CALENDAR = {
     5:"Peak breeding and production season. Does can raise 4-5 litters/year. Butcher weight kits (5 lbs) at 8-12 weeks. Rotate grow-out tractors on fresh grass daily for supplemental grazing.",
     6:"Heat stress danger — rabbits die at 85°F+. Provide frozen water bottles in cages to lie against. Shade all hutches 100%. Reduce breeding in peak heat — conception rates drop and does reabsorb litters.",
     7:"Hottest month — minimal breeding. Keep alive and comfortable. Frozen treats help. Watch for heat stroke (rapid panting, wet nose, sprawled out). Drench with cool water immediately if heat stroke.",
-    8:"Begin rebuilding breeding pace as temps moderate. Wean kits at 6-8 weeks to protect doe's condition. Grow and dry summer grass into hay for winter — cut, spread thin, dry 3-5 days.",
+    8:"Begin rebuilding breeding pace as temps moderate. Wean kits at 6-8 weeks to protect doe\'s condition. Grow and dry summer grass into hay for winter — cut, spread thin, dry 3-5 days.",
     9:"Excellent breeding weather. Push production now before winter. Stock up on dried hay for winter. Process any overstock bucks for meat before winter to reduce feed costs.",
     10:"Reduce litter sizes heading into winter — cold increases kit mortality. Make winter nestboxes deeper with more insulation. Snuffles (runny nose, sneezing) often flares in fall transition.",
     11:"Winter transition. Increase hay availability. Insulate hutches from wind. Continue monitoring for GI stasis — cold weather reduces movement. Worm with pumpkin seeds in feed.",
@@ -2192,25 +2193,25 @@ const chickenDiseases = [
   {name:"Coccidiosis",symptoms:"Bloody or rusty droppings, lethargy, hunched posture, pale comb, off feed",natural:"Apple cider vinegar 2 tbsp per gallon water. Thyme and oregano added to feed. Vitamin A supplementation. KEEP BEDDING DRY — wet conditions breed coccidia.",prevention:"Keep ground dry. Rotate outdoor areas. Never use moldy bedding."},
   {name:"Egg Binding",symptoms:"Straining, tail pumping, lethargy, sitting in nest box for hours without laying",natural:"Warm bath soak 20 minutes — relaxes muscles. Olive oil or coconut oil applied to vent. Calcium supplementation. EMERGENCY if bird cannot pass egg within 24-48 hours.",prevention:"Always provide oyster shell calcium. Prevent obesity. Ensure adequate exercise space."},
   {name:"Lice and Mites",symptoms:"Feather loss (especially vent area), pale comb, excessive preening, poor production, weight loss",natural:"Diatomaceous earth dusted thoroughly in bedding, nest boxes, and on birds under feathers. Wood ash bathing area. Neem oil diluted 1:10 in water sprayed on birds.",prevention:"Regular DE dusting. Clean coop monthly. Dust bathing area always available."},
-  {name:"Sour Crop / Impacted Crop",symptoms:"Swollen crop that does not empty overnight, sour smell from beak, lethargy",natural:"Massage crop downward gently 2 minutes per hour. Isolate and withhold feed 12-24 hours. Offer water with ACV only. Olive oil 1 tsp orally to lubricate. If impacted (hard, firm) — massage more aggressively.",prevention:"Always provide grit. Avoid long-fibered dry grasses. Ensure birds don't gorge."},
+  {name:"Sour Crop / Impacted Crop",symptoms:"Swollen crop that does not empty overnight, sour smell from beak, lethargy",natural:"Massage crop downward gently 2 minutes per hour. Isolate and withhold feed 12-24 hours. Offer water with ACV only. Olive oil 1 tsp orally to lubricate. If impacted (hard, firm) — massage more aggressively.",prevention:"Always provide grit. Avoid long-fibered dry grasses. Ensure birds don\'t gorge."},
   {name:"Bumblefoot",symptoms:"Swollen black scab on foot pad, limping, reluctance to walk",natural:"Soak in warm Epsom salt water 15 min daily. Remove black scab carefully with sterile blade. Pack wound with raw honey (antibacterial). Wrap with clean bandage. Change daily.",prevention:"Smooth perches (no splinters). Clean dry bedding. Avoid sharp ground cover."},
-  {name:"Internal Worms",symptoms:"Weight loss despite good appetite, pale yolks, poor production, lethargy",natural:"Pumpkin seeds ground and mixed in feed 1 cup per 6 birds weekly — cucurbitacin paralyzes roundworms. Garlic in water weekly. Black walnut hull tea as occasional drench.",prevention:"Rotate outdoor areas. Don't allow birds on wet muddy ground continuously."},
-  {name:"Marek's Disease (viral)",symptoms:"Paralysis of legs/wings, grey eye, weight loss, tumors",natural:"No cure. Supportive care — isolate, vitamins, comfortable conditions. Prevent via vaccination at hatch only.",prevention:"Vaccinate all chicks at hatch. Marek's is everywhere — vaccination is non-negotiable."}
+  {name:"Internal Worms",symptoms:"Weight loss despite good appetite, pale yolks, poor production, lethargy",natural:"Pumpkin seeds ground and mixed in feed 1 cup per 6 birds weekly — cucurbitacin paralyzes roundworms. Garlic in water weekly. Black walnut hull tea as occasional drench.",prevention:"Rotate outdoor areas. Don\'t allow birds on wet muddy ground continuously."},
+  {name:"Marek\'s Disease (viral)",symptoms:"Paralysis of legs/wings, grey eye, weight loss, tumors",natural:"No cure. Supportive care — isolate, vitamins, comfortable conditions. Prevent via vaccination at hatch only.",prevention:"Vaccinate all chicks at hatch. Marek\'s is everywhere — vaccination is non-negotiable."}
 ];
 
 const goatDiseases = [
   {name:"Barber Pole Worm (Haemonchus contortus)",symptoms:"Pale inner eyelids (bottle jaw), anemia, weakness, sudden death — most common fatal disease",natural:"FAMACHA scoring every 2 weeks — only treat pale animals (score 3,4,5). Wormwood herb in feed. Copper sulfate drench. Papaya leaves. Pumpkin seeds. Prevention: rotate pastures constantly.",prevention:"Never graze below 4 inches. Rotate every 21 days minimum. Select for FAMACHA resistance — cull animals that always need treatment."},
-  {name:"Enterotoxemia / Overeating Disease",symptoms:"Sudden death of healthy-looking animals, especially kids. Convulsions, bloat, diarrhea.",natural:"Penicillin if available. Oral Vitamin B complex. Probiotic drench. Slow feed changes prevent it.",prevention:"CD&T vaccination twice yearly (most critical goat vaccine). Never make sudden feed changes. Don't allow gorging on grain."},
+  {name:"Enterotoxemia / Overeating Disease",symptoms:"Sudden death of healthy-looking animals, especially kids. Convulsions, bloat, diarrhea.",natural:"Penicillin if available. Oral Vitamin B complex. Probiotic drench. Slow feed changes prevent it.",prevention:"CD&T vaccination twice yearly (most critical goat vaccine). Never make sudden feed changes. Don\'t allow gorging on grain."},
   {name:"Mastitis",symptoms:"Hot, hard, or lumpy udder. Off-colored milk (watery, bloody, chunky). Sick doe.",natural:"Frequent milking to clear infection. Peppermint oil diluted on udder (cooling, antimicrobial). Garlic oil massage into teat canal. Teat dip with dilute ACV after milking.",prevention:"Clean hands and equipment before milking. Teat dip after every milking. Cull chronic cases."},
   {name:"Hoof Rot (Footrot)",symptoms:"Severe limping, foul smell from hoof, soft black tissue between toes",natural:"Trim aggressively — remove all diseased tissue. Zinc sulfate footbath (2 lbs per gallon water, stand 15 min). Pack with copper sulfate paste. Keep on dry ground.",prevention:"Dry footing. Trim hooves every 6-8 weeks. Zinc mineral supplementation."},
-  {name:"Copper Deficiency",symptoms:"Faded coat color, 'fish tail' (sparse tail hair), rough coat, poor production, anemia, neurological signs in kids",natural:"Copper bolus capsule orally every 6 months — most reliable method. Copper sulfate in mineral mix. Kelp meal supplement.",prevention:"Don't feed cattle mineral to goats — it's low in copper. Provide goat-specific loose mineral with copper always available."},
+  {name:"Copper Deficiency",symptoms:"Faded coat color, 'fish tail' (sparse tail hair), rough coat, poor production, anemia, neurological signs in kids",natural:"Copper bolus capsule orally every 6 months — most reliable method. Copper sulfate in mineral mix. Kelp meal supplement.",prevention:"Don\'t feed cattle mineral to goats — it\'s low in copper. Provide goat-specific loose mineral with copper always available."},
   {name:"White Muscle Disease (Selenium deficiency)",symptoms:"Weak kids unable to stand, stiff gait, sudden death in kids, white streaks in muscle tissue",natural:"Bo-Se (selenium + vitamin E) injection from vet supply OR oral selenium supplement. Vitamin E oil orally.",prevention:"Supplement pregnant does with selenium-vitamin E 4 weeks before kidding. Many regions are selenium-deficient — supplement all animals."},
   {name:"Pinkeye (Conjunctivitis)",symptoms:"Watery eye, squinting, red/pink conjunctiva, white cloudy eye in advanced cases",natural:"Flush eye with clean saline. Apply dilute raw honey eyedrops (antibacterial). Tea tree oil 1 drop diluted in 1 tbsp water as eye flush. Isolate immediately.",prevention:"Control face flies. Isolate new animals. Prevent close nose-to-nose contact when disease is active."}
 ];
 
 const horseDiseases = [
-  {name:"Colic (abdominal pain)",symptoms:"Pawing, looking at flank, rolling repeatedly, refusing to eat, elevated heart rate",natural:"Walk continuously — most important intervention. Provide fresh water. Dilute peppermint or ginger oil in water for cramping. Call vet for severe or persistent cases — can be fatal.",prevention:"Regular deworming. Consistent feeding schedule. Always provide fresh water. Don't change feed suddenly."},
-  {name:"Thrush (hoof infection)",symptoms:"Black foul-smelling discharge in hoof clefts, soft rubbery frog tissue, horse may or may not be lame",natural:"Clean hoof thoroughly daily. Pack with pine tar (traditional remedy — antifungal, antiseptic). Dilute tea tree oil applied to clefts. Oregano oil diluted 1:10.",prevention:"Clean hooves daily. Dry footing. Trim regularly. Don't leave in mud."},
+  {name:"Colic (abdominal pain)",symptoms:"Pawing, looking at flank, rolling repeatedly, refusing to eat, elevated heart rate",natural:"Walk continuously — most important intervention. Provide fresh water. Dilute peppermint or ginger oil in water for cramping. Call vet for severe or persistent cases — can be fatal.",prevention:"Regular deworming. Consistent feeding schedule. Always provide fresh water. Don\'t change feed suddenly."},
+  {name:"Thrush (hoof infection)",symptoms:"Black foul-smelling discharge in hoof clefts, soft rubbery frog tissue, horse may or may not be lame",natural:"Clean hoof thoroughly daily. Pack with pine tar (traditional remedy — antifungal, antiseptic). Dilute tea tree oil applied to clefts. Oregano oil diluted 1:10.",prevention:"Clean hooves daily. Dry footing. Trim regularly. Don\'t leave in mud."},
   {name:"Rain Rot (Dermatophilosis)",symptoms:"Crusty scabs along back and rump that pull off with tufts of hair, raised bumpy coat",natural:"Remove all scabs while wet (they soften in rain or water). Apple cider vinegar spray directly on skin. Coconut oil after scabs removed. Keep dry.",prevention:"Provide shelter from prolonged rain. Dry blankets. Selenium/vitamin E supplementation strengthens skin resistance."},
   {name:"Heaves (COPD / RAO)",symptoms:"Chronic cough, flared nostrils, 'heave line' visible (secondary abdominal muscle development), exercise intolerance",natural:"Completely eliminate round bale hay — too much mold/dust. Wet all hay before feeding. Move to pasture grazing. Reduce dust in barn. Elderflower tea has mild bronchodilator effect.",prevention:"Never feed dusty or moldy hay. Use low-dust bedding (paper or rubber mats). Good barn ventilation."},
   {name:"Laminitis / Founder",symptoms:"Hot hooves, reluctance to move, 'sawhorse stance', lying down more than normal",natural:"Remove from pasture immediately — grass is the trigger. Apply cold water or ice to hooves. Deep sand or soft bedding for standing on. Long-term: diet management is everything.",prevention:"Limit access to rich spring pasture. Never allow grazing on frost-killed grass (releases sugars). No grain for easy-keepers."}
@@ -2264,7 +2265,7 @@ ${diseaseTable(chickenDiseases)}</div>
 <li><strong>Best meat breeds:</strong> New Zealand White, Californian, Rex — reach 5 lbs butcher weight in 8-10 weeks</li>
 <li><strong>Feed from your land:</strong> Clover (plant throughout property), comfrey (the "rabbit herb" — high protein, they love it), kale, dandelion, plantain, chicory, dried summer grass hay</li>
 <li><strong>Making rabbit hay:</strong> Cut grass and clover before it seeds. Spread thin in rows. Turn daily for 3-5 days until completely dry and crackly throughout. Store in dry covered area. Never feed damp hay — mold causes GI stasis and death.</li>
-<li><strong>Breeding:</strong> Bring doe to buck's cage always. Kindle (birth) 28-31 days after breeding. Provide nest box with deep hay at day 28.</li>
+<li><strong>Breeding:</strong> Bring doe to buck\'s cage always. Kindle (birth) 28-31 days after breeding. Provide nest box with deep hay at day 28.</li>
 <li><strong>Butcher weight:</strong> 4-5 lbs live at 8-12 weeks. Most efficient meat-to-feed ratio of any homestead animal.</li>
 </ul>
 <table class="tbl"><tr><th>Disease</th><th>Symptoms</th><th>Natural Treatment</th><th>Prevention</th></tr>
@@ -2323,7 +2324,7 @@ ${diseaseTable(horseDiseases)}</div>
 <li><strong>Always raise two together:</strong> Pigs suffer alone. Minimum pair.</li>
 <li><strong>Feed from homestead:</strong> Kitchen scraps, garden waste, whey from cheese-making, acorns (they harvest themselves in forest), spent garden plants, fermented grain, roots</li>
 <li><strong>Fermented feed:</strong> Soak grain 3-5 days until sour. Increases digestibility 40%, reduces feed cost significantly. Pigs actively prefer it.</li>
-<li><strong>Butcher weight:</strong> 250-300 lbs live at 5-6 months on good mixed diet. Don't wait longer — feed efficiency drops dramatically after 300 lbs.</li>
+<li><strong>Butcher weight:</strong> 250-300 lbs live at 5-6 months on good mixed diet. Don\'t wait longer — feed efficiency drops dramatically after 300 lbs.</li>
 <li><strong>Wallow:</strong> Essential — pigs cannot sweat. Mud wallow prevents heat stroke and provides parasite protection. Minimum 8x8 ft wet wallow in summer.</li>
 </ul></div>
 
@@ -2361,7 +2362,7 @@ PAGES.foraging = function(r,m){
 
   return `
 <div class="ph"><span class="pi">&#127807;</span><h2>Foraging &amp; Edible Plants</h2>
-<p class="sub">${RN[r]} &mdash; ${MN[m]}: What's available, what's edible, what will kill you.</p></div>
+<p class="sub">${RN[r]} &mdash; ${MN[m]}: What\'s available, what\'s edible, what will kill you.</p></div>
 <div class="warn"><strong>Golden Rule:</strong> Never eat any plant unless you can identify it using at least 3 separate features. One mistake can be fatal. When in doubt — leave it out.</div>
 <div class="rn">&#127758; Showing plants available in <strong>${RN[r]}</strong> during <strong>${MN[m]}</strong>. Change region or month above to update this list.</div>
 
@@ -2374,14 +2375,14 @@ ${caution.length ? `<div class="kb"><h3 style="color:var(--gold)">&#9888;&#65039
 ${caution.map(row).join('')}</table></div>` : ''}
 
 ${deadly.length ? `<div class="kb"><h3 style="color:var(--ember)">&#9762;&#65039; DEADLY — Know These Plants</h3>
-<table class="tbl"><tr><th>Plant</th><th>Status</th><th>Why It's Dangerous</th></tr>
+<table class="tbl"><tr><th>Plant</th><th>Status</th><th>Why It\'s Dangerous</th></tr>
 ${deadly.map(row).join('')}</table></div>` : ''}
 
 <div class="kb"><h3>&#128218; Year-Round Reliable Edibles — Any Region</h3>
 <div class="cg">
   <div class="card"><div class="ct">&#127804; Dandelion</div><p>Every part edible. Young leaves raw, roots roasted as coffee, flowers raw or fried. Found everywhere year-round.</p></div>
   <div class="card"><div class="ct">&#127793; Cattail</div><p>Near water everywhere. Shoots, pollen, and roots all edible at different seasons. Learn this one plant above all others.</p></div>
-  <div class="card"><div class="ct">&#129845; Wild Onion/Garlic</div><p>If it smells like onion — it's safe. The only reliable smell test in foraging. Entire plant edible.</p></div>
+  <div class="card"><div class="ct">&#129845; Wild Onion/Garlic</div><p>If it smells like onion — it\'s safe. The only reliable smell test in foraging. Entire plant edible.</p></div>
   <div class="card"><div class="ct">&#127807; Plantain (lawn weed)</div><p>Oval parallel-veined leaves in disturbed soil everywhere. Eat raw or cooked. Also excellent on insect stings.</p></div>
 </div></div>`;
 };
@@ -2400,7 +2401,7 @@ PAGES.fishing = function(r,m){
 
   return `
 <div class="ph"><span class="pi">&#127907;</span><h2>Fishing</h2>
-<p class="sub">${RN[r]} &mdash; ${MN[m]}: What's biting, where to find them, what bait to use.</p></div>
+<p class="sub">${RN[r]} &mdash; ${MN[m]}: What\'s biting, where to find them, what bait to use.</p></div>
 <div class="rn">&#127758; Showing fish species for <strong>${RN[r]}</strong> in <strong>${MN[m]}</strong>. Change region or month above to update.</div>
 
 <div class="kb"><h3>&#127907; What to Target This Month</h3>
@@ -2423,7 +2424,7 @@ PAGES.fishing = function(r,m){
 <li><strong>Gorge hook:</strong> Carve hardwood or bone stick 1–2 inches, sharp both ends, notched center. Fish swallows it, pulling line causes it to lodge crosswise.</li>
 <li><strong>Line:</strong> Paracord inner strand, thread from clothing, twisted plant fiber</li>
 <li><strong>Trotline (passive):</strong> String a line across a creek with multiple hooks at different depths. Bait all hooks. Check every few hours — works overnight while you sleep.</li>
-<li><strong>Fish weir:</strong> Build a funnel of sticks and rocks narrowing to a dead-end pen. Fish follow current in and can't find the exit.</li>
+<li><strong>Fish weir:</strong> Build a funnel of sticks and rocks narrowing to a dead-end pen. Fish follow current in and can\'t find the exit.</li>
 </ul></div>`;
 };
 
@@ -2435,7 +2436,7 @@ PAGES.trapping = function(r,m){
 
   return `
 <div class="ph"><span class="pi">&#129332;</span><h2>Trapping &amp; Hunting</h2>
-<p class="sub">${RN[r]} &mdash; ${MN[m]}: What's active, where to set, what to target.</p></div>
+<p class="sub">${RN[r]} &mdash; ${MN[m]}: What\'s active, where to set, what to target.</p></div>
 <div class="rn" style="${isPeak?'border-left-color:var(--gold);color:var(--gold)':''}">
   &#127758; <strong>${RN[r]} — ${MN[m]}:</strong> ${isPeak?'&#11088; PEAK TRAPPING MONTH — ':''} ${monthNote}
 </div>
@@ -2459,7 +2460,7 @@ PAGES.trapping = function(r,m){
 </ol></div>
 
 <div class="kb"><h3>&#9878;&#65039; Figure-4 Deadfall</h3>
-<p>Three notched sticks support a heavy rock or log (3× target animal's weight). Bait placed on the toggle releases the weight when disturbed. Practice this at home — the balance requires hands-on feel.</p></div>
+<p>Three notched sticks support a heavy rock or log (3× target animal\'s weight). Bait placed on the toggle releases the weight when disturbed. Practice this at home — the balance requires hands-on feel.</p></div>
 
 <div class="kb"><h3>&#129385; Processing Game</h3>
 <ul>
@@ -2497,7 +2498,7 @@ PAGES.snakes = function(r,m){
 <tr><th>Feature</th><th>Venomous</th><th>Non-Venomous</th><th>Exceptions</th></tr>
 <tr><td>Head shape</td><td>Triangular/arrowhead, wider than neck</td><td>Oval/rounded, same width as neck</td><td>Coral snake has round head. Some harmless snakes flatten defensively.</td></tr>
 <tr><td>Heat pit</td><td>Pit between eye and nostril (looks like 3rd nostril)</td><td>No pit</td><td>Definitive for pit vipers. Coral snake has no pit.</td></tr>
-<tr><td>Pupils</td><td>Vertical slit — cat eye</td><td>Round</td><td>Coral snake has round pupils despite being venomous. Don't get close enough to check.</td></tr>
+<tr><td>Pupils</td><td>Vertical slit — cat eye</td><td>Round</td><td>Coral snake has round pupils despite being venomous. Don\'t get close enough to check.</td></tr>
 <tr><td>Tail rattle</td><td>Rattlesnakes only — unique segmented rattle</td><td>No rattle</td><td>Some harmless snakes vibrate tails in leaves. Only rattlesnakes have actual segments.</td></tr>
 </table></div>
 
@@ -2525,7 +2526,7 @@ PAGES.bugs = function(r,m){
 
   return `
 <div class="ph"><span class="pi">🦟</span><h2>Bugs &amp; Insects</h2>
-<p class="sub">${RN[r]} &mdash; ${MN[m]}: What's biting, what diseases are active, how to protect yourself.</p></div>
+<p class="sub">${RN[r]} &mdash; ${MN[m]}: What\'s biting, what diseases are active, how to protect yourself.</p></div>
 
 <div class="rn" style="${isPeak?'border-left-color:var(--ember);color:#e8b090':''}">
   &#127758; <strong>${RN[r]} — ${MN[m]}:</strong> ${bugNote}
@@ -2611,7 +2612,7 @@ ${(r==='alaska'||r==='mountain'||r==='pacific')?`
 ${(r==='pacific'||r==='mountain'||r==='southwest'||r==='alaska')?`
 <div class="kb"><h3>&#129409; Mountain Lion</h3>
 <ul>
-<li>Secretive — if you see one watching you, it's been watching much longer</li>
+<li>Secretive — if you see one watching you, it\'s been watching much longer</li>
 <li>Do NOT run. Make yourself large. Maintain eye contact. Pick up children.</li>
 <li>If attacked: fight back aggressively. Target eyes and nose. They expect passive prey.</li>
 </ul></div>`:''}
@@ -2626,7 +2627,7 @@ ${(r==='southeast'||r==='texas'||r==='midatlantic')?`
 <div class="kb"><h3>&#128038; Other Hazardous Wildlife</h3>
 <table class="tbl">
 <tr><th>Animal</th><th>Risk</th><th>Response</th></tr>
-<tr><td>Moose (north)</td><td>Most dangerous animal in North America by attacks per year. Charges without warning.</td><td>Run and put large trees between you and the moose. They won't chase around obstacles.</td></tr>
+<tr><td>Moose (north)</td><td>Most dangerous animal in North America by attacks per year. Charges without warning.</td><td>Run and put large trees between you and the moose. They won\'t chase around obstacles.</td></tr>
 <tr><td>Coyote</td><td>Very rarely attacks adults. Risk to small children and pets.</td><td>Haze aggressively — yell, clap, throw objects. Never run.</td></tr>
 <tr><td>Black Widow Spider</td><td>Red hourglass underside. Neurotoxic. Dark undisturbed spaces.</td><td>Gloves when reaching into dark spaces. Seek medical care for bite.</td></tr>
 <tr><td>Brown Recluse</td><td>Violin mark on body. Tissue-destroying bite. Central/SE US.</td><td>Shake clothing before wearing. Gloves in storage/wood piles.</td></tr>
@@ -2673,7 +2674,7 @@ return `
 <li><strong>Housing:</strong> Wire-bottom cages 30" x 36" minimum per adult. Elevated for air circulation and waste management. Shade essential — rabbits die quickly above 85°F.</li>
 <li><strong>Feeding from your land:</strong> Rabbits thrive on fresh forage. Grow: clover (high protein, they love it), kale, comfrey, chicory, plantain, sunflower leaves, dandelion, grass hay. Cut and dry summer grass into hay for winter — same process as cattle hay. Comfrey especially is called "the rabbit herb" — high protein, they eat it eagerly.</li>
 <li><strong>Hay making:</strong> Cut grass/clover/alfalfa before it seeds. Spread in thin rows. Turn daily for 3–5 days until completely dry and crackly throughout. Bale loosely or store in dry covered piles. Never store damp hay — mold kills rabbits.</li>
-<li><strong>Breeding:</strong> Bring doe to the buck's cage, never reverse — bucks get territorial. Leave 30 minutes. Kindle (birth) in 28–32 days. Provide nest box 28 days after breeding filled with hay.</li>
+<li><strong>Breeding:</strong> Bring doe to the buck\'s cage, never reverse — bucks get territorial. Leave 30 minutes. Kindle (birth) in 28–32 days. Provide nest box 28 days after breeding filled with hay.</li>
 </ul>
 <div class="kb"><h3>&#128138; Rabbit Diseases</h3>
 <table class="tbl">
@@ -2699,7 +2700,7 @@ return `
 <div class="kb"><h3>🐄 Cattle</h3>
 <ul>
 <li><strong>Best homestead breeds:</strong> Dexter (small, dual purpose, efficient), Jersey (best milk butterfat), Angus or Hereford (meat), Scottish Highland (cold-hardy, rough forage)</li>
-<li><strong>Land requirement:</strong> 1–2 acres per cow depending on pasture quality. Rotate pastures — never graze below 4 inches or it won't regrow properly.</li>
+<li><strong>Land requirement:</strong> 1–2 acres per cow depending on pasture quality. Rotate pastures — never graze below 4 inches or it won\'t regrow properly.</li>
 <li><strong>Making hay for your cattle:</strong> Need hay baler (mechanical) OR cut and stack loose hay in covered shed. Plan for 25–30 lbs hay per cow per winter day. A 1,000 lb cow needs 1.5–2 tons of hay for a 5-month winter. Grow alfalfa, orchardgrass, timothy, or brome for best quality. Let alfalfa reach 10% bloom before cutting for maximum protein.</li>
 <li><strong>Supplemental feed from the homestead:</strong> Corn silage (whole corn plants chopped and fermented in a pit or bags). Turnips and beets grown and fed whole in winter. Kelp meal if near coast (excellent minerals). Apples, pumpkins, squash as treats.</li>
 <li><strong>Basic cattle diseases — natural treatment:</strong> Pink eye: isolate, dilute aloe vera or honey water eyewash. Bloat: walk the animal, drench with 1 cup vegetable oil or mineral oil to break gas bubble. Foot rot: clean wound, pack with pine tar. Worms: rotate pastures constantly — most important prevention. Pumpkin seeds, black walnut hull tea as natural dewormers.</li>
@@ -2891,7 +2892,7 @@ return `
 <li><strong>Watch wildlife behavior:</strong> Deer and birds alarm-call well before humans hear anything. A deer staring hard in one direction, flagging its tail, or "blowing" (loud snort) indicates something approaching from that direction. Crows and jays are especially reliable alarm callers.</li>
 <li><strong>Establish patterns and notice breaks:</strong> Know what your normal looks like — sounds, smells, animal behavior. Anything that deviates from normal warrants attention.</li>
 <li><strong>Fire visibility management:</strong> Fire visible for miles at night. Use Dakota holes (underground fire — see Fire section) for concealed cooking. Shield fire from view with tarps or terrain. In uncertain situations, cold camps are safer than warm, visible ones.</li>
-<li><strong>Smell management:</strong> Cook smells carry far. Cook early in the day when wind disperses smell upward. Don't cook food with strong smells near your sleeping area.</li>
+<li><strong>Smell management:</strong> Cook smells carry far. Cook early in the day when wind disperses smell upward. Don\'t cook food with strong smells near your sleeping area.</li>
 </ul></div>
 
 <div class="kb"><h3>🌿 Natural Barrier Plants</h3>
@@ -2930,7 +2931,7 @@ r==='southwest'?`
 <tr><th>Tree</th><th>ID</th><th>Food</th><th>Medicine/Other Uses</th></tr>
 <tr><td><strong>Mesquite</strong></td><td>Thorny, small leaflets in compound leaves, tan seed pods</td><td>Pods ground into sweet flour (mezquitamal). Seeds edible. Flowers edible. Staple food of the desert.</td><td>Gum (sap) as eye wash and for sore throat. Wood for smoking meat. Excellent fuel — burns very hot.</td></tr>
 <tr><td><strong>Palo Verde</strong></td><td>Green trunk and branches, sparse small leaflets</td><td>Green seeds edible raw in spring. Dried seeds ground into flour.</td><td>Provides critical shade. Nitrogen fixer — improves desert soil.</td></tr>
-<tr><td><strong>Saguaro Cactus (giant)</strong></td><td>Iconic columnar cactus — AZ/Sonora only</td><td>Bright red fruit at top — traditional Tohono O'odham harvest food. Very sweet, high calorie. Fermented into traditional wine.</td><td>Ribs used for construction poles. Boots (holes in trunk) provide shelter from heat.</td></tr>
+<tr><td><strong>Saguaro Cactus (giant)</strong></td><td>Iconic columnar cactus — AZ/Sonora only</td><td>Bright red fruit at top — traditional Tohono O\'odham harvest food. Very sweet, high calorie. Fermented into traditional wine.</td><td>Ribs used for construction poles. Boots (holes in trunk) provide shelter from heat.</td></tr>
 <tr><td><strong>Pinyon Pine</strong></td><td>Short 2-needle bundles, round fat cones</td><td>Pine nuts — highest calorie wild food available. Harvest Sept–Oct.</td><td>Resin as wound sealant, fire starter, waterproofing. Needles for vitamin C tea.</td></tr>
 <tr><td><strong>One-seed Juniper</strong></td><td>Scale-like leaves, blue-gray berries, shredding bark</td><td>Berries edible — use as seasoning, dry for storage</td><td>Bark for tinder (excellent), basket fiber, cordage. Berries: kidney/urinary tonic. Natural insect repellent.</td></tr>
 <tr><td><strong>Cottonwood</strong></td><td>Heart-shaped leaves that tremble, cottony seed fluff in spring</td><td>Inner bark as emergency food (spring)</td><td>Indicates water nearby — always. Spring buds (balm of Gilead) steeped in oil = natural pain-relieving salve.</td></tr>
@@ -3012,7 +3013,7 @@ return `
 <tr><td><strong>Smooth Stones</strong></td><td>Streams everywhere</td><td>Rounded, smooth, 2–3 inch river stones</td><td>Traditional in many cultures. Rinse after use. Carry a small pouch of clean smooth stones — reusable indefinitely.</td></tr>
 <tr><td><strong>Corn Husks / Dry Grass</strong></td><td>Fields, homestead</td><td>Any dry non-scratchy grass, flattened</td><td>Bunch together and fold. Works well when dry.</td></tr>
 <tr><td><strong>Snow</strong></td><td>Winter, all northern regions</td><td>N/A</td><td>Excellent natural wipe — cold but hygienic. Traditional in northern indigenous cultures.</td></tr>
-<tr><td><strong>Water (hand wash)</strong></td><td>Any water source</td><td>N/A</td><td>Safest and most hygienic method used by majority of world's population. Requires thorough hand washing after.</td></tr>
+<tr><td><strong>Water (hand wash)</strong></td><td>Any water source</td><td>N/A</td><td>Safest and most hygienic method used by majority of world\'s population. Requires thorough hand washing after.</td></tr>
 </table>
 <div class="warn"><strong>NEVER USE:</strong> Poison Ivy, Poison Oak, Poison Sumac (three-leafed or white-berried), Stinging Nettle (unless boiled first), any plant with milky sap, nettles, wild parsnip, wild parsley, or any plant you cannot positively identify.</div></div>
 
@@ -3165,7 +3166,7 @@ PAGES.animalhealth = function(r,m){
       '🐴 Horses':['Increase hay dramatically — horses generate heat by fermenting hay, not grain','Check weight weekly — blanketing hides body condition loss','Pick hooves daily — thrush (black rot) thrives in wet winter conditions','Watch for impaction colic — horses drink less cold water, risk rises','Be consistent with blanketing — blanket all winter or none at all']
     },
     spring:{
-      '🐓 Chickens':['Deep clean coop — remove all bedding, scrub walls, dry completely before re-bedding','Deworm naturally: grind pumpkin seeds into feed — cucurbitacin paralyzes worms','Watch for Marek's disease if introducing new birds to the flock','Spring is best time to hatch new chicks','Check molt status — some birds may still be in late molt from winter'],
+      '🐓 Chickens':['Deep clean coop — remove all bedding, scrub walls, dry completely before re-bedding','Deworm naturally: grind pumpkin seeds into feed — cucurbitacin paralyzes worms','Watch for Marek\'s disease if introducing new birds to the flock','Spring is best time to hatch new chicks','Check molt status — some birds may still be in late molt from winter'],
       '🐇 Rabbits':['Breeding season beginning — verify does are at good weight before breeding','Coccidiosis risk rises with warmth and wet — add apple cider vinegar to water daily','Expand cage ventilation — heat stress kills rabbits faster than cold','Transition to fresh grass slowly — sudden green grass causes GI stasis'],
       '🐐 Goats':['Hoof trim — hoof growth accelerates in spring','Deworm if FAMACHA score indicates anemia — check eyelid color','Kidding season — provide clean private pen, iodine for umbilical cord','Watch for white muscle disease in kids — selenium injection at birth if in deficient region','Test for CAE if bringing in any new animals'],
       '🐄 Cattle':['Slow pasture introduction — 2 hrs/day increasing over 2 weeks or risk frothy bloat','Deworm calves','Begin fly control program — face flies spread pinkeye','Check for hardware disease (swallowed metal) if cattle seem off','Spring vaccination boosters if on annual program'],
@@ -3213,6 +3214,8 @@ ${Object.entries(st).map(([animal,taskList])=>`
 };
 
 
+
 </script>
+
 </body>
 </html>
