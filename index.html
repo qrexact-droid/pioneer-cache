@@ -252,7 +252,875 @@ select:focus{border-color:var(--gold)}
   <span class="fm">THE PIONEER CACHE &middot; OFFLINE EDITION &middot; V1.0</span>
 </div>
 
-<script src="app.js"></script>
+<script>
+const MN=['','January','February','March','April','May','June','July','August','September','October','November','December'];
+const RN={pacific:'Pacific Coast',southwest:'Southwest Desert',mountain:'Mountain West',midwest:'Midwest/Plains',southeast:'Southeast',northeast:'Northeast',midatlantic:'Mid-Atlantic',texas:'Texas/Gulf',alaska:'Alaska',hawaii:'Hawaii'};
+
+document.getElementById('mSel').value = new Date().getMonth()+1;
+
+function R(){return document.getElementById('rSel').value}
+function M(){return parseInt(document.getElementById('mSel').value)}
+
+function updateCtx(){
+  document.getElementById('ctx').textContent = RN[R()]+' · '+MN[M()];
+}
+updateCtx();
+
+function go(p){
+  const fn = PAGES[p];
+  if(!fn) return;
+  document.getElementById('navgrid').style.display='none';
+  document.getElementById('content').innerHTML = fn(R(),M());
+  document.getElementById('content').classList.add('show');
+  document.getElementById('backbar').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function getPlanting(r,m){
+  const d={
+    pacific:{1:'Indoors: Tomatoes, peppers, eggplant<br>Direct: Lettuce, spinach, kale, peas',2:'Indoors: Basil, squash<br>Direct: Peas, spinach, brassicas, chard',3:'Direct: Potatoes, onions, lettuce, beets<br>Indoors: Tomatoes, peppers, celery',4:'Direct: Tomatoes (coastal), squash, cucumbers, beans<br>Transplant: Brassicas',5:'Direct: Everything. Peak planting month for most of CA.',6:'Direct: Succession lettuce, beans, beets, carrots',7:'Direct: Fall broccoli, kale, carrots, turnips',8:'Direct: Fall garlic (late), brassicas, spinach, Asian greens',9:'Direct: Cover crops, garlic, winter greens, peas',10:'Direct: Garlic, cover crops, onion sets, fava beans',11:'Rest and plan. Start seed inventory.',12:'Order seeds. Build soil amendments. Plan beds.'},
+    southwest:{1:'Indoors: Tomatoes, peppers<br>Direct: Leafy greens, peas, carrots, beets',2:'Direct: Tomatoes, peppers, squash<br>Transplant: Brassicas',3:'Direct: Everything warm-season. Beans, corn, squash.',4:'Peak planting. Beans, corn, squash, melons.',5:'Direct: Okra, sweet potatoes, Armenian cucumber',6:'Mulch heavily 4 in. deep. Plant heat-tolerant varieties.',7:'Rest. Extreme heat. Water only.',8:'Direct: Fall crops — broccoli, kale, beets, carrots',9:'Direct: Full fall garden — tomatoes, peppers, squash',10:'Direct: Greens, peas, root veg, onions',11:'Direct: Peas, brassicas, root veg',12:'Direct: Lettuce, spinach, carrots, radishes'},
+    mountain:{1:'Rest and plan. Order seeds.',2:'Indoors: Onions, leeks, peppers (8 wks before last frost)',3:'Indoors: Tomatoes, squash, herbs',4:'Indoors: Most things. Last frost May-June.',5:'Direct: Hardy greens, peas (after late frost risk)',6:'Direct: Tomatoes, peppers (after last frost, mid-Jun high elevation)',7:'Direct: Fast crops — lettuce, radishes, beans, spinach',8:'Harvest begins. Direct: Fall spinach, kale.',9:'Harvest heavily. Direct: Cover crops.',10:'Final harvest. Protect root crops with mulch.',11:'Put beds to rest. Add compost and mulch.',12:'Plan rotations. Order heirloom seeds.'},
+    midwest:{1:'Rest. Plan garden layout and rotations.',2:'Indoors: Onions, peppers, leeks',3:'Indoors: Tomatoes, squash. Direct: Peas outside.',4:'Direct: Potatoes, onions, brassicas, spinach',5:'Direct: Tomatoes, peppers after last frost',6:'Direct: Beans, cucumbers, squash, melons fully',7:'Succession: Beans, lettuce. Harvest begins.',8:'Direct: Fall brassicas, root veg, spinach',9:'Harvest heavily. Direct: Fall garlic.',10:'Final harvest. Direct: Garlic cloves in ground.',11:'Mulch beds 3-4 in. Add compost.',12:'Order seeds. Plan crop rotations.'},
+    southeast:{1:'Direct: Peas, greens, root veg',2:'Direct: Tomatoes, peppers, squash (S. FL year-round)',3:'Peak spring planting — full garden',4:'Direct: Beans, sweet potatoes, okra',5:'Direct: Okra, southern peas, sweet potatoes',6:'Mulch heavily. Deep water. Manage heat.',7:'Rest. Extreme heat in most of region.',8:'Direct: Fall tomatoes, squash, peppers',9:'Direct: Full fall garden',10:'Direct: Greens, peas, brassicas, carrots',11:'Direct: Winter greens, root veg',12:'Direct: Spinach, lettuce, root veg'},
+    northeast:{1:'Rest. Order seeds.',2:'Indoors: Onions, peppers (8 wks)',3:'Indoors: Tomatoes. Direct: Peas outside.',4:'Direct: Brassicas, peas, spinach outside',5:'Transplant: Tomatoes, peppers after frost',6:'Full summer garden planted',7:'Succession: Beans, lettuce',8:'Direct: Fall kale, broccoli, beets',9:'Harvest. Direct: Garlic.',10:'Final harvest. Garlic in ground.',11:'Mulch and cover beds.',12:'Plan and order seeds.'},
+    midatlantic:{1:'Indoors: Onions. Plan beds.',2:'Indoors: Peppers, leeks',3:'Direct: Peas, spinach, brassicas outside',4:'Direct: Potatoes, onions. Indoors: Squash.',5:'Direct: Tomatoes, peppers, beans',6:'Full summer garden. Beans, cucumbers.',7:'Succession lettuce. Harvest begins.',8:'Direct: Fall crops — kale, broccoli',9:'Direct: Fall garlic, spinach, root veg',10:'Harvest. Garlic in ground.',11:'Clean beds. Mulch.',12:'Order seeds.'},
+    texas:{1:'Direct: Greens, peas, root veg',2:'Direct: Tomatoes, peppers, squash',3:'Peak spring — plant everything',4:'Direct: Beans, sweet potatoes, okra',5:'Direct: Heat-lovers. Mulch heavily.',6:'Water and mulch. Hot.',7:'Rest. Extreme heat.',8:'Direct: Fall tomatoes, squash',9:'Fall full garden planted',10:'Direct: Greens, peas, brassicas',11:'Direct: Winter greens, carrots',12:'Direct: Spinach, lettuce, root veg'},
+    alaska:{1:'Rest. Order seeds.',2:'Start: Onions, peppers indoors (12 wks)',3:'Start: Tomatoes, brassicas indoors',4:'Start: All warm crops indoors under lights',5:'Direct: Cold-hardy crops outside (May 15+ south AK)',6:'Direct: Tomatoes, squash under row cover',7:'Peak growing season. Harvest early crops.',8:'Harvest heavily. Plant cover crops.',9:'Final harvest before first frost.',10:'Put garden to bed. Mulch perennials.',11:'Rest.',12:'Rest.'},
+    hawaii:{1:'Plant: Most crops thrive year-round',2:'Plant: Tomatoes, peppers, tropical veg',3:'Plant: All crops',4:'Plant: All crops',5:'Plant: All crops',6:'Plant: All crops',7:'Plant: All crops',8:'Plant: All crops',9:'Plant: All crops',10:'Plant: All crops',11:'Plant: All crops',12:'Plant: All crops'}
+  };
+  return (d[r]||d.midwest)[m]||'Check local frost dates for precise timing.';
+}
+
+const PAGES = {
+
+home:(r,m)=>`
+<div class="ph"><span class="pi">&#127968;</span><h2>Home Base</h2><p class="sub">Your complete offline survival encyclopedia — no internet, no grid, no problem.</p></div>
+<div class="pb"><span style="font-size:1.4rem;flex-shrink:0">&#128314;</span><div><h3>Survival Priority Order</h3><p><strong style="color:var(--parchment)">Mindset &rarr; Shelter &rarr; Fire &rarr; Water &rarr; Food &rarr; Navigation.</strong> You can live 3 weeks without food, 3 days without water, 3 hours in extreme weather without shelter. Panic and exposure kill far more people than starvation ever has.</p></div></div>
+<div class="dg">
+  <div class="dc" onclick="go('water')"><span class="di">&#128167;</span><div class="dtitle">Water</div><div class="ddesc">Dew, fog, rain, purification</div></div>
+  <div class="dc" onclick="go('shelter')"><span class="di">&#9978;</span><div class="dtitle">Shelter</div><div class="ddesc">Lean-to, log cabin, debris hut</div></div>
+  <div class="dc" onclick="go('fire')"><span class="di">&#128293;</span><div class="dtitle">Fire</div><div class="ddesc">Friction, solar, star fire</div></div>
+  <div class="dc" onclick="go('foraging')"><span class="di">&#127807;</span><div class="dtitle">Foraging</div><div class="ddesc">Edible plants by region &amp; season</div></div>
+  <div class="dc" onclick="go('snakes')"><span class="di">&#128013;</span><div class="dtitle">Snakes</div><div class="ddesc">Venomous vs safe ID</div></div>
+  <div class="dc" onclick="go('stars')"><span class="di">&#11088;</span><div class="dtitle">Navigation</div><div class="ddesc">Stars, compass, terrain</div></div>
+  <div class="dc" onclick="go('planting')"><span class="di">&#127793;</span><div class="dtitle">Planting</div><div class="ddesc">What to grow by month</div></div>
+  <div class="dc" onclick="go('bugs')"><span class="di">🦟</span><div class="dtitle">Bugs &amp; Ticks</div><div class="ddesc">Protection &amp; disease prevention</div></div>
+  <div class="dc" onclick="go('sanitation')"><span class="di">&#128701;</span><div class="dtitle">Sanitation</div><div class="ddesc">Waste disposal &amp; hygiene</div></div>
+</div>
+<div class="cg">
+  <div class="card"><div class="ct">&#9889; The 3-3-3 Rule</div><p>3 minutes without air. 3 hours without shelter in harsh conditions. 3 days without water. 3 weeks without food. Prioritize in this order — every time, without exception.</p></div>
+  <div class="card"><div class="ct">&#127756; The Domino Effect</div><p>Most emergencies cascade from one mistake. Panic accelerates each failure. The antidote: <strong>Stop. Breathe. Think. Then act.</strong> Deliberate action in crisis outperforms instinct almost every time.</p></div>
+  <div class="card"><div class="ct">&#128218; Your Region Now</div><p>You're viewing knowledge filtered for <strong style="color:var(--gold)">${RN[r]}</strong> in <strong style="color:var(--gold)">${MN[m]}</strong>. Change your region and month in the bar above to get location-specific guidance throughout this app.</p></div>
+</div>`,
+
+water:(r,m)=>`
+<div class="ph"><span class="pi">&#128167;</span><h2>Water Collection &amp; Purification</h2><p class="sub">Three days without water. That's your window. This is always your first priority after shelter.</p></div>
+<div class="rn">&#127758; <strong>${RN[r]}</strong> — ${r==='southwest'?'Arid conditions. Solar stills, cactus moisture, and seeps in dry washes are critical sources here.':r==='alaska'?'Abundant surface water everywhere — but always purify. Even pristine-looking mountain streams harbor Giardia.':r==='pacific'?'Fog collection is highly productive on the coast and in coastal ranges, especially June–October. Dew is abundant in spring.':'Focus on rivers, streams, dew collection, and rain catchment as your primary sources.'}</div>
+<div class="kb"><h3>&#9925; Collecting Dew &amp; Fog</h3>
+<p>Morning dew condenses on all surfaces as temperatures drop overnight. It is one of the most overlooked water sources in any survival scenario.</p>
+<ul>
+<li><strong>Dew walk:</strong> Before sunrise — before the sun rises 30 degrees — tie clean absorbent cloths around your ankles and walk slowly through tall grass and low vegetation. The dew saturates the fabric. Wring into a container repeatedly. A persistent 30-minute walk can collect meaningful water.</li>
+<li><strong>Fog net:</strong> In coastal or high-elevation fog zones, string any mesh material (shirt, mosquito netting) between two poles perpendicular to the wind direction. Water droplets cling to the mesh, merge, and drip into a container at the base. Higher elevation = denser fog = more water per hour.</li>
+<li><strong>Natural absorbents:</strong> Moss, dense grass clumps, and bark strips absorb atmospheric moisture overnight. Press them over your container and squeeze. Check again after foggy nights — they can hold surprising amounts.</li>
+<li><strong>Rock and leaf surfaces:</strong> Smooth rocks and large waxy leaves collect significant dew. Wipe with a cloth and wring out before the sun evaporates it.</li>
+</ul>
+<div class="tip"><strong>Timing is everything:</strong> By the time the sun is 30 degrees above the horizon, most surface dew has already evaporated. Pre-set cloths and nets before you sleep to capture the overnight accumulation.</div></div>
+<div class="kb"><h3>&#127783;&#65039; Rain Catchment</h3>
+<ul>
+<li><strong>Tarp funnel:</strong> Tie corners of a poncho or tarp between trees a few feet off the ground. Place a rock at the center to create a low drip point. Funnel directs water into your container. Even a 10-minute rain can provide liters of water.</li>
+<li><strong>Leaf funnels:</strong> Large waxy leaves — magnolia, elephant ear, banana — work as natural gutters. Angle them toward your container.</li>
+<li><strong>Bark gutters:</strong> Peel a long strip of bark, curl it into a half-pipe shape, and use it to redirect water running off any angled surface.</li>
+<li><strong>Multiple catchment points:</strong> Set up every available container and catchment surface simultaneously. More surface area = more water in any rain event.</li>
+</ul></div>
+<div class="kb"><h3>&#127807; Transpiration &amp; Plant Water</h3>
+<ul>
+<li><strong>Transpiration bag:</strong> Tie a clear plastic bag tightly over a leafy branch in full direct sunlight. Seal as airtight as possible. Water condenses inside over several hours. Only use on positively identified non-toxic plants.</li>
+<li><strong>Vegetation bag:</strong> Fill a clear bag with fresh-cut green grass or leaves, seal it, and place in direct sun. Water accumulates as the plant material releases moisture.</li>
+</ul>
+<div class="warn"><strong>Important:</strong> Transpiration water carries properties of the host plant. Always verify plants are non-toxic first. Purify all collected water whenever possible.</div></div>
+<div class="kb"><h3>&#9728;&#65039; Solar Still</h3>
+<ol>
+<li>Dig a bowl-shaped pit approximately 3 feet wide and 18 inches deep in a sunny location</li>
+<li>Place a clean collection container in the center of the pit</li>
+<li>Optional: surround the container with green vegetation or pour non-potable water around it</li>
+<li>Cover the pit with clear plastic sheeting — seal all edges firmly with soil</li>
+<li>Place a small rock at the center of the plastic directly over your container to create a drip point</li>
+<li>Sun heats interior &rarr; moisture evaporates &rarr; condenses on cool plastic &rarr; drips into container</li>
+</ol>
+<div class="tip"><strong>Yield:</strong> Roughly 1–3 cups per day. Slow, but the water is clean of bacteria, parasites, and most chemicals. Build one any time you have the materials and a stationary camp.</div></div>
+<div class="kb"><h3>&#128269; Finding Natural Sources</h3>
+<ul>
+<li><strong>Follow game trails downhill</strong> — multiple converging trails nearly always lead to water. Where trails merge into a V-shape, the point leads toward water.</li>
+<li><strong>Indicator plants:</strong> Willows, cottonwood, cattails, and elderberry grow within 50 feet of water almost always. These are your compass plants when thirsty.</li>
+<li><strong>Morning sky:</strong> Low fog or cloud in early morning concentrates over water bodies. The sky directly above water appears slightly bluer than surrounding forest.</li>
+<li><strong>Insects:</strong> Bees and flies are typically within one mile of water. Note their flight direction when water is scarce.</li>
+<li><strong>Collect upstream</strong> from any animal trails, camp sites, or visible contamination. Faster-moving water is generally safer than stagnant.</li>
+</ul></div>
+<div class="kb"><h3>&#129514; Purification — Never Skip This</h3>
+<ul>
+<li><strong>Boiling:</strong> Full rolling boil for 1 minute (3 minutes above 6,500 ft elevation). Kills all biological threats. The gold standard for purification.</li>
+<li><strong>SODIS (Solar Disinfection):</strong> Fill a clear PET plastic bottle, lay on a reflective surface in direct sunlight for 6+ hours (2 days if overcast). UV light neutralizes most pathogens.</li>
+<li><strong>Improvised filter:</strong> Layer fine sand on top, coarse sand, small gravel, then large gravel in a perforated container. Removes sediment and improves taste — but does NOT remove bacteria. Always boil after filtering.</li>
+</ul>
+<div class="warn"><strong>Never drink:</strong> Saltwater, urine, or blood — all accelerate dehydration. If the only choice is untreated water vs. death from dehydration, drink the water and manage the illness. Dehydration kills faster than most waterborne illness.</div></div>`,
+
+fire:(r,m)=>`
+<div class="ph"><span class="pi">&#128293;</span><h2>Fire — Starting &amp; Sustaining</h2><p class="sub">Fire means warmth, purified water, cooked food, signal, and morale. Master it before you ever need it.</p></div>
+<div class="kb"><h3>&#128210; The Fire Triangle</h3><p>Every fire requires three elements working together: <strong>Fuel</strong> (combustible material), <strong>Heat</strong> (ignition source), and <strong>Oxygen</strong> (airflow). Remove any one element and fire dies. Build with all three in mind from the start.</p></div>
+<div class="kb"><h3>&#129394; Tinder &rarr; Kindling &rarr; Fuel</h3>
+<p>Always prepare all three stages completely before striking the first spark. Running out mid-build kills the fire.</p>
+<ul>
+<li><strong>Tinder (catches the spark):</strong> Dry grass, cattail fluff, shredded cedar/birch/juniper bark, dried bird nests, fine wood shavings, charcloth, dry shelf fungi. Must be completely dry and fibrous.</li>
+<li><strong>Kindling (builds the flame):</strong> Pencil-to-finger-thick dead dry twigs. Test: dead wood that snaps cleanly is dry. Wood that bends is still wet.</li>
+<li><strong>Fuel (sustains the fire):</strong> Wrist-thick and larger. Hardwoods (oak, hickory, maple) burn hot and long. Softwoods (pine, cedar) ignite easily but burn faster. Use what's available.</li>
+</ul>
+<div class="tip"><strong>Pioneer rule:</strong> Gather 3× more of each material than you think you need before striking anything.</div></div>
+<div class="kb"><h3>&#127993; Bow Drill — Friction Fire</h3>
+<ol>
+<li><strong>Spindle:</strong> Straight dry hardwood rod, 18–24 in, ~3/4 in diameter. Best species: mullein, yucca stalk, cedar, willow, cottonwood.</li>
+<li><strong>Fireboard:</strong> Flat softwood piece (same species as spindle or softer). Carve a depression and adjacent V-notch extending to the edge where coal collects.</li>
+<li><strong>Bow:</strong> Curved branch strung with paracord, shoelace, or twisted plant fiber. Wrap spindle once around the string.</li>
+<li><strong>Handhold:</strong> Smooth hard stone or hardwood to press down on top of spindle.</li>
+<li><strong>Technique:</strong> Apply firm downward pressure on handhold. Saw the bow back and forth at full length with horizontal strokes. Maintain consistent rhythm. Black powder accumulates in notch. When smoke appears from the board itself — not just the friction — a coal is forming. Gently slide coal into tinder bundle, fold bundle around it, lift and blow steadily until flame ignites.</li>
+</ol>
+<div class="warn"><strong>Critical requirement:</strong> Both board and spindle must be completely dry. Even slight moisture prevents ignition. In wet conditions, search under rock overhangs and inside hollow standing logs for dry material.</div></div>
+<div class="kb"><h3>&#127774; Alternative Ignition</h3>
+<ul>
+<li><strong>Lens:</strong> Magnifying glass, convex eyeglass lens, or a water-filled clear bag focused to a point on dark tinder. Requires bright direct sunlight and patience.</li>
+<li><strong>Flint and steel:</strong> Strike high-carbon steel against sharp flint, chert, or quartzite. Direct sparks onto charcloth or a dry tinder nest.</li>
+<li><strong>Battery and steel wool:</strong> Touch ultra-fine steel wool across both terminals of a 9V battery. Ignites instantly.</li>
+</ul></div>
+<div class="kb"><h3>&#127996; Fire Structures</h3>
+<ul>
+<li><strong>Teepee fire:</strong> Hot, high flames. Best for cooking and warmth. Collapses inward, naturally self-feeding.</li>
+<li><strong>Log cabin fire:</strong> Long slow burn. Excellent for sustained heat and signaling. Stack logs in alternating square layers with tinder in the center.</li>
+<li><strong>Star fire:</strong> 4–5 logs pointing toward a central burn. Push logs inward as tips char. Conserves wood — the original pioneer and native method.</li>
+<li><strong>Dakota hole:</strong> Two connected underground chambers — fire in one, air intake tunnel entering from the side. Nearly smokeless, wind-resistant, and visually concealed from a distance. Ideal for grid-down security.</li>
+</ul></div>
+<div class="kb"><h3>&#9888;&#65039; Safety &amp; Signal Fires</h3>
+<ul>
+<li>Clear a 10-foot radius of all dry debris before lighting any fire</li>
+<li>Never build directly under branches or near dry grass with wind</li>
+<li>Always have dirt or water nearby for rapid extinguishing</li>
+<li><strong>Signal fire:</strong> Three fires in a triangle = the universal distress signal. Green/wet vegetation on a hot fire creates thick white smoke visible against dark forest. Black rubber or oil creates black smoke visible against a light sky.</li>
+</ul></div>`,
+
+shelter:(r,m)=>`
+<div class="ph"><span class="pi">&#9978;&#65039;</span><h2>Shelter Building</h2><p class="sub">Exposure kills faster than starvation. Shelter is your first priority in any extreme weather condition.</p></div>
+<div class="rn">&#127758; <strong>${RN[r]}</strong> — ${r==='southwest'?'Priority: shade and air circulation. Sun exposure is your primary enemy. A ramada-style shade structure takes priority over all else.':r==='alaska'?'Priority: maximum insulation and wind blocking. In a blizzard, a snow shelter can be warmer than any lean-to.':r==='southeast'?'Priority: elevation off wet ground, ventilation, and insect protection.':'Balance wind protection, rain shedding, and heat retention based on your current conditions.'}</div>
+<div class="kb"><h3>&#128205; Site Selection — Non-Negotiable Rules</h3>
+<ul>
+<li>Elevated, flat ground — cold air and water both settle in valleys and low spots</li>
+<li>Check overhead for dead "widow maker" branches that could fall in wind before building</li>
+<li>50–100 yards from water — accessible but above flood line</li>
+<li>Face opening away from prevailing wind (typically away from west or north in the US)</li>
+<li><strong>Small shelters retain body heat dramatically better</strong> — build only large enough for your body</li>
+<li>Elevation off the bare ground is non-negotiable in cold weather — earth constantly conducts your body heat away</li>
+</ul></div>
+<div class="kb"><h3>&#127807; Debris Hut — Fastest Warm Emergency Shelter</h3>
+<p>Requires no tools and no cordage. A well-built debris hut can maintain survivable warmth in near-freezing conditions on body heat alone:</p>
+<ol>
+<li>Prop a ridgepole 9–10 ft long at a 30° angle — one end on ground, far end resting in a forked branch or stump at waist height</li>
+<li>Lean ribbing sticks along both sides at 45° angles — creating a skeleton frame</li>
+<li>Layer the skeleton with smaller sticks, then pile leaves, pine needles, bark, and any dry forest debris at least 3 feet thick on all sides. Test: if daylight shows through it anywhere, add more material.</li>
+<li>Fill the inside cavity with 2+ feet of dry leaves as bedding — this is your critical insulation layer</li>
+<li>Create a door plug: stuff a bag or shirt with dry leaves to block the entrance completely</li>
+</ol>
+<div class="tip"><strong>Key principle:</strong> The debris hut works exactly like a down sleeping bag — it traps dead air as insulation. It is not waterproof but is thermally exceptional. In rain, add overlapping bark shingles from bottom to top.</div></div>
+<div class="kb"><h3>&#127959;&#65039; Lean-To — The Pioneer Standard</h3>
+<ol>
+<li>Lash a horizontal ridgepole between two trees at chest height using cordage, vines, or twisted bark strips</li>
+<li>Lean long branches against the ridgepole at 45° on one side to create a wall-roof frame</li>
+<li>Layer smaller cross-branches to create a framework for roofing material</li>
+<li>Apply roofing material from the bottom up, like overlapping shingles — bark pieces, large leaves, pine boughs. Each layer overlaps the one below so rain runs off rather than through.</li>
+<li>Build a fire several feet in front of the open face — the lean-to reflects and retains the heat toward you</li>
+</ol></div>
+<div class="kb"><h3>&#129394; Log Cabin — Long-Term Homestead Shelter</h3>
+<ul>
+<li><strong>Best wood:</strong> Cedar and spruce — naturally rot-resistant, straight-grained, workable with hand tools. Also: white pine, Douglas fir, hemlock. Avoid soft species that rot rapidly.</li>
+<li>Fell trees in winter when sap content is lowest — reduces cracking and drying time</li>
+<li>Peel all bark completely before building — bark holds moisture and harbors insects that cause rapid rot</li>
+<li>Build on a stone foundation — direct ground contact will rot even the best logs within a few years</li>
+<li>Use saddle notch or round notch at corners to lock logs — the American pioneer standard requiring no fasteners</li>
+<li>Fill gaps between logs (chinking) with clay mud mixed with dry moss (sphagnum is best) and small flat stones</li>
+<li>Build chimney on the outside wall — traditional pioneer design that allows maximum interior space</li>
+<li>Steep-pitched gambrel roof sheds rain and snow loads effectively</li>
+</ul></div>
+<div class="kb"><h3>&#10052;&#65039; Cold &amp; Snow Shelters</h3>
+<ul>
+<li><strong>Quinzhee:</strong> Pile snow 8 ft high and 10 ft wide. Let it harden (sinter) for 2 hours. Insert 12-inch stick depth guides around the outside. Hollow out the interior, stopping when you hit a stick. Punch a ventilation hole at the top. The interior stays near 32°F — dramatically warmer than blizzard conditions outside.</li>
+<li><strong>Snow trench:</strong> Fastest winter survival shelter. Dig a trench just wide enough for your body, cover with branches and snow blocks. Interior temperature stabilizes near freezing — far warmer than any wind.</li>
+<li><strong>Desert ramada:</strong> Four posts, lightweight beams, brush or tarp roof. No rain protection but provides critical shade that can prevent fatal heat stroke.</li>
+</ul></div>`,
+
+mindset:(r,m)=>`
+<div class="ph"><span class="pi">&#129504;</span><h2>Mindset &amp; Wilderness Dangers</h2><p class="sub">Your brain is your most important survival tool. Panic kills more people than the wilderness does.</p></div>
+<div class="kb"><h3>&#9889; The Three Root Causes of Every Wilderness Emergency</h3>
+<ul>
+<li><strong>Underestimating the task:</strong> Complacency — treating serious situations as routine. "It's just a short hike." Going further than your gear and skill level supports. Getting in over your head.</li>
+<li><strong>Preparedness failure:</strong> Being unprepared, underprepared, or wrongly equipped for the conditions. No map, no water, no fire-making ability, inappropriate gear.</li>
+<li><strong>Lack of training and research:</strong> Making wrong decisions under pressure. Not knowing the basics when they matter most. This is why The Pioneer Cache exists.</li>
+</ul></div>
+<div class="kb"><h3>&#127756; The Synergy / Domino Effect</h3>
+<p>Survival emergencies rarely happen as single events — they cascade. One cold leads to slowed thinking. Slowed thinking leads to a wrong turn. Wrong turn leads to exhaustion. Exhaustion leads to exposure. Exposure leads to death. Each failure amplifies the next in a compounding spiral.</p>
+<p><strong>The single most important survival response: Stop. Breathe. Think. Then act.</strong> A panicked first response almost always worsens the situation. A calm, deliberate assessment performed in 60 seconds can save your life.</p></div>
+<div class="kb"><h3>&#128128; The Primary Killers — In Priority Order</h3>
+<ul>
+<li><strong>Exposure (hypothermia / hyperthermia):</strong> The #1 killer across all survival scenarios. Cold and wet together kill in hours. Desert heat kills nearly as fast. Shelter is always the first priority in extreme weather.</li>
+<li><strong>Falls:</strong> Most survival-situation falls happen when people are exhausted, injured, or moving at night in a desperate attempt at self-rescue. Slow down after dark and in terrain you don't know.</li>
+<li><strong>Dehydration:</strong> Begins impairing judgment and decision-making before you feel seriously thirsty. In desert heat, water needs can be 10× your normal daily intake.</li>
+<li><strong>Drowning:</strong> Cold water incapacitates swimming ability rapidly. Never attempt water crossings in flood conditions.</li>
+<li><strong>Starvation:</strong> The least urgent threat. Most healthy adults can function for 2–3 weeks without food. Focus on water and shelter first, always.</li>
+</ul></div>
+<div class="kb"><h3>&#129398; Hypothermia — Signs &amp; Response</h3>
+<ul>
+<li><strong>Mild (95–98°F body temp):</strong> Shivering, poor coordination, slurred speech, difficulty thinking clearly</li>
+<li><strong>Moderate (90–95°F):</strong> Shivering stops — this is a danger sign. Severe confusion, stumbling, irrational behavior, denial of problem.</li>
+<li><strong>Severe (below 90°F):</strong> Loss of consciousness, very slow irregular breathing, appears near death</li>
+</ul>
+<p><strong>Treatment:</strong> Remove wet clothing immediately. Insulate from ground (critical — bare ground drains heat fastest). Add dry insulation around the core (torso and head), not just extremities. Provide warm non-alcoholic fluids if conscious. Note: Alcohol feels warming but actually accelerates core heat loss.</p></div>
+<div class="kb"><h3>&#127777;&#65039; Heat Stroke — Signs &amp; Response</h3>
+<ul>
+<li>Skin hot, dry, and flushed red — sweating has stopped completely (very dangerous sign)</li>
+<li>Confusion, irrational behavior, agitation, or loss of consciousness</li>
+<li>Rapid, strong pulse</li>
+</ul>
+<p><strong>Treatment:</strong> This is a life-threatening emergency requiring immediate action. Move to shade immediately. Cool the body aggressively — wet cloths on skin, fan air across the wet skin, prioritize neck, armpits, and groin where major blood vessels run close to the surface. Do NOT give water or anything by mouth to an unconscious person.</p></div>`,
+
+foraging:(r,m)=>`
+<div class="ph"><span class="pi">&#127807;</span><h2>Foraging &amp; Edible Wild Plants</h2><p class="sub">Nature's pantry is open year-round to those who know where to look. Start with a handful of plants you can identify with total certainty.</p></div>
+<div class="rn">&#127758; Region: <strong>${RN[r]}</strong> &middot; Month: <strong>${MN[m]}</strong></div>
+<div class="warn"><strong>The Golden Rule of Foraging:</strong> Never consume any plant unless you can identify it using at least three separate characteristics (leaf shape, stem structure, habitat, and/or smell). One misidentification can be fatal. When in doubt — leave it out without exception.</div>
+<div class="kb"><h3>&#127758; Reliable Edibles Found Across All US Regions</h3>
+<div class="cg">
+  <div class="card"><div class="ct">&#127804; Dandelion</div><p>Every part is edible. Young spring leaves (before flowering) are mildest raw in salads. Mature leaves best boiled with two changes of water to reduce bitterness. Yellow flowers edible raw or fried. Root roasted as coffee substitute. Most abundant April–June and Sept–Oct.</p></div>
+  <div class="card"><div class="ct">&#127793; Common Plantain</div><p>The lawn weed with oval parallel-veined leaves — not the banana. Found in disturbed soil everywhere. Young leaves edible raw or steamed. Crushed fresh leaves applied to insect stings draw out irritants within minutes. Two types: broadleaf and narrowleaf, both edible.</p></div>
+  <div class="card"><div class="ct">&#127807; Cattail</div><p>The wilderness supermarket. Found near water everywhere in the US. Young spring shoots taste like cucumber. Bright yellow pollen (June–July) used as flour supplement. Starchy roots ground into flour year-round. Seed heads provide excellent fire tinder. Learn this one plant above all others.</p></div>
+  <div class="card"><div class="ct">&#9931; Arrowhead / Wapato</div><p>Shallow water and muddy stream banks. Tubers resemble small potatoes and taste similar when roasted or boiled. Use a forked stick to dislodge tubers in mud — they float to the surface. Available year-round where water doesn't freeze solid.</p></div>
+  <div class="card"><div class="ct">&#127806; Chickweed</div><p>Small low-growing plant with tiny white star-shaped flowers. Cool-season: most abundant spring and fall. Entire plant edible raw or cooked with mild pleasant flavor. Identify by a single line of fine hairs running along the stem — the definitive feature.</p></div>
+  <div class="card"><div class="ct">&#129845; Wild Onion &amp; Garlic</div><p>If it smells like onion, it is safe to eat — this is one of the only reliable smell tests in all of foraging. Wild onion and garlic grow in meadows and open woodland. Entire plant edible raw or cooked. Easy to find and identify confidently.</p></div>
+</div></div>
+<div class="kb"><h3>&#127758; Regional Edibles for ${RN[r]}</h3>
+${r==='pacific'?`<ul><li><strong>Miner's lettuce:</strong> Cool wet months (winter/spring). Circular leaves around stem. Mild flavor, excellent raw. A California foraging staple.</li><li><strong>Wood sorrel:</strong> Clover-like with heart-shaped leaves. Sour, bright flavor. Rich in vitamin C. Forest floors year-round.</li><li><strong>Huckleberries / Blackberries:</strong> Late summer. Easy to identify when fruiting. High calorie and excellent raw.</li><li><strong>Acorns:</strong> Fall harvest from any oak. Must leach tannins — soak cracked acorns in water for 3–7 days changing water daily before eating or grinding into flour.</li><li><strong>Sea vegetables (coastal):</strong> Bull kelp and sea lettuce washed clean — edible raw or dried. High in minerals and iodine.</li></ul>`:
+r==='southwest'?`<ul><li><strong>Prickly pear cactus:</strong> Pads (nopales) and fruit (tunas) both edible. Carefully remove all spines. Pads cooked, fruit raw. Available year-round.</li><li><strong>Mesquite pods:</strong> Ripe tan or brown pods in summer. Dried and ground into sweet nutritious flour. A staple food of desert indigenous peoples.</li><li><strong>Pine nuts (pinyon):</strong> Harvest from pinyon pine cones Sept–Oct before cones fully open. Among the highest-calorie wild foods available anywhere.</li><li><strong>Yucca flowers:</strong> Spring. Petals edible raw or cooked. Slightly bitter but nutritious.</li><li><strong>Agave hearts:</strong> Roasted in pit fires for many hours. Very high calorie. Mature plants only, never eat raw.</li></ul>`:
+r==='mountain'?`<ul><li><strong>Serviceberries:</strong> June–July. Purple-black berries on tall shrubs. Sweet, high calorie. One of the most important traditional foods in the Mountain West.</li><li><strong>Huckleberries:</strong> Late summer at mid-to-high elevation. Small, intense-flavored berries in multiple colors. Follow bear activity — where bears eat, people can too.</li><li><strong>Fireweed:</strong> Young shoots in spring before flowering. Excellent cooked like asparagus. Follows disturbed areas — burns, roadsides, clearcuts.</li><li><strong>Pine nuts:</strong> High-calorie harvest from pinyon pines in fall.</li><li><strong>Wild strawberries:</strong> June–July at lower elevations. Small but intensely flavored.</li></ul>`:
+r==='midwest'?`<ul><li><strong>Hickory nuts:</strong> East of Great Plains. Outer husk and hard inner shell. Taste like pecans. Extremely calorie-dense. Harvest Oct–Nov.</li><li><strong>Black walnuts:</strong> Strong flavor, very high calorie. Outer green husk stains everything — always harvest with gloves.</li><li><strong>Pawpaw:</strong> Eastern river bottoms, Aug–Oct. Tropical-flavored custard-like fruit. The largest native edible fruit in North America.</li><li><strong>Wild leeks (ramps):</strong> Early spring forest floors. Strong onion-garlic flavor. Both bulb and leaves edible.</li><li><strong>Elderberries:</strong> Late summer. Dark purple clusters. Must be cooked — raw berries cause nausea in most people.</li></ul>`:
+r==='southeast'?`<ul><li><strong>Muscadine grapes:</strong> Native wild grape, late summer. Thick-skinned and sweet. Easy to identify.</li><li><strong>Persimmons:</strong> Wait for first frost — unripe persimmons are painfully astringent and inedible. Fully ripe = custard-sweet. One of the best wild calorie sources in the Southeast.</li><li><strong>Saw palmetto berries:</strong> Fall. Reddish-black when ripe. Bitter but nutritious. Important wildlife food — where wildlife eats, people can too.</li><li><strong>Smilax greenbrier:</strong> Young spring shoots like asparagus. Starchy roots edible year-round.</li><li><strong>Mayhaw:</strong> Tart apple-like fruit, April–May in swampy areas. Excellent cooked.</li></ul>`:
+r==='alaska'?`<ul><li><strong>Crowberries:</strong> Common on tundra and forest floors. Small black berries in late summer. Tart and high in antioxidants. Dries well for storage.</li><li><strong>Salmonberries:</strong> Orange-red raspberry relative. Late summer. One of the most abundant berries in coastal and forest Alaska.</li><li><strong>Nagoonberries:</strong> Ground-level raspberry. Excellent flavor. Found in moist forest openings.</li><li><strong>Wild rose hips:</strong> After first frost. Very high in vitamin C — critical for preventing scurvy in long winters. All rose species produce edible hips.</li><li><strong>Spruce tips:</strong> Bright green new growth in spring. High in vitamin C. Can be eaten raw, made into tea, or dried for later.</li></ul>`:
+`<ul><li><strong>Fiddlehead ferns:</strong> Early spring. Tightly coiled young fronds of ostrich fern. Must be cooked thoroughly. Excellent flavor — one of the best spring vegetables available wild.</li><li><strong>Beach plum (coastal):</strong> Late summer on sandy dunes. Small tart plum. Excellent raw or made into preserves.</li><li><strong>Wild blueberries:</strong> July–August. Smaller and more intensely flavored than cultivated. Easy identification when fruiting.</li><li><strong>Staghorn sumac:</strong> Red berry clusters in fall. Soak clusters in water to make a tart, vitamin C-rich drink. Do NOT confuse with poison sumac which has white or gray berries.</li><li><strong>Hickory nuts:</strong> Throughout northeastern hardwood forest. Calorie-dense, harvest Oct–Nov.</li></ul>`}
+</div>
+<div class="kb"><h3>&#9760;&#65039; Deadly Plants — Know Before You Forage</h3>
+<ul>
+<li><strong>Water Hemlock:</strong> Most violently toxic plant in North America. White flower clusters near water. Even small amounts cause convulsions and death. Often confused with wild carrot or edible cow parsnip.</li>
+<li><strong>Poison Hemlock:</strong> Hollow purple-spotted stems. Deadly systemic poison. Socrates was executed with this plant.</li>
+<li><strong>Deadly Nightshade:</strong> Small dark berries, bell-shaped purple flowers. Fatal especially in children.</li>
+<li><strong>White Snakeroot:</strong> Caused "milk sickness" that killed Abraham Lincoln's mother. Toxic through livestock's milk.</li>
+<li><strong>Poison Ivy / Oak / Sumac:</strong> "Leaves of three, let it be." Severe allergic skin reaction. Never burn these plants — the smoke causes severe lung injury.</li>
+</ul></div>`,
+
+trapping:(r,m)=>`
+<div class="ph"><span class="pi">&#129332;</span><h2>Trapping &amp; Hunting</h2><p class="sub">Traps work while you sleep. Set many. Check often. Where you place a trap matters more than how you build it.</p></div>
+<div class="kb"><h3>&#128683; The Core Principle</h3>
+<p>Active hunting burns calories you may not have. Trapping is passive — it works around the clock without your attention. The key insight most people miss: <strong>a perfect snare in a bad location catches nothing. A simple snare on an active game run catches reliably.</strong> Learn to read sign before you learn trap construction.</p></div>
+<div class="kb"><h3>&#128269; Reading Animal Sign</h3>
+<ul>
+<li><strong>Trails vs. Runs:</strong> A trail shows evidence of multiple species — wider, worn, meandering. A run is single-species — narrower, more direct, connecting water to bedding to feeding areas. Set your traps on runs.</li>
+<li><strong>Scat (droppings):</strong> Fresh scat (moist throughout) means recent activity. Dry scat = hours to days old. Location confirms the run is active.</li>
+<li><strong>Other sign:</strong> Fur on low branches, tree rubs, muddy wallows, claw marks, compressed grass, runs through brush. All confirm presence and movement patterns.</li>
+<li><strong>Dullings in dew:</strong> In early morning, anything walking through dew-covered grass creates dull patches visible in low-angle light. Track even through grass using this effect.</li>
+</ul></div>
+<div class="kb"><h3>&#128279; The Simple Snare</h3>
+<ol>
+<li>Use wire (best), paracord inner strand, or twisted plant fiber cordage</li>
+<li>Form a loop: 4 inches diameter for rabbits, 2.5 inches for squirrels, 8–10 inches for larger game</li>
+<li>Position the loop height: 4 inches off ground for rabbits, 6–8 inches for larger animals — centered where the animal's head will pass through</li>
+<li>Anchor the far end firmly to a root or deeply driven stake</li>
+<li>Use a one-way slip mechanism — the loop tightens as the animal struggles but cannot loosen</li>
+<li>Mask your scent: rub snare with dirt or charred wood. Wear gloves while handling.</li>
+</ol>
+<div class="tip"><strong>Channelization:</strong> Build a natural-looking funnel of sticks narrowing toward the snare loop. Animals follow the path of least resistance — guide them through your trap without triggering alarm.</div></div>
+<div class="kb"><h3>&#9878;&#65039; Figure-4 Deadfall</h3>
+<p>Three notched sticks form the shape of the number 4. A heavy rock or log (at least 3× the target animal's weight) is balanced on the trigger system. When the animal takes the bait, the mechanism releases and weight falls:</p>
+<ol>
+<li>Carve three sticks: a vertical upright post, a diagonal brace, and a horizontal toggle/bait stick</li>
+<li>Notch all three so they interlock and support the deadfall weight</li>
+<li>Place bait at the end of the toggle stick — bait should be something the animal knows and is drawn to</li>
+<li>Weight must be large enough to kill cleanly — a flat stone or heavy log works best</li>
+</ol>
+<div class="warn"><strong>Practice this at home before you need it.</strong> The balance point requires tactile feel that cannot be learned from reading alone.</div></div>
+<div class="kb"><h3>&#129377; Small Game for ${RN[r]}</h3>
+${r==='pacific'?'Cottontail and brush rabbits (year-round), California ground squirrels (spring–fall), quail along brushy edges, black-tailed deer. Pacific coast: Dungeness crab and clams at low tide. Steelhead and salmon in coastal rivers fall–winter.':
+r==='southwest'?'Jackrabbits and desert cottontails (year-round, most active dawn/dusk), Gambel\'s quail along water sources, javelina/peccary, mule deer. Critical note: desert wildlife concentrates near water — set all traps within 200 yards of any water source.':
+r==='mountain'?'Snowshoe hare (winter/spring in heavy conifer forests), cottontail (lower elevations), blue and ruffed grouse, ground squirrels (spring–fall), mule deer and elk (larger game). Set snares near willow and aspen thickets where rabbit sign concentrates.':
+r==='midwest'?'Eastern cottontail (most abundant small game in the region), fox and gray squirrel in timber, ring-necked pheasant, Canada goose near water, white-tailed deer. Brushy field edges and creek bottoms are your most productive areas.':
+r==='southeast'?'Eastern cottontail, fox squirrel, wild turkey, white-tailed deer, raccoon (excellent bait: anything sweet-smelling or shiny), opossum, feral hog (abundant but potentially dangerous — do not approach a live trapped hog alone).':
+r==='alaska'?'Snowshoe hare — most abundant small game in boreal forest, massive population cycles. Set wire snares along willow and alder runs. Ptarmigan on tundra (approachable, easily snared). Porcupine (slow-moving — traditional emergency food for indigenous people). Salmon in any river July–October (set fish traps).':
+'Eastern cottontail, gray squirrel, ruffed grouse, white-tailed deer. Beaver in wetland areas — high calorie, traditional survival food. Raccoon near water and agricultural edges.'}</div>
+<div class="kb"><h3>&#129385; Processing &amp; Preserving Game</h3>
+<ul>
+<li>Work quickly in warm weather — meat spoils rapidly once the animal is dead and warm</li>
+<li>Hang cleaned meat at least 10 feet off the ground, 4 feet from any trunk to prevent predator access</li>
+<li>Use everything: boil bones for broth, render all fat (extremely calorie-dense), eat liver and heart first — they spoil fastest and are most nutritious</li>
+<li><strong>Smoking:</strong> Slice meat thinly and smoke over low hardwood fire 6–12 hours until dry and dark. Properly dried jerky lasts weeks without refrigeration.</li>
+<li><strong>Drying:</strong> Thin-sliced meat on clean racks in hot dry air. Best in arid regions and dry mountain summer.</li>
+<li>Cook all wild game thoroughly — most carry parasites that are invisible to the naked eye</li>
+</ul></div>`,
+
+fishing:(r,m)=>`
+<div class="ph"><span class="pi">&#127907;</span><h2>Wilderness Fishing</h2><p class="sub">Water concentrates food. With minimal or improvised gear, fishing can be your most consistent protein source.</p></div>
+<div class="kb"><h3>&#129693; Improvised Hooks &amp; Line</h3>
+<ul>
+<li><strong>Gorge hook:</strong> Carve a hardwood or bone stick 1–2 inches long, sharpened at both ends, notched in the center for the line. When baited and swallowed, pulling the line taut causes it to lodge crosswise.</li>
+<li><strong>Bent metal:</strong> Any stiff bent wire, safety pin, or carved hardwood thorn bent into a hook shape. Fish in still water will take almost any hook when hungry.</li>
+<li><strong>Line:</strong> Paracord inner strand (6 strands inside 550 cord), thread from clothing, or twisted plant fiber cordage</li>
+</ul></div>
+<div class="kb"><h3>&#9971; Passive Fishing — Work While You Sleep</h3>
+<ul>
+<li><strong>Trotline:</strong> String a line across or along a creek with multiple hooks at varying depths. Anchor both ends. Bait all hooks. Check every few hours. Works passively overnight.</li>
+<li><strong>Fish weir / trap:</strong> Build a funnel of sticks and rocks in a stream narrowing to a dead-end corral. Fish follow the current into the funnel and can't find the exit. Check daily.</li>
+<li><strong>Set lines:</strong> Tie individual baited hooks to overhanging branches so hooks hang just at water surface. Set several along a productive bank simultaneously.</li>
+</ul>
+<div class="tip"><strong>Passive fishing works while you do other survival tasks.</strong> Set 5–10 rigs simultaneously rather than actively fishing from one spot.</div></div>
+<div class="kb"><h3>&#128032; Where Fish Hold</h3>
+<ul>
+<li><strong>Cover and shade:</strong> Under undercut banks, beneath fallen logs and root systems, in deep shaded pools. Fish avoid open sunny water during midday heat.</li>
+<li><strong>Current seams:</strong> Where fast water meets slow water — called "seams" or "edges." Fish station here to intercept food washing through without fighting the full current.</li>
+<li><strong>Inlets and outlets:</strong> Where water enters or exits a lake or pond. Food concentrates at these transition points.</li>
+<li><strong>Best times:</strong> Dawn and dusk. Fish feed most aggressively in low light. These are your highest-yield windows.</li>
+</ul></div>
+<div class="kb"><h3>&#129408; Other Aquatic Food Sources</h3>
+<ul>
+<li><strong>Crayfish:</strong> Under rocks in clear streams and lake edges. Overturn rocks quickly and grab from behind. Boil thoroughly. Excellent protein-dense food.</li>
+<li><strong>Frogs:</strong> Along water edges at dusk. Bullfrog legs are substantial eating. Gig with a sharp stick at night using a light source.</li>
+<li><strong>Mussels and freshwater clams:</strong> Sift through gravel in streams. Boil all shellfish thoroughly. Avoid coastal shellfish during red tide events.</li>
+<li><strong>Aquatic insects:</strong> Caddisfly and stonefly larvae under rocks in clean streams are edible boiled. High protein, easy to collect in quantity.</li>
+</ul></div>`,
+
+planting:(r,m)=>`
+<div class="ph"><span class="pi">&#127793;</span><h2>Planting Calendar</h2><p class="sub">Knowing what to plant and when turns a patch of dirt into a food supply. Timing your region's frost dates is everything.</p></div>
+<div class="rn">&#127758; <strong>${RN[r]}</strong> &mdash; Month: <strong>${MN[m]}</strong></div>
+<div class="kb"><h3>&#128197; Monthly Planting Guide &mdash; ${RN[r]}</h3>
+<div class="mg">
+${Array.from({length:12},(_,i)=>{
+  const mo=MN[i+1];
+  const isCurrent=i+1===m;
+  return `<div class="mc"><div class="mh${isCurrent?' now':''}">${mo}${isCurrent?' &#9664; Now':''}</div><div class="mb">${getPlanting(r,i+1)}</div></div>`;
+}).join('')}
+</div></div>
+<div class="kb"><h3>&#127777;&#65039; USDA Hardiness Zones — Quick Reference</h3>
+<table class="tbl">
+<tr><th>Region</th><th>Zone(s)</th><th>Last Spring Frost</th><th>First Fall Frost</th></tr>
+<tr><td>Pacific Coast (CA coast)</td><td>9–11</td><td>Feb–Mar</td><td>Nov–Dec</td></tr>
+<tr><td>Pacific Coast (OR/WA)</td><td>7–9</td><td>Mar–Apr</td><td>Oct–Nov</td></tr>
+<tr><td>Southwest Desert</td><td>7–10</td><td>Feb–Apr</td><td>Oct–Dec</td></tr>
+<tr><td>Mountain West (high elevation)</td><td>3–5</td><td>May–Jun</td><td>Aug–Sep</td></tr>
+<tr><td>Midwest / Great Plains</td><td>4–7</td><td>Apr–May</td><td>Sep–Oct</td></tr>
+<tr><td>Southeast</td><td>7–10</td><td>Feb–Mar</td><td>Nov–Dec</td></tr>
+<tr><td>Northeast</td><td>4–7</td><td>Apr–May</td><td>Sep–Oct</td></tr>
+<tr><td>Texas / Gulf Coast</td><td>7–9</td><td>Feb–Mar</td><td>Nov–Dec</td></tr>
+<tr><td>Alaska</td><td>1–4</td><td>May–Jun</td><td>Aug–Sep</td></tr>
+</table></div>
+<div class="kb"><h3>&#127807; Essential Survival Garden Crops</h3>
+<p>These crops prioritize caloric density, ease of growing without inputs, and long-term storability — the three factors that matter most when the grid is down:</p>
+<ul>
+<li><strong>Potatoes:</strong> Highest calorie per square foot of any vegetable. Grow from saved eyes. Plant 4 weeks before last frost. Store for months in cool dark conditions.</li>
+<li><strong>Dried beans (pole and bush):</strong> Complete protein. Store for years when fully dried. Grow in all US regions. Plant after last frost.</li>
+<li><strong>Winter squash:</strong> Stores without refrigeration for months. Butternut and Hubbard keep best. Very high calorie and nutritious.</li>
+<li><strong>Corn (field corn):</strong> Dried field corn stores for years and grinds into cornmeal. Needs heat, space, and pollinators. Plant in blocks not rows for good pollination.</li>
+<li><strong>Kale and collards:</strong> Cold-hardy, providing nutrition through most of the year. Survive frost. Extremely nutritious per calorie.</li>
+<li><strong>Garlic:</strong> Plant cloves in fall, harvest mid-summer. Natural antimicrobial properties. Stores well braided and hung.</li>
+<li><strong>Sweet potatoes (warm regions):</strong> Extremely calorie-dense and nutritious. Long storage life. Grows easily in southern US.</li>
+<li><strong>Sunflowers:</strong> High-calorie seeds. Easy to grow. Attracts pollinators for all other crops.</li>
+</ul></div>
+<div class="kb"><h3>&#127793; Heirloom Seeds — Non-Negotiable</h3>
+<p>Hybrid seeds produce sterile plants — you cannot save their seeds for next year. In a long-term grid-down scenario, hybrid seeds are a one-time resource. Always prioritize:</p>
+<ul>
+<li><strong>Open-pollinated heirloom varieties only</strong> — seeds you can save, dry, and replant indefinitely</li>
+<li>Dry seeds completely before storing — even slight moisture causes mold</li>
+<li>Store in cool, dark, sealed containers. Most heirloom seeds remain viable 3–5 years.</li>
+<li>Maintain a multi-year seed supply and store in multiple separate locations as backup</li>
+</ul></div>`,
+
+compost:(r,m)=>`
+<div class="ph"><span class="pi">&#9851;&#65039;</span><h2>Composting &amp; Soil Building</h2><p class="sub">Living soil is the foundation of all food security. You can build extraordinarily productive soil from nothing using what's immediately around you.</p></div>
+<div class="kb"><h3>&#127807; Why This Matters Off-Grid</h3>
+<p>Without access to commercial fertilizers and soil amendments, your garden's long-term productivity depends entirely on the biological health of your soil. Composting closes the nutrient loop permanently — your waste becomes your fertility. A homesteader who masters composting never runs out of growing capacity regardless of what's available commercially.</p></div>
+<div class="kb"><h3>&#128230; The Basic Compost Pile</h3>
+<p>Composting is controlled decomposition. The recipe is simple: carbon-rich "browns" plus nitrogen-rich "greens" plus moisture plus oxygen:</p>
+<ul>
+<li><strong>Browns (carbon):</strong> Dry leaves, straw, wood chips, shredded cardboard, sawdust, newspaper, woody stalks, wood ash</li>
+<li><strong>Greens (nitrogen):</strong> Fresh grass clippings, vegetable and fruit scraps, coffee grounds, fresh plant trimmings, animal manure</li>
+<li><strong>Ratio:</strong> Approximately 3 parts browns to 1 part greens by volume. Too much green = slimy and foul-smelling. Too much brown = very slow to decompose.</li>
+<li><strong>Moisture:</strong> As consistently moist as a wrung-out sponge — never saturated, never bone dry</li>
+<li><strong>Aeration:</strong> Turn the pile every 1–2 weeks with a fork to introduce oxygen and speed the process</li>
+</ul>
+<div class="tip"><strong>Hot composting:</strong> A properly balanced pile generates 130–160°F internally — hot enough to kill weed seeds and most pathogens. Finished compost ready in 4–8 weeks. Cold composting (unturned) takes 6–12 months but requires almost no effort.</div></div>
+<div class="kb"><h3>&#129425; Worm Composting (Vermicomposting)</h3>
+<p>Red wiggler worms convert food scraps into "castings" — the richest compost available — faster than any hot pile:</p>
+<ul>
+<li>Use any wooden box with drainage holes and a lid</li>
+<li>Bedding: moist torn cardboard or shredded newspaper, 4–6 inches deep</li>
+<li>Feed: vegetable scraps, fruit peels, coffee grounds, crushed eggshells. Avoid all meat, dairy, and oils.</li>
+<li>Castings ready when bedding is dark, earthy-smelling, and uniform — typically 3–4 months</li>
+<li>One pound of red wigglers processes approximately half a pound of food waste per day</li>
+</ul></div>
+<div class="kb"><h3>&#127807; Improving Soil Without Bought Inputs</h3>
+<ul>
+<li><strong>Biochar:</strong> Crush charcoal from campfires into small pieces and work into soil. Biochar holds nutrients and water for centuries and dramatically improves soil biology. Indigenous Amazonian peoples created extremely fertile terra preta (dark earth) this way.</li>
+<li><strong>Wood ash:</strong> Raises soil pH and adds potassium and calcium. Use sparingly — too much kills plants. Excellent around fruit trees and root vegetables. 1–2 cups per square yard maximum.</li>
+<li><strong>Leaf mold:</strong> Pile autumn leaves in a wire cage, keep moist, and leave for 1–2 years. The result is a rich, moisture-retaining soil amendment that improves all soil types with zero effort.</li>
+<li><strong>Mulch:</strong> A 3–4 inch layer of any organic material on soil surface. Retains moisture, moderates temperature, suppresses weeds, and slowly feeds soil biology. One of the most impactful garden practices available.</li>
+<li><strong>Nitrogen fixers:</strong> Plant beans, peas, clover, or other legumes in rotation. Their roots host bacteria that capture atmospheric nitrogen and enrich the soil for subsequent crops.</li>
+</ul></div>`,
+
+stars:(r,m)=>`
+<div class="ph"><span class="pi">&#11088;</span><h2>Stars &amp; Sky Navigation</h2><p class="sub">The stars guided human beings across continents and oceans for thousands of years before any instrument was invented. They will guide you too.</p></div>
+<div class="kb"><h3>&#11088; Finding Polaris — The North Star</h3>
+<p>Polaris sits almost directly above Earth's North Pole. It is the only star in the northern sky that appears completely stationary throughout the night. When you find it and drop an imaginary vertical line straight down to the horizon — that direction is true north.</p>
+<div class="star-sky">        ★ POLARIS (North Star)
+        ↑ extend line ~5x this gap
+       ▲ ▲  ← Merak &amp; Dubhe
+      (outer edge of Big Dipper cup)
+     these "pointer stars" aim at Polaris
+
+   ╔═══════════╗
+   ║ BIG DIPPER ║  Ursa Major
+   ╚═══════════╝
+   7 bright stars, never sets in northern sky</div>
+<ol>
+<li>Find the <strong>Big Dipper</strong> — 7 bright stars forming a ladle shape. It never sets below the horizon in the northern US and is always visible on clear nights.</li>
+<li>Identify the two stars forming the outer edge of the cup — the side farthest from the handle. These are Dubhe (top) and Merak (bottom).</li>
+<li>Draw an imaginary line from Merak through Dubhe and extend it approximately 5 times the distance between them</li>
+<li>The moderately bright star at the end of that line is Polaris — the last and brightest star in the Little Dipper's handle</li>
+<li>Drop a vertical line from Polaris straight down to the horizon — that direction is true north</li>
+</ol>
+<div class="tip"><strong>Confirm Polaris:</strong> Cassiopeia (shaped like a W or M) always appears on the opposite side of Polaris from the Big Dipper. The two constellations rotate around Polaris together throughout the night. If both are visible, Polaris is exactly between them.</div></div>
+<div class="kb"><h3>&#128207; Finding Your Latitude Using Polaris</h3>
+<p>Wherever you stand in the northern hemisphere, Polaris is the same number of degrees above the horizon as your latitude north of the equator. At Miami (25°N) it sits 25° up. At Seattle (48°N) it sits 48° up.</p>
+<p><strong>Measure with your fist:</strong> Extend your arm toward the horizon, closed fist. Each fist-width represents approximately 10 degrees. Stack fists from horizon to Polaris and multiply by 10 — that's your approximate latitude.</p></div>
+<div class="kb"><h3>&#11088; Cassiopeia — When the Big Dipper Is Low</h3>
+<p>Cassiopeia looks like a distinct W or M shape in the sky (changes appearance based on time and season). It rotates on the opposite side of Polaris from the Big Dipper. When the Big Dipper is near the horizon and partly obscured, use Cassiopeia — draw a line from the center star of the W straight outward. This line points toward Polaris.</p></div>
+<div class="kb"><h3>&#9733; Orion — Finding East &amp; West</h3>
+<p>Orion the Hunter is visible in the winter night sky across the entire Northern Hemisphere. His three-belt stars are one of the most useful navigation features in the entire sky:</p>
+<ul>
+<li>The middle belt star Alnilam rises almost exactly due east and sets almost exactly due west, regardless of your latitude anywhere on Earth</li>
+<li>Watch where Orion's belt first appears above the horizon — that is east</li>
+<li>Watch where it sets — that is west</li>
+<li>For the belt star to be useful for this, it needs to be near the horizon at rising or setting</li>
+</ul></div>
+<div class="kb"><h3>&#9728;&#65039; Daytime Navigation</h3>
+<ul>
+<li><strong>Shadow stick method:</strong> Push a straight stick vertically into flat ground. Mark the tip of its shadow with a stone. Wait 15 minutes, mark the new shadow tip. The line from first mark to second mark runs roughly west to east (first mark = west, second = east).</li>
+<li><strong>Analog watch method:</strong> Point the hour hand at the sun. The midpoint between the hour hand and 12 o'clock points roughly south in the Northern Hemisphere.</li>
+<li><strong>Solar arc:</strong> The sun rises in the east and sets in the west. Note: This is exact only at the equinoxes. In summer it rises northeast and sets northwest across the US.</li>
+</ul></div>`,
+
+mapcompass:(r,m)=>`
+<div class="ph"><span class="pi">&#129517;</span><h2>Map &amp; Compass Navigation</h2><p class="sub">A compass and topo map work without batteries, signal, or satellites. Master these and you can navigate anywhere on Earth.</p></div>
+<div class="kb"><h3>&#128218; Essential Terminology</h3>
+<table class="tbl">
+<tr><th>Term</th><th>Definition</th></tr>
+<tr><td>Declination</td><td>The angle between true north (geographic) and magnetic north (compass needle). Varies by location — critical to account for when navigating precisely. Eastern US: compass points slightly west of true north. Western US: slightly east.</td></tr>
+<tr><td>Topo lines</td><td>Lines on a topographic map connecting all points at equal elevation. Each line = one elevation increment. Widely spaced = gentle slope. Closely packed = steep terrain.</td></tr>
+<tr><td>Contour interval</td><td>The elevation difference between adjacent topo lines. Listed in the map legend. Common values: 20 ft, 40 ft, 100 ft.</td></tr>
+<tr><td>Bearing</td><td>A direction expressed in degrees (0–360°). North = 0° or 360°. East = 90°. South = 180°. West = 270°.</td></tr>
+<tr><td>Triangulation</td><td>Using compass bearings to two or more identifiable landmarks to determine your exact position on the map where the back-bearings intersect.</td></tr>
+</table></div>
+<div class="kb"><h3>&#129517; Using a Compass</h3>
+<ul>
+<li>Hold the compass flat and level — needle swings freely only when level</li>
+<li>Allow the needle to fully settle before reading any bearing</li>
+<li>The RED end of the needle points to magnetic north — NOT exactly true north</li>
+<li><strong>Adjusting for declination:</strong> Western US add ~12–15° to get true north. Eastern US subtract ~10–15°. The exact value for your location is printed on most topo maps.</li>
+<li>To travel on a bearing: set the bearing on the degree dial, rotate the entire compass body until the needle aligns with the orienting arrow ("red in the shed"), then follow the direction of travel arrow on the baseplate</li>
+<li>Pick a landmark in the direction of travel and walk to it — don't stare at the compass while walking</li>
+</ul></div>
+<div class="kb"><h3>&#128506;&#65039; Reading Topographic Lines</h3>
+<ul>
+<li>U or V shapes pointing uphill = valley or drainage (water flows through the bottom)</li>
+<li>U or V shapes pointing downhill = ridge or spur (high ground between drainages)</li>
+<li>Concentric circles = hilltop, peak, or depression</li>
+<li>Widely spaced lines = gentle slope, relatively easy travel</li>
+<li>Closely packed lines = steep terrain, difficult and slow travel</li>
+<li>Every 5th line is darker and labeled with its elevation (index contour)</li>
+</ul></div>
+<div class="kb"><h3>&#128205; Finding Your Position by Triangulation</h3>
+<ol>
+<li>Identify two or three prominent landmarks you can physically see from where you are (peaks, river bends, road junctions, towers)</li>
+<li>Find each of these landmarks on your map</li>
+<li>Take a compass bearing from your location to each landmark</li>
+<li>Convert to back-bearing (add or subtract 180°) and draw lines on the map from each landmark in that direction</li>
+<li>Where the lines intersect is your position on the map</li>
+</ol></div>`,
+
+terrain:(r,m)=>`
+<div class="ph"><span class="pi">&#128506;&#65039;</span><h2>Reading Terrain</h2><p class="sub">The landscape itself is a survival manual — water, shelter, food, and danger are all written in the land if you learn to read it.</p></div>
+<div class="kb"><h3>&#128167; Water Indicators in Terrain</h3>
+<ul>
+<li><strong>Plant indicators:</strong> Willows, cottonwood, cattails, elderberry, sycamore, and box elder grow within 50 feet of water in almost all circumstances. These are your water compass plants — they never lie.</li>
+<li><strong>Topography:</strong> Water flows downhill and collects in depressions, valley bottoms, and canyon floors. Follow any drainage feature downhill.</li>
+<li><strong>Morning fog:</strong> Ground-level fog concentrates over water bodies at dawn — visible from elevation</li>
+<li><strong>Converging animal trails:</strong> Multiple game trails merging toward a V-point almost always lead to water nearby</li>
+<li><strong>Insects and birds:</strong> Dragonflies, swallows hunting insects, and bee flight paths typically within one mile of water</li>
+<li><strong>Rock seeps:</strong> Where different rock types meet or where cracks allow groundwater to emerge — look for green moss or vegetation on otherwise dry cliff faces</li>
+</ul></div>
+<div class="kb"><h3>&#9928;&#65039; Reading Weather from Terrain and Sky</h3>
+<ul>
+<li><strong>Rapidly building cumulus clouds in afternoon:</strong> Thunderstorms likely within 2–4 hours. Get off exposed ridges and peaks immediately.</li>
+<li><strong>Red sky at morning, red sunrise:</strong> Low pressure approaching — weather will likely deteriorate. The weather saying is reliable: "Red sky at morning, sailor take warning."</li>
+<li><strong>Halo around moon:</strong> Ice crystals in high cirrus clouds — precipitation likely within 24–48 hours</li>
+<li><strong>Wind direction shift to northeast or east:</strong> Classic indicator of incoming storm system in North America</li>
+<li><strong>Animals:</strong> Birds flying low, livestock lying down, insects biting more aggressively — traditional reliable storm indicators across cultures worldwide</li>
+</ul></div>
+<div class="kb"><h3>&#129517; Natural Compasses in the Landscape</h3>
+<ul>
+<li><strong>Moss:</strong> Tends to grow heaviest on north-facing (shaded) sides of trees and rocks. Not always reliable alone — use as one indicator among several.</li>
+<li><strong>Tree crown asymmetry:</strong> In open areas, trees grow more branches and fuller crowns on the south side (more sun). The crown extends further toward sunlight.</li>
+<li><strong>Snow melt patterns:</strong> South-facing slopes lose snow faster in late winter and spring — a reliable N/S indicator when present.</li>
+<li><strong>Ant hills:</strong> In many regions, anthills are built on the south or southeast side of trees and rocks to capture maximum winter sun. The hill slopes face south.</li>
+</ul>
+<div class="warn"><strong>Important:</strong> Natural compass indicators are supplementary — use them to confirm direction, not as your primary navigation. Stars and compass are always more reliable.</div></div>`,
+
+tracks:(r,m)=>`
+<div class="ph"><span class="pi">&#128062;</span><h2>Animal Tracks &amp; Sign</h2><p class="sub">Every animal leaves a record of its passage. Learning to read tracks turns the entire wilderness into a readable map of wildlife activity.</p></div>
+<div class="kb"><h3>&#128269; How to Read a Track</h3>
+<ul>
+<li><strong>Best surfaces:</strong> Mud, moist soft soil, fine sand, and snow hold the clearest impressions. Track in early morning or late afternoon — low-angle sunlight casts shadows that reveal fine detail.</li>
+<li><strong>What to measure:</strong> Width × length from widest/longest points. Count toes clearly. Note claw marks, heel pad shape, and overall track outline.</li>
+<li><strong>Aging tracks:</strong> Fresh tracks have sharp, crisp edges. Older tracks have crumbled edges, dried mud, or accumulated blown debris. Scat dry all the way through = old sign, hours to days.</li>
+<li><strong>Gait patterns:</strong> Walk, trot, lope, and bound each create distinct foot-placement groupings. Rabbits and squirrels bound — rear feet land ahead of front feet leaving a distinctive Y or starburst grouping.</li>
+</ul></div>
+<div class="kb"><h3>&#128062; North American Track Reference</h3>
+<table class="tbl">
+<tr><th>Animal</th><th>Track Size</th><th>Toes</th><th>Key Features</th></tr>
+<tr><td>White-tailed Deer</td><td>2–3.5 in</td><td>2 (cloven)</td><td>Heart-shaped split hoof. Pointed tips. Dewclaws show in deep mud/snow. Paired walking tracks.</td></tr>
+<tr><td>Black Bear</td><td>Front 4 in wide; Rear 7 in long</td><td>5</td><td>Rear track resembles large human foot. All 5 toes register. Claw dots well ahead of toes. Pigeon-toed gait.</td></tr>
+<tr><td>Grizzly Bear</td><td>Front 5+ in wide</td><td>5</td><td>Much larger than black bear. Long claw marks (2+ in) extending far ahead of toe pads — distinguishing feature from black bear.</td></tr>
+<tr><td>Mountain Lion</td><td>3–4 in wide</td><td>4 (no claws)</td><td>Large round cat track. NO claw marks (retracted). Asymmetrical — two middle toes project forward. Three-lobed heel pad.</td></tr>
+<tr><td>Coyote</td><td>2–2.5 in</td><td>4 with claws</td><td>Oval outline. Claw marks present. Walks in nearly straight line (efficient trot gait). Neater and more oval than domestic dog.</td></tr>
+<tr><td>Gray Wolf</td><td>4–5 in</td><td>4 with claws</td><td>Much larger than coyote. Stride 26–30 inches. Near-straight walking line. Outer toes widely spread.</td></tr>
+<tr><td>Raccoon</td><td>2–3 in</td><td>5 front &amp; rear</td><td>Rear foot resembles tiny human hand with 5 spread "fingers." Often found at water edges.</td></tr>
+<tr><td>Cottontail Rabbit</td><td>1–1.5 in</td><td>4</td><td>Bounding pattern — two large rear feet land ahead of two small front feet in a Y-grouping. Very common everywhere.</td></tr>
+<tr><td>Wild Turkey</td><td>4–5 in</td><td>3 forward + 1 rear</td><td>Large three-toed track with clear claw impressions. Long middle toe. Usually in groups.</td></tr>
+<tr><td>River Otter</td><td>2.5–3.5 in</td><td>5 with webbing</td><td>Webbing between toes often shows. Belly drag groove in snow or mud. Always near water.</td></tr>
+<tr><td>Beaver</td><td>Rear: 5–6 in</td><td>5 webbed (rear)</td><td>Large webbed rear foot. Distinctive flat tail drag groove between track groups. Always within feet of water.</td></tr>
+</table></div>
+<div class="kb"><h3>&#128221; Sign Beyond Tracks</h3>
+<ul>
+<li><strong>Scat:</strong> Canine scat (coyote/fox/wolf) is twisted and tapered, often with hair. Bear scat is large and variable — berries, seeds, or fur depending on season. Cat scat is segmented, often covered. Rabbit = small round pellets in piles.</li>
+<li><strong>Rubs:</strong> Deer bucks rub antlers on small trees in fall — shredded bark and hair at 2–4 ft height marks territories and removes velvet</li>
+<li><strong>Bear claw marks:</strong> Long parallel gouges high on smooth-barked trees (birch, aspen) — height marks territory and communicates size</li>
+<li><strong>Beds:</strong> Oval depressions in grass or leaves where deer/elk rested. Size indicates animal size. Fresh beds have crushed, warm vegetation and scent.</li>
+<li><strong>Single-species runs:</strong> Narrow, purposeful paths through brush connecting water, bedding, and feeding areas — where you set snares</li>
+</ul></div>`,
+
+leafid:(r,m)=>`
+<div class="ph"><span class="pi">&#127810;</span><h2>Leaf &amp; Tree Identification</h2><p class="sub">Trees provide food, medicine, fire, shelter, and tools. Knowing them by their leaves is foundational knowledge for anyone living close to the land.</p></div>
+<div class="kb"><h3>&#127807; Leaf Types — The Foundation</h3>
+<table class="tbl">
+<tr><th>Type</th><th>Description</th><th>Examples</th></tr>
+<tr><td>Simple pinnate veins</td><td>Single leaf with one central vein and side branches</td><td>Oak, birch, elm, cherry, beech</td></tr>
+<tr><td>Simple palmate veins</td><td>Multiple main veins radiating from base</td><td>Sweet gum, sycamore, maple</td></tr>
+<tr><td>Pinnately compound</td><td>Multiple leaflets along a central stem (rachis)</td><td>Walnut, ash, hickory, elderberry, locust</td></tr>
+<tr><td>Palmately compound</td><td>Multiple leaflets radiating from a single point</td><td>Buckeye, horse chestnut</td></tr>
+<tr><td>Opposite arrangement</td><td>Leaves attach in pairs directly across from each other</td><td>Maple, ash, dogwood (MAD rule: Maple Ash Dogwood)</td></tr>
+<tr><td>Alternate arrangement</td><td>Leaves attach one at a time, alternating sides of stem</td><td>Oak, birch, elm, cherry, willow — most trees</td></tr>
+<tr><td>Needle leaves — bundles</td><td>Long thin needles grouped in bundles</td><td>Pine (2, 3, or 5 per bundle)</td></tr>
+<tr><td>Needle leaves — single</td><td>Individual needles, not bundled</td><td>Spruce (4-sided), Fir (flat with white stripes), Hemlock</td></tr>
+</table></div>
+<div class="kb"><h3>&#127795; Essential Survival Trees</h3>
+<div class="cg">
+  <div class="card"><div class="ct">&#127795; White Birch</div><p><strong>ID:</strong> Unmistakable white papery bark peeling in horizontal strips. Triangular toothed leaves. <strong>Survival uses:</strong> Bark starts fire even when wet — the resin in birch bark is waterproof and highly flammable. Inner bark edible. Bark used to waterproof shelters and make containers.</p></div>
+  <div class="card"><div class="ct">&#127795; Eastern White Pine</div><p><strong>ID:</strong> Exactly 5 needles per bundle — the only common 5-needle eastern pine. Long, soft, flexible needles in bunches. <strong>Survival uses:</strong> Pine needle tea is high in vitamin C. Inner bark (cambium) edible. Resin seals wounds and waterproofs. Most abundant large tree in northeastern US forests.</p></div>
+  <div class="card"><div class="ct">&#127795; Red Cedar / Juniper</div><p><strong>ID:</strong> Scale-like overlapping leaves (not needles). Aromatic blue-gray berries. Reddish shredding fibrous bark. <strong>Survival uses:</strong> Shredded inner bark is the best natural tinder — lights even when slightly damp. Berries edible as seasoning. Wood repels insects naturally. Widespread across the US.</p></div>
+  <div class="card"><div class="ct">&#127795; Black Walnut</div><p><strong>ID:</strong> Pinnately compound leaves with 11–23 leaflets. Round green-husked nuts in fall. Leaves and husks stain skin dark brown on contact. <strong>Survival uses:</strong> Very calorie-dense and nutritious nuts. Husks dye fabric dark brown permanently. Hard, dense wood for tool handles and shelter.</p></div>
+  <div class="card"><div class="ct">&#127795; Elderberry</div><p><strong>ID:</strong> Pinnately compound leaves with 5–9 toothed leaflets. Distinctive white flat-topped flower clusters in spring. Dark purple-black berry clusters late summer. <strong>Survival uses:</strong> Flowers and cooked berries medicinal for respiratory illness. Hollow stems used as fireboard material in bow drill.</p></div>
+  <div class="card"><div class="ct">&#127795; Willow</div><p><strong>ID:</strong> Long narrow lance-shaped leaves, flexible whip-like branches. Always found near water. Many species. <strong>Survival uses:</strong> Inner bark contains salicin — natural aspirin. Chew fresh bark or make a tea for pain relief and fever. Flexible branches for baskets, traps, fish weirs, and shelter cordage. Presence indicates water within 50 feet.</p></div>
+</div></div>`,
+
+snakes:(r,m)=>`
+<div class="ph"><span class="pi">&#128013;</span><h2>Snakes — Venomous vs Safe</h2><p class="sub">Of 150+ North American snake species, only 4 types are venomous. Learn to identify them confidently. Respect all snakes.</p></div>
+<div class="warn"><strong>Default rule:</strong> If you cannot positively identify a snake as harmless, treat it as potentially venomous. All snakes bite defensively when cornered or handled. The safest policy: give it space and let it move on.</div>
+<div class="kb"><h3>&#128272; The Four Key Identification Features</h3>
+<table class="tbl">
+<tr><th>Feature</th><th>Venomous (Pit Vipers)</th><th>Non-Venomous</th><th>Exceptions / Cautions</th></tr>
+<tr><td>Head shape</td><td>Triangular / arrowhead — wider than neck</td><td>Oval / rounded — similar width to neck</td><td>Some non-venomous snakes flatten their heads defensively to appear more dangerous. Coral snake has a rounded head despite being venomous.</td></tr>
+<tr><td>Eye pupils</td><td>Vertical, elliptical — cat-eye slit</td><td>Round, circular pupils</td><td>Coral snake has round pupils. Never get close enough to check pupils as a primary identification method.</td></tr>
+<tr><td>Heat pit</td><td>Small pit/hole between eye and nostril — looks like a third nostril</td><td>No pit present</td><td>This feature is definitive for pit vipers. Coral snake is NOT a pit viper and lacks this feature.</td></tr>
+<tr><td>Tail scales</td><td>Single row of scales from vent to tail tip</td><td>Double row of scales to tail tip</td><td>Most useful on shed skins. Difficult and dangerous to check on a live snake.</td></tr>
+</table></div>
+<div class="kb"><h3>&#128013; The Four Venomous Types in the US</h3>
+<div class="cg">
+  <div class="card"><div class="ct">&#128013; Rattlesnake (33+ species)</div><p><strong>Range:</strong> All US states except Maine, Alaska, and Hawaii. Most common in Southwest and Southeast.<br><strong>ID:</strong> Segmented rattle at tail tip — the ONLY North American snake with this feature. Triangular head. Heat pit. Cat-eye pupils. Heavy-bodied. Patterned with diamonds, blotches, or banding.<br><strong>Note:</strong> Juveniles have tiny rattles often missed. A rattlesnake may strike without rattling first — never rely on sound alone.</p></div>
+  <div class="card"><div class="ct">&#128013; Copperhead</div><p><strong>Range:</strong> Eastern US extending through Texas. Most common venomous snake in the eastern US.<br><strong>ID:</strong> Distinctive hourglass or dumbbell-shaped crossband pattern — wider on sides, narrowing to a thin waist at the top. Coppery-brown coloration. Triangular head. Pit present. Cat-eye pupils. Heavy body.<br><strong>Note:</strong> Juveniles have a bright yellow-green tail tip used to lure prey.</p></div>
+  <div class="card"><div class="ct">&#128013; Cottonmouth / Water Moccasin</div><p><strong>Range:</strong> Southeast US from SE Virginia through Texas. Always associated with water.<br><strong>ID:</strong> Dark brown to nearly black body, sometimes with faint banding. When threatened, gapes mouth wide showing bright white interior — the "cotton." Swims with head held above water (non-venomous water snakes swim lower with body submerged). Thick body. Triangular head.</p></div>
+  <div class="card"><div class="ct">&#128013; Coral Snake</div><p><strong>Range:</strong> Southeast US (Florida, Gulf Coast) and Texas. Secretive and rarely encountered.<br><strong>ID:</strong> Red, yellow, and black rings. The rhyme: <strong>"Red touches yellow, kill a fellow. Red touches black, friend of Jack."</strong><br>Slender body. Small rounded head. Not a pit viper. Reclusive — lives under logs and leaf litter. Neurotoxic venom that acts on nervous system.<br><strong>Critical:</strong> This rhyme applies ONLY in the US and Canada.</p></div>
+</div></div>
+<div class="kb"><h3>&#128260; Common Safe Look-Alikes</h3>
+<table class="tbl">
+<tr><th>Safe Snake</th><th>Mimics</th><th>How to Tell Them Apart</th></tr>
+<tr><td>Scarlet Kingsnake</td><td>Coral Snake</td><td>Scarlet king: red touches BLACK (safe). Coral snake: red touches YELLOW (venomous). Apply the rhyme only in the US.</td></tr>
+<tr><td>Eastern Hognose</td><td>Copperhead or Rattlesnake</td><td>Hognose has an upturned, shovel-shaped snout. Flattens head and hisses dramatically. Completely harmless theatrical display.</td></tr>
+<tr><td>Banded Water Snakes</td><td>Cottonmouth</td><td>Water snakes swim with body lower in water. More slender head, no heat pit. Bite readily but are not venomous.</td></tr>
+<tr><td>Bull Snake / Gopher Snake</td><td>Rattlesnake</td><td>Vibrates tail in dry leaves mimicking rattle sound convincingly. But has a rounded head, round pupils, no heat pit, and no rattle segments.</td></tr>
+</table></div>
+<div class="kb"><h3>&#129306; Snakebite Response</h3>
+<ul>
+<li>Stay calm — elevated heart rate accelerates venom circulation through the body</li>
+<li>Immobilize the bitten limb and keep it at or below heart level</li>
+<li>Remove rings, watches, and tight clothing near bite site before swelling begins</li>
+<li>Get to medical care as quickly as possible — antivenom is the only definitive treatment</li>
+<li><strong>DO NOT:</strong> Cut and suck the wound, apply tourniquets, use ice, apply electrical shock, or give alcohol. All of these cause additional harm.</li>
+<li>Note the snake's description for medical staff — do NOT waste time or risk another bite trying to capture it</li>
+</ul>
+<div class="warn"><strong>Grid-down scenario:</strong> Without antivenom, rest the victim completely. Immobilize the limb. Keep the person hydrated and calm. Most rattlesnake bites are not immediately fatal in healthy adults — the greatest dangers are secondary infection, tissue necrosis, and blood clotting disorders over 24–48 hours. The less you panic and move, the better the outcome.</div></div>`,
+
+predators:(r,m)=>`
+<div class="ph"><span class="pi">&#128059;</span><h2>Predators &amp; Dangerous Wildlife</h2><p class="sub">Most wild animals actively avoid humans. Understanding their behavior replaces fear with informed respect — which is far safer.</p></div>
+<div class="kb"><h3>&#128059; Black Bear</h3>
+<p>Most common bear in North America. Present across most of the US. Generally timid and conflict-avoidant. Most "charges" are defensive bluffs that stop short.</p>
+<ul>
+<li><strong>Prevention:</strong> Store all food, cooking gear, and scented items 10 ft off ground and 4 ft from any trunk. Never cook or eat near your sleeping area. Use bear canisters in high-bear areas.</li>
+<li><strong>Encounter:</strong> Speak calmly and firmly. Stand tall and appear large. Back away slowly — never run (triggers chase instinct). Maintain eye contact.</li>
+<li><strong>Attack:</strong> Black bear attacks are rare. When they occur, <strong>fight back aggressively</strong> — target the nose and eyes. Black bears are opportunistic and respond immediately to resistance.</li>
+</ul></div>
+<div class="kb"><h3>&#128059; Grizzly / Brown Bear</h3>
+<p>Range: Alaska, Northern Rockies (ID/MT/WY), and Yellowstone ecosystem. Larger and more powerful than black bears.</p>
+<ul>
+<li><strong>ID difference from black bear:</strong> Grizzly has a pronounced shoulder hump, dished/concave face profile, and very long front claws (2+ in). Black bear has no hump and a straight or Roman-nosed profile.</li>
+<li><strong>Encounter:</strong> Speak calmly. Avoid direct eye contact (perceived as aggression). Back away slowly. If hiking in grizzly country, carry bear spray on your belt at all times.</li>
+<li><strong>Defensive attack (most common — surprised bear):</strong> PLAY DEAD. Face down, hands laced behind neck, legs spread to make rolling difficult. Stay still and silent until the bear leaves and is out of sight.</li>
+<li><strong>Predatory attack (rare — bear approaching slowly and silently):</strong> Fight back with everything available. Target eyes and nose.</li>
+</ul>
+<div class="tip"><strong>Bear spray is more effective than firearms</strong> in stopping charging bears according to studies. Effective range 30–60 feet. Carry it on your belt, not in your pack where it's unreachable in a sudden encounter.</div></div>
+<div class="kb"><h3>&#129409; Mountain Lion / Cougar</h3>
+<p>Present across nearly all western states and increasingly in Texas and the Southeast. Rarely seen — but often watching. Most active at dawn and dusk.</p>
+<ul>
+<li><strong>Prevention:</strong> Don't hike alone in known cougar territory. Keep children close and within sight at all times. If you see one watching you — it has typically been watching much longer than you know.</li>
+<li><strong>Encounter:</strong> Do NOT run — this triggers the predatory chase response immediately. Make yourself large (raise arms, open jacket). Maintain direct eye contact. Speak loudly and firmly. Pick up small children without bending or crouching.</li>
+<li><strong>Attack:</strong> Fight back with full aggression. Target the eyes and nose. Mountain lions respond strongly to active resistance — they are ambush predators programmed to expect passive prey.</li>
+</ul></div>
+<div class="kb"><h3>&#128038; Other Dangerous Wildlife</h3>
+<table class="tbl">
+<tr><th>Animal</th><th>Where</th><th>Behavior</th><th>Response</th></tr>
+<tr><td>Wild Boar / Feral Hog</td><td>Southeast, Texas, spreading nationwide</td><td>Sharp tusks. Defensive when cornered. Unpredictable with piglets nearby.</td><td>Climb anything above ground quickly. Never corner a hog.</td></tr>
+<tr><td>Moose</td><td>Alaska, northern states, Rocky Mountains</td><td>Kills more people annually than bears in North America. Charges without warning. Extremely fast.</td><td>Run and put large trees between you and the moose. They will not chase around obstacles.</td></tr>
+<tr><td>Bison</td><td>National parks, Great Plains</td><td>Deceptively fast at 35 mph. Charge with little warning. Do not approach for photographs.</td><td>Maintain 75+ yards at all times. Get behind a vehicle or solid structure.</td></tr>
+<tr><td>Alligator</td><td>Southeast US, especially Florida</td><td>Most active at dusk and night. Fast on land for short distances (&lt;20 ft).</td><td>Never approach. Never swim near them. If attacked: target eyes and snout — jaw-open muscles are weak.</td></tr>
+<tr><td>Scorpion (Bark scorpion)</td><td>Arizona, New Mexico, Nevada</td><td>Hides in dark spaces. Sting very painful, potentially dangerous for children and elderly.</td><td>Shake out boots and shoes every morning. Check sleeping gear. Keep area clear of debris and rocks.</td></tr>
+<tr><td>Black Widow Spider</td><td>All US, especially Southwest and Southeast</td><td>Red hourglass marking on underside. Builds irregular webs in dark undisturbed spaces.</td><td>Gloves when reaching into boxes, wood piles, and outhouses. Seek medical care for bite.</td></tr>
+<tr><td>Brown Recluse Spider</td><td>Central and Southeast US</td><td>Violin-shaped marking on body. Hides in undisturbed dark areas. Bite causes tissue destruction.</td><td>Shake clothing before wearing. Gloves in storage areas. Avoid putting hands into unseen spaces.</td></tr>
+</table></div>`,
+
+bugs:(r,m)=>`
+<div class="ph"><span class="pi">🦟</span><h2>Insects, Ticks &amp; Bug Management</h2><p class="sub">Bugs aren't just annoying — mosquitoes and ticks transmit diseases that can disable or kill you. Daily protection is essential.</p></div>
+<div class="kb"><h3>🦟 Mosquitoes — Disease &amp; Protection</h3>
+<p>Mosquitoes transmit West Nile virus, malaria (in some regions), dengue fever, Zika, and multiple forms of encephalitis. Most active at dawn and dusk. Attracted to dark clothing, body heat, and carbon dioxide.</p>
+<ul>
+<li><strong>Physical barrier first:</strong> Long sleeves, long pants, head netting. Tuck pants into socks. This is your most reliable and always-available defense — no chemicals required.</li>
+<li><strong>Smoke:</strong> One of the oldest and most effective repellents known. Position yourself where campfire smoke bathes you. For your shelter, burn a chunk of smoldering punk wood (crumbled rotten wood) or a dry cattail seed head on the dirt floor — drives out all insects. Repeat every few days in warm weather.</li>
+<li><strong>Natural repellents:</strong> Crushed fresh catnip leaves applied to skin and clothing (proven highly effective in studies). Crushed pineapple weed (Matricaria). Wax myrtle leaf extract. Citronella candles (50% protection nearby). All natural repellents require frequent reapplication — every 1–2 hours.</li>
+<li><strong>Light-colored clothing:</strong> Mosquitoes are attracted to dark colors. Wear light, neutral, and pastel colors in heavy bug areas.</li>
+<li><strong>Eliminate standing water:</strong> Any container holding still water breeds mosquitoes within 3–7 days. Eliminate every potential breeding site within your camp area.</li>
+<li><strong>Timing:</strong> Minimize outdoor exposure at dawn and dusk. Stay near smoke, indoors, or in breezy locations — mosquitoes are weak flyers and can't operate in wind.</li>
+</ul></div>
+<div class="kb"><h3>&#129361; Ticks — Disease &amp; Removal</h3>
+<p>Ticks are active whenever temperatures are consistently above freezing. They transmit Lyme disease, Rocky Mountain spotted fever, anaplasmosis, ehrlichiosis, tularemia, and other serious illnesses. They don't jump or fly — they wait on vegetation tips and grab passing hosts.</p>
+<ul>
+<li><strong>Prevention:</strong> Tuck pants into socks creating a sealed barrier. Wear light-colored clothing (ticks are visible against it). Walk in the center of trails — ticks wait on grass and brush edges within 18–24 inches of the ground.</li>
+<li><strong>Daily tick checks:</strong> Thoroughly examine entire body every day — head and hairline, behind ears, armpits, groin and inner thighs, behind knees, and between toes. Have a partner check your back and scalp. Ticks prefer thin-skinned, warm, hidden locations.</li>
+<li><strong>Removal:</strong> Use fine-tipped tweezers. Grasp the tick as close to the skin surface as possible. Pull upward with steady, even, continuous pressure — do NOT twist or jerk. Do NOT crush the tick's body. Clean bite area with soap and water. Do NOT use petroleum jelly, heat, nail polish, or other folk methods — these can cause the tick to regurgitate into the wound.</li>
+<li><strong>After removal:</strong> Save the tick in a sealed container with the date. Watch for the bullseye rash (erythema migrans) around the bite site in the following 3–30 days — a highly reliable early indicator of Lyme disease requiring prompt treatment.</li>
+</ul>
+<div class="warn"><strong>Lyme disease diagnoses have increased dramatically in recent decades</strong> due to expanding tick habitat. Early treatment with antibiotics is highly effective. Untreated Lyme disease becomes increasingly difficult to treat as it spreads through the body.</div></div>
+<div class="kb"><h3>&#128029; Stinging Insects</h3>
+<ul>
+<li>Yellow jackets nest in the ground — watch your step in late summer and fall around old tree stumps, rock piles, and any ground disturbance</li>
+<li>Wasps and hornets nest in trees, under eaves, and inside hollow logs — inspect before disturbing any wood</li>
+<li>If attacked by a swarm: run in a straight line immediately, cover your face, get inside any shelter or under water if available. Do NOT swat at them — this releases more alarm pheromones and increases the attack.</li>
+<li>Single sting: scrape out the stinger (don't pinch), cool the area. <strong>Watch for anaphylaxis</strong> — spreading hives beyond the sting site, throat tightening, difficulty breathing = life-threatening allergic emergency requiring immediate action</li>
+</ul></div>
+<div class="kb"><h3>&#129426; Other Significant Insects by Region</h3>
+<table class="tbl">
+<tr><th>Insect</th><th>Region / Season</th><th>Risk</th><th>Prevention &amp; Response</th></tr>
+<tr><td>Chiggers (harvest mites)</td><td>Southeast &amp; Midwest, summer/fall</td><td>Intensely itchy welts that last weeks. Scratching breaks skin and invites infection.</td><td>Tuck clothing. Sulfur powder around boot tops repels effectively. Cool bath helps relieve itching.</td></tr>
+<tr><td>Fire Ants</td><td>Southeast US, Texas, spreading west</td><td>Swarm and sting repeatedly without warning. Potential severe allergic reaction.</td><td>Never stand still near a mound. Move immediately if you step on a colony. Antihistamine for reaction.</td></tr>
+<tr><td>Deer flies / Horse flies</td><td>Near water, warm months, all regions</td><td>Painful bite. Active during daylight near water and swamps.</td><td>Light-colored clothing. Keep moving — they target stationary subjects. Head net with fine mesh.</td></tr>
+<tr><td>No-see-ums / Midges</td><td>Coastal and northern areas, warm months</td><td>Extremely tiny — penetrate standard mesh. Painful bite, potential significant reaction.</td><td>Fine-mesh head net only. Natural oils provide some relief. Most active at dawn and dusk near water.</td></tr>
+</table></div>
+<div class="kb"><h3>&#127807; Natural Insect Shelter Strategies</h3>
+<ul>
+<li>Build sleeping shelters away from standing water and dense low vegetation wherever possible</li>
+<li>Smudge your shelter interior with smoke before bed on warm, still evenings</li>
+<li>A small fire kept burning near the shelter entrance keeps insects at bay all night</li>
+<li>Pine and cedar boughs used as bedding naturally repel some insects due to volatile oils</li>
+<li>Keep your camp scrupulously clean — food waste and garbage attract flies, wasps, and biting insects</li>
+</ul></div>`,
+
+sanitation:(r,m)=>`
+<div class="ph"><span class="pi">&#128701;</span><h2>Waste Disposal &amp; Sanitation</h2><p class="sub">Improper waste disposal kills more people in survival situations than predators and storms combined. This knowledge is life-critical.</p></div>
+<div class="warn"><strong>Why this matters critically:</strong> Untreated human waste spreads cholera, dysentery, typhoid fever, hepatitis A, roundworms, hookworms, and Giardia. Every system here is designed around one fundamental rule: keep human waste 200+ feet from water sources, food prep areas, and living spaces.</div>
+<div class="kb"><h3>&#128369; Cat Hole — Wilderness Single Use</h3>
+<p>For individuals or very short stays without a fixed camp:</p>
+<ol>
+<li>Choose a site at least 200 feet (approximately 70 adult paces) from any water source, trail, or campsite</li>
+<li>Dig a hole 6–8 inches deep and 4–6 inches in diameter with a stick or trowel</li>
+<li>After use, use a stick to mix waste with the soil at the bottom of the hole — this dramatically accelerates decomposition</li>
+<li>Cover completely with original soil and tamp down firmly</li>
+<li>Toilet paper: bury in the hole in moist climates, pack out in arid climates where decomposition is very slow</li>
+</ol>
+<div class="tip"><strong>Natural toilet paper alternatives:</strong> Smooth rounded stones, large non-toxic leaves (avoid anything with milky sap or irritating smell), soft dry moss, or water and your hand with immediate thorough washing.</div></div>
+<div class="kb"><h3>&#128371; Latrine Trench — Group Camp or Extended Stay</h3>
+<p>For groups of 2+ people or stays of 3+ days at a fixed camp:</p>
+<ol>
+<li>Dig a trench 1 ft wide &times; 4 ft long &times; 18 inches deep — scale to group size and expected stay length</li>
+<li>Keep all excavated soil piled beside the trench</li>
+<li>After each use, cover waste with 2–3 inches of soil. Add a handful of wood ash or lime if available — dramatically reduces flies and odor.</li>
+<li>Build a simple privacy screen from branches or tarps</li>
+<li>When the trench fills within 6 inches of ground surface, fill completely with soil, mark the spot with a stick, and dig a new trench at least 200 feet from water</li>
+</ol></div>
+<div class="kb"><h3>&#127968; Pit Latrine — Permanent Homestead Structure</h3>
+<p>For a semi-permanent structure at a fixed homestead location:</p>
+<ol>
+<li>Dig a pit 3–4 feet in diameter and 6–10 feet deep. Depth determines service life — a deeper pit lasts years longer.</li>
+<li>Build a stable wooden platform over the pit with a hole sized appropriately, reinforced so it cannot flex or collapse</li>
+<li>Construct a privacy enclosure with a door — this also keeps flies out and is not optional</li>
+<li>Install a ventilation pipe extending 2+ feet above the roof with a fly screen on the top. The updraft this creates removes odor and traps flies in the pipe rather than the toilet space.</li>
+<li>Separate urine from feces when possible — urine is nearly sterile and can drain separately, dramatically reducing volume, odor, and fly attraction</li>
+<li>When the pit fills within 18 inches of surface: fill completely with soil, plant a tree or garden over it (the nutrients are excellent), and build a new pit at a new location at least 10 feet away</li>
+</ol></div>
+<div class="kb"><h3>&#9851;&#65039; Composting Human Waste — Humanure</h3>
+<p>Human waste CAN be safely composted when managed correctly. The key is sustained heat sufficient to kill pathogens:</p>
+<ul>
+<li>Use a 5-gallon bucket with a tight-fitting lid as the collection vessel</li>
+<li>After each use, add a generous layer of dry carbon material as cover: sawdust (ideal), dry leaves, straw, or wood shavings. This eliminates odor, absorbs moisture, and begins the composting process.</li>
+<li>When the bucket is 2/3 full, empty it onto a dedicated outdoor compost pile that will mature for a minimum of one full year before any use</li>
+<li>The compost pile must sustain temperatures of 113–160°F for at least one month to kill pathogens reliably. A properly maintained pile smells like earth — not sewage. Odor indicates insufficient carbon cover.</li>
+<li><strong>Use finished humanure compost only on:</strong> Fruit trees (applied away from the trunk), ornamental plants, or forest restoration. Never on root vegetables, salad greens, or any edible plant where compost contacts the edible portion.</li>
+</ul>
+<div class="warn"><strong>Two-year rule for safety:</strong> When in doubt about composting completeness, wait two full years before applying to any garden near edible plants. Patience eliminates all pathogen risk.</div></div>
+<div class="kb"><h3>&#129510; Handwashing — The Single Most Important Hygiene Practice</h3>
+<p>Handwashing prevents more illness in a survival camp than any other single measure:</p>
+<ul>
+<li><strong>Drip station:</strong> Punch small holes in the bottom of a container (plastic bottle, bucket). Fill with water. The slow drip is sufficient — even 2 ounces of water with soap effectively cleans hands if used correctly.</li>
+<li><strong>Soap substitute:</strong> Dissolve wood ash in water and allow to settle. The clear liquid above the ash is a mild lye solution (potassium hydroxide) that kills bacteria effectively. Rinse well.</li>
+<li><strong>When to wash without exception:</strong> After every toilet use. Before preparing any food. Before eating. After handling raw meat or game. After treating wounds.</li>
+</ul></div>`,
+
+medicine:(r,m)=>`
+<div class="ph"><span class="pi">&#127806;</span><h2>Natural Medicine &amp; Plant Remedies</h2><p class="sub">Indigenous people maintained health across continents for millennia using the plants around them. This knowledge has been refined over thousands of years.</p></div>
+<div class="warn"><strong>Important:</strong> This knowledge is for genuine survival emergencies when professional medical care is unavailable. When professional care is accessible, always seek it. Plant remedies vary in effectiveness and individual response.</div>
+<div class="kb"><h3>&#127807; Essential Medicinal Plants</h3>
+<div class="cg">
+  <div class="card"><div class="ct">&#127807; Plantain (Plantago)</div><p>The common lawn weed with oval parallel-veined leaves — found everywhere. Crush fresh leaves and apply directly to insect stings, bee stings, splinters, minor cuts, and skin rashes. Draws out irritants and reduces inflammation visibly within minutes. Also edible. The most universally useful first-aid plant in North America.</p></div>
+  <div class="card"><div class="ct">&#127807; Yarrow (Achillea millefolium)</div><p>Feathery fern-like leaves, flat-topped clusters of small white flowers. Named for Achilles who used it on battle wounds. Pack crushed fresh leaves firmly into bleeding wounds to slow and stop bleeding. Also used as a fever-reducing tea. Grows in meadows, roadsides, and open forest throughout North America.</p></div>
+  <div class="card"><div class="ct">&#127795; Willow Bark</div><p>All willow species contain salicin — the natural compound aspirin was synthesized from in 1853. Chew fresh inner bark (sweet white layer beneath outer bark) or simmer bark strips in water for 10 minutes as tea. Effective for headaches, fever reduction, mild pain, and inflammation. Takes 30–60 minutes to work. Avoid in individuals with aspirin allergy or sensitivity.</p></div>
+  <div class="card"><div class="ct">&#127807; Elderflower &amp; Elderberry</div><p>White flat-topped flower clusters (spring) steeped as tea effectively treat cold, flu, and upper respiratory infections. Ripe dark purple berries cooked into syrup are highly immune-supporting. Important: the bark, leaves, raw berries, and unripe berries are toxic. Use only the flowers and fully ripe cooked berries.</p></div>
+  <div class="card"><div class="ct">&#127807; Pine / Spruce Needles</div><p>Fresh green needles of any pine, spruce, or fir are extremely high in vitamin C — historically used to prevent and reverse scurvy on expeditions. Simmer 1 tablespoon of fresh needles in water for 5 minutes. Strain and drink. Mild, slightly citrusy flavor. Available year-round in nearly all forested regions.</p></div>
+  <div class="card"><div class="ct">&#129528; Honey (stored or foraged)</div><p>Raw honey is a proven ancient wound treatment. It draws out infection through osmosis, creates an antibacterial moist healing environment, and inhibits a broad spectrum of bacteria. Apply to wounds, burns, and infected skin and cover. Stores indefinitely without refrigeration. Archaeologists have found edible honey in Egyptian tombs.</p></div>
+</div></div>
+<div class="kb"><h3>&#128137; Wound Care Without Modern Supplies</h3>
+<ul>
+<li><strong>Irrigation with clean boiled water:</strong> The single most important wound care step. Copiously flush all wounds with clean water before any other treatment. Most infections that kill begin with contamination that could have been washed out.</li>
+<li><strong>Pine resin (pitch):</strong> Warm fresh sticky pine sap until pliable and apply as a wound sealant and natural antimicrobial dressing. It hardens to protect the wound and can be softened again with body heat for removal.</li>
+<li><strong>Garlic:</strong> Crushed raw garlic applied to wound edges has well-documented antimicrobial properties. Apply externally for infected wounds. Do not hold for extended periods — can cause skin burns.</li>
+<li><strong>Elevation and immobilization:</strong> Elevating infected extremities reduces swelling and spread. Immobilizing injured areas reduces pain and tissue damage.</li>
+</ul></div>`,
+
+firstaid:(r,m)=>`
+<div class="ph"><span class="pi">&#129306;</span><h2>Field First Aid</h2><p class="sub">When professional medical care is unavailable, knowing the right action at the right moment can mean survival. These are the most critical basics.</p></div>
+<div class="kb"><h3>&#129657; Bleeding Control</h3>
+<ul>
+<li><strong>Direct pressure:</strong> Press firmly on the wound with the cleanest available cloth. Do not remove to check — add more cloth on top if blood soaks through. Hold continuous firm pressure for 10+ minutes without releasing.</li>
+<li><strong>Tourniquet (life-threatening limb bleeding only):</strong> Apply 2–3 inches above the wound. Tighten until bleeding completely stops — this requires significant pressure. Record the time it was applied. Do NOT remove a tourniquet — leave for medical professionals.</li>
+<li><strong>Wound packing:</strong> For deep puncture wounds or cavities, pack firmly with cloth from inside outward, then apply direct pressure on top.</li>
+</ul></div>
+<div class="kb"><h3>&#129461; Fractures &amp; Sprains</h3>
+<ul>
+<li><strong>Splinting:</strong> Immobilize a suspected fracture in the position found — do not try to realign it. Apply rigid material (straight sticks, boards) padded with soft cloth above AND below the injured joint. Check circulation below the splint — fingers or toes should remain warm and retain sensation.</li>
+<li><strong>Sprain treatment (RICE):</strong> Rest, Ice if available, Compression (firm wrap — not tight enough to cut off circulation), Elevation above heart level. A sprained ankle can be walked on in a true survival emergency with firm supportive strapping.</li>
+</ul></div>
+<div class="kb"><h3>&#128167; Dehydration Assessment</h3>
+<ul>
+<li>Mild: thirst, darker urine, mild headache, dry mouth</li>
+<li>Moderate: significant headache, dizziness when standing, very dark urine or none, fatigue, irritability, poor judgment</li>
+<li>Severe: confusion, rapid heart rate, sunken eyes, skin tenting (pinch skin — doesn't spring back), loss of consciousness</li>
+<li><strong>Treatment:</strong> Small frequent sips of clean water. Oral rehydration: 1 liter water + pinch of salt + pinch of sugar. This closely mimics commercial oral rehydration salts and aids absorption dramatically.</li>
+</ul></div>
+<div class="kb"><h3>&#128012; Improvised Pain Relief</h3>
+<ul>
+<li>Willow bark tea (see Natural Medicine section) — contains natural salicin/aspirin</li>
+<li>Cold water application for acute pain, burns, and inflammation</li>
+<li>Elevation of painful extremities reduces pressure and pain</li>
+<li>Immobilization of injured areas reduces pain significantly</li>
+</ul></div>
+<div class="kb"><h3>&#129371; Choking Response</h3>
+<ul>
+<li><strong>Conscious adult:</strong> 5 firm back blows between shoulder blades with the heel of your hand. Then 5 abdominal thrusts (Heimlich): stand behind them, arms around their waist, one fist between belly button and breastbone, your other hand over that fist, sharp upward thrusts. Alternate until object clears or person loses consciousness.</li>
+<li><strong>Unconscious:</strong> Begin CPR immediately. Each time you open the airway to give breaths, look for a visible obstruction and remove it only if you can clearly see it.</li>
+</ul></div>`,
+
+urban:(r,m)=>`
+<div class="ph"><span class="pi">&#127961;&#65039;</span><h2>Urban Survival &amp; Grid-Down Security</h2><p class="sub">When the grid fails in a city, the threats change — but the core principles remain: awareness, preparation, and calm methodical action.</p></div>
+<div class="kb"><h3>&#128314; Preplanning &amp; Threat Awareness</h3>
+<ul>
+<li><strong>Know your environment:</strong> Are there dangerous individuals or groups active in your area? What resources will create competition or conflict when scarce (food, water, fuel, medicine)?</li>
+<li><strong>Location security:</strong> Choose housing with multiple exit routes. Secure door and window frames — most residential doors fail at the frame, not the lock. Gravel around windows creates noise from approach. Know your neighbors and establish genuine relationships before you need them.</li>
+<li><strong>Routine variation:</strong> Predictable behavior is exploitable by anyone with patience. Vary your routes, departure times, and daily patterns. Threats target the predictable.</li>
+<li><strong>Family communications plan:</strong> Establish meeting points and communication protocols before emergencies occur. Assume cell networks will be overwhelmed or unavailable in any major disaster.</li>
+</ul></div>
+<div class="kb"><h3>&#128680; First 72 Hours When the Grid Goes Down</h3>
+<ol>
+<li><strong>Don't panic and don't rush.</strong> Most grid outages resolve within hours or days. Assess before acting.</li>
+<li><strong>Fill all containers with water immediately</strong> while municipal pressure lasts. A full bathtub holds 40–60 gallons. Fill every pot, bottle, and bucket available.</li>
+<li><strong>Assess food inventory.</strong> A closed refrigerator maintains safe food temperature for 4–6 hours without power. A full freezer stays safe for 48 hours.</li>
+<li><strong>Gather information.</strong> A battery or hand-crank radio is your most valuable information tool when the internet is down. Tune to emergency broadcast frequencies.</li>
+<li><strong>Manage visibility of resources.</strong> The smell of cooking, light from windows, and generator noise all advertise resources and attract attention in a dark neighborhood. Be thoughtful about what your home communicates to observers.</li>
+<li><strong>Identify and connect with trustworthy neighbors.</strong> A neighborhood that functions as a community is dramatically safer and more capable than a collection of isolated individuals.</li>
+</ol></div>
+<div class="kb"><h3>&#128274; Security Principles</h3>
+<ul>
+<li>Make yourself and your location appear to be a harder target than available alternatives — most opportunistic threats will move toward easier options</li>
+<li>Community networks are far more secure than isolated individuals. Your neighbors are your greatest security resource.</li>
+<li>Do not display valuable resources (food, fuel, medicine, electronics) where others can observe them through windows or from outside</li>
+<li>Travel in groups when possible. Minimize unnecessary movement during overnight hours.</li>
+<li>When travel is necessary: plan your route and an alternate route in advance, know your destination and a fallback, and inform someone of your plan and expected return time</li>
+</ul></div>`,
+
+tools:(r,m)=>`
+<div class="ph"><span class="pi">&#128295;</span><h2>Essential Tools &amp; Gear</h2><p class="sub">The right tool at the right moment saves energy, time, and potentially your life. Know what you have and how to maintain it.</p></div>
+<div class="kb"><h3>&#128298; The Fixed-Blade Knife — Your Most Essential Tool</h3>
+<p>A quality fixed-blade knife is the single most versatile tool in a survival situation. It is not primarily a weapon — it is a tool for fire-making, food processing, shelter building, cordage work, first aid, and dozens of other daily tasks:</p>
+<ul>
+<li><strong>Full tang construction</strong> (blade steel extending the full length of the handle) — provides maximum strength under heavy use</li>
+<li>4–5 inch blade length is the most universally versatile for camp tasks</li>
+<li>High-carbon steel holds an edge better under field conditions and sharpens more easily on found stones than stainless steel</li>
+<li>Maintain a sharp edge — a dull knife requires more force, causes more slipping accidents, and fails at critical moments</li>
+<li>Sharpen on any flat stone with water using consistent 20° angle strokes. The motion: circular, figure-8, or straight strokes away from the edge.</li>
+</ul></div>
+<div class="kb"><h3>&#129683; Axe &amp; Hatchet</h3>
+<ul>
+<li>A full-size quality axe makes log cabin building, firewood processing, and large shelter construction feasible for one person working alone</li>
+<li>A hatchet handles most camp tasks in a lighter, more portable package</li>
+<li>Always check the head-handle connection before use — a loose axe head is more dangerous than any other tool failure</li>
+<li>Early American pioneers carried axe heads only — handles were carved from local hardwood (hickory, ash, or oak) as needed. This is a viable strategy.</li>
+</ul></div>
+<div class="kb"><h3>&#129693; Cordage — Paracord &amp; Natural Alternatives</h3>
+<p>550 paracord contains 7 inner strands each usable independently for fine work: snare wire, fishing line, sutures, gear repair, and more. The outer sheath is strong utility cordage. 100 feet weighs nearly nothing and fits in a pocket.</p>
+<p><strong>Making natural cordage:</strong> Stinging nettle fiber, inner bark of dead willow or basswood, yucca leaf fibers, and cattail leaves all twist into strong cordage. The reverse-wrap method: twist two fiber bundles clockwise individually, then twist the two bundles together counterclockwise. This self-tightening construction is how every indigenous culture worldwide made cordage for millennia.</p></div>
+<div class="kb"><h3>&#128294; Lighting Without Electricity</h3>
+<ul>
+<li><strong>Fat lamp:</strong> Any heat-proof container + animal fat (rendered to lard/tallow) + any fiber wick. Burns for hours with a steady, controllable flame. Used by every pre-industrial human culture worldwide for tens of thousands of years.</li>
+<li><strong>Pine torch:</strong> Split the end of a green stick and wedge in dried pine resin or fatwood shavings. Lights easily, burns hot and bright.</li>
+<li><strong>Tallow candle:</strong> Render animal fat, allow to cool slightly, dip a plant fiber wick repeatedly until a candle forms around it. Pour into any cylindrical mold for a more permanent candle.</li>
+<li><strong>Birch bark torch:</strong> Tightly rolled dry birch bark burns brightly and holds a sustained flame. Birch bark resin is highly flammable.</li>
+</ul></div>`
+};
+
+updateCtx();
+
+</script>
 <script>
 function showHome(){
   document.getElementById('navgrid').style.display='flex';
