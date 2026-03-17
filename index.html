@@ -194,11 +194,11 @@ select:focus{border-color:var(--gold)}
         <p>Find your way anywhere</p>
       </div>
       <div class="catbox-items">
-        <div class="ci-btn" onclick="go('map')"><span class="ico">🗺️</span><span class="lbl">Interactive US Map</span></div>
+        <div class="ci-btn" onclick="go('mapview')"><span class="ico">🗺️</span><span class="lbl">Interactive US Map</span></div>
         <div class="ci-btn" onclick="go('stars')"><span class="ico">&#11088;</span><span class="lbl">Stars &amp; Sky</span></div>
         <div class="ci-btn" onclick="go('mapcompass')"><span class="ico">&#129517;</span><span class="lbl">Map &amp; Compass</span></div>
         <div class="ci-btn" onclick="go('terrain')"><span class="ico">&#128506;&#65039;</span><span class="lbl">Reading Terrain</span></div>
-        <div class="ci-btn" onclick="go('map')"><span class="ico">🗺️</span><span class="lbl">US Geographic Map</span></div>
+        <div class="ci-btn" onclick="go('mapview')"><span class="ico">🗺️</span><span class="lbl">US Geographic Map</span></div>
       </div>
     </div>
 
@@ -313,7 +313,7 @@ select:focus{border-color:var(--gold)}
         <p>Rivers, mountains, landmarks — all 50 states</p>
       </div>
       <div class="catbox-items">
-        <div class="ci-btn" onclick="go('map')"><span class="ico">🗺️</span><span class="lbl">Interactive US Map</span></div>
+        <div class="ci-btn" onclick="go('mapview')"><span class="ico">🗺️</span><span class="lbl">Interactive US Map</span></div>
         <div class="ci-btn" onclick="go('mapcompass')"><span class="ico">🧭</span><span class="lbl">Map &amp; Compass Skills</span></div>
         <div class="ci-btn" onclick="go('terrain')"><span class="ico">⛰️</span><span class="lbl">Reading Terrain</span></div>
       </div>
@@ -347,6 +347,8 @@ select:focus{border-color:var(--gold)}
 <script>
 
 
+
+
 const MN=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const RN={pacific:'Pacific Coast',southwest:'Southwest Desert',mountain:'Mountain West',midwest:'Midwest/Plains',southeast:'Southeast',northeast:'Northeast',midatlantic:'Mid-Atlantic',texas:'Texas/Gulf',alaska:'Alaska',hawaii:'Hawaii'};
 
@@ -363,6 +365,7 @@ function updateCtx(){
   if(_currentPage && PAGES[_currentPage]){
     var scrollY = window.scrollY;
     document.getElementById('content').innerHTML = PAGES[_currentPage](R(),M());
+    if(_currentPage==='mapview'){ setTimeout(initMapControls,50); }
     window.scrollTo({top:scrollY});
   }
 }
@@ -374,6 +377,7 @@ function go(p){
   _currentPage = p;
   document.getElementById('navgrid').style.display='none';
   document.getElementById('content').innerHTML = fn(R(),M());
+  if(p==='mapview'){ setTimeout(initMapControls,50); }
   document.getElementById('content').classList.add('show');
   document.getElementById('backbar').classList.add('show');
   window.scrollTo({top:0,behavior:'smooth'});
@@ -2840,6 +2844,58 @@ const US_SVG_PATHS = {
   DC:'M 622,240 L 630,238 L 632,248 L 622,248 Z'
 };
 
+function initMapControls(){
+  var vb = [80,95,640,400];
+  var dragging=false, lastX=0, lastY=0, scale=1, tx=0, ty=0;
+  var svg = document.getElementById('usmap');
+  var states = document.getElementById('states');
+
+  function applyTransform(){
+    if(states) states.setAttribute('transform','translate('+tx+','+ty+') scale('+scale+')');
+  }
+
+  window.mapZoom = function(factor){
+    scale = Math.min(8, Math.max(0.5, scale*factor));
+    applyTransform();
+  };
+  window.mapReset = function(){
+    scale=1; tx=0; ty=0; applyTransform();
+  };
+  window.mapDragStart = function(e){
+    dragging=true; lastX=e.clientX; lastY=e.clientY;
+    if(svg) svg.style.cursor='grabbing';
+  };
+  window.mapDragMove = function(e){
+    if(!dragging) return;
+    tx += (e.clientX-lastX)/scale;
+    ty += (e.clientY-lastY)/scale;
+    lastX=e.clientX; lastY=e.clientY;
+    applyTransform();
+  };
+  window.mapDragEnd = function(){
+    dragging=false;
+    if(svg) svg.style.cursor='grab';
+  };
+  window.mapTouchStart = function(e){
+    if(e.touches.length===1){dragging=true;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;}
+  };
+  window.mapTouchMove = function(e){
+    if(!dragging||e.touches.length!==1) return;
+    e.preventDefault();
+    tx+=(e.touches[0].clientX-lastX)/scale;
+    ty+=(e.touches[0].clientY-lastY)/scale;
+    lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+    applyTransform();
+  };
+  window.selectState = function(code){
+    if(!code) return;
+    window._selectedState = code;
+    var sel = document.getElementById('stateSelect');
+    if(sel) sel.value = code;
+    go('mapview');
+  };
+}
+
 PAGES.mapview = function(r,m){
   const selectedState = (window._selectedState) || null;
   const sd = selectedState ? STATE_DATA[selectedState] : null;
@@ -3009,58 +3065,7 @@ ${detailHtml}
 
 <div class="tip" style="margin-top:16px"><strong>How to use:</strong> Click any state on the map or use the dropdown to see rivers, mountains, and key landmarks. Drag to pan. Use +/− to zoom. Rivers are blue lines — follow them downhill to find water and navigation corridors. Mountain triangles show major ranges.</div>
 
-(function(){
-  var vb = [80,95,640,400];
-  var dragging=false, lastX=0, lastY=0, scale=1, tx=0, ty=0;
-  var svg = document.getElementById('usmap');
-  var states = document.getElementById('states');
-
-  function applyTransform(){
-    if(states) states.setAttribute('transform','translate('+tx+','+ty+') scale('+scale+')');
-  }
-
-  window.mapZoom = function(factor){
-    scale = Math.min(8, Math.max(0.5, scale*factor));
-    applyTransform();
-  };
-  window.mapReset = function(){
-    scale=1; tx=0; ty=0; applyTransform();
-  };
-  window.mapDragStart = function(e){
-    dragging=true; lastX=e.clientX; lastY=e.clientY;
-    if(svg) svg.style.cursor='grabbing';
-  };
-  window.mapDragMove = function(e){
-    if(!dragging) return;
-    tx += (e.clientX-lastX)/scale;
-    ty += (e.clientY-lastY)/scale;
-    lastX=e.clientX; lastY=e.clientY;
-    applyTransform();
-  };
-  window.mapDragEnd = function(){
-    dragging=false;
-    if(svg) svg.style.cursor='grab';
-  };
-  window.mapTouchStart = function(e){
-    if(e.touches.length===1){dragging=true;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;}
-  };
-  window.mapTouchMove = function(e){
-    if(!dragging||e.touches.length!==1) return;
-    e.preventDefault();
-    tx+=(e.touches[0].clientX-lastX)/scale;
-    ty+=(e.touches[0].clientY-lastY)/scale;
-    lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
-    applyTransform();
-  };
-  window.selectState = function(code){
-    if(!code) return;
-    window._selectedState = code;
-    var sel = document.getElementById('stateSelect');
-    if(sel) sel.value = code;
-    go('map');
-  };
-})();
-<\/script>`;
+`;
 };
 
 // ================================================================
@@ -3251,82 +3256,7 @@ ${sel.map(k=>STATE_INFO[k]?`<div class="card"><div class="ct">📍 ${STATE_INFO[
 <tr><td>High ground</td><td>Observation, signaling, communication, flood safety, usually drier and warmer at night</td></tr>
 </table></div>
 
-(function(){
-  // Try to load Leaflet from CDN
-  if(typeof L !== 'undefined'){
-    initMap();
-    return;
-  }
-  var s = document.createElement('script');
-  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
-  s.onload = function(){
-    var css = document.createElement('link');
-    css.rel='stylesheet';
-    css.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
-    document.head.appendChild(css);
-    setTimeout(initMap, 100);
-  };
-  s.onerror = function(){
-    document.getElementById('leafMap').style.display='none';
-    document.getElementById('mapOffline').style.display='flex';
-  };
-  document.head.appendChild(s);
-
-  var MAP_INSTANCE = null;
-
-  window.initMap = function(lat,lng,z){
-    lat = lat||38.5; lng = lng||-96; z = z||4;
-    try {
-      if(MAP_INSTANCE){ MAP_INSTANCE.remove(); MAP_INSTANCE=null; }
-      MAP_INSTANCE = L.map('leafMap',{zoomControl:true}).setView([lat,lng],z);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-        attribution:'© OpenStreetMap contributors',
-        maxZoom:18
-      }).addTo(MAP_INSTANCE);
-
-      // Style the map dark
-      document.getElementById('leafMap').style.filter='invert(1) hue-rotate(180deg) brightness(0.85) contrast(1.1)';
-
-      // Add markers for major landmarks based on current region
-      var lmks = ${JSON.stringify(getLandmarks(r))};
-      lmks.forEach(function(lm){
-        var icon = L.divIcon({
-          html:'<div style="background:rgba(184,146,42,.9);color:#1a1209;font-family:Cinzel,serif;font-size:10px;padding:3px 6px;border-radius:2px;white-space:nowrap;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.5)">'+lm[2]+'</div>',
-          className:'',iconAnchor:[0,0]
-        });
-        L.marker([lm[0],lm[1]],{icon:icon}).addTo(MAP_INSTANCE);
-      });
-
-    } catch(e){
-      document.getElementById('leafMap').style.display='none';
-      document.getElementById('mapOffline').style.display='flex';
-    }
-  };
-
-  window.loadStateMap = function(){
-    var code = document.getElementById('stateSelect').value;
-    if(!code) return;
-    var info = ${JSON.stringify(STATE_INFO)};
-    var s = info[code];
-    if(!s) return;
-    document.getElementById('stateName').textContent = s.name;
-    document.getElementById('stateFeatures').textContent = s.features;
-    document.getElementById('stateInfo').style.display='block';
-    if(MAP_INSTANCE) MAP_INSTANCE.setView([s.lat,s.lng],s.z);
-    else initMap(s.lat,s.lng,s.z);
-  };
-
-  window.resetMap = function(){
-    document.getElementById('stateSelect').value='';
-    document.getElementById('stateInfo').style.display='none';
-    if(MAP_INSTANCE) MAP_INSTANCE.setView([38.5,-96],4);
-    else initMap(38.5,-96,4);
-  };
-
-  // Init on load
-  setTimeout(function(){ initMap(); }, 200);
-})();
-<\/script>`;
+;
 };
 
 function getLandmarks(r){
@@ -3564,7 +3494,11 @@ ${diseaseTable(horseDiseases)}</div>
 
 
 
+
+
 </script>
+
+
 
 </body>
 </html>
