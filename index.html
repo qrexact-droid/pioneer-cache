@@ -82,9 +82,7 @@ select:focus{border-color:var(--gold)}
 .fm{font-family:'Cinzel',serif;font-size:.6rem;color:rgba(184,146,42,.4);letter-spacing:.14em}
 @media(max-width:700px){.catbox-items{grid-template-columns:1fr 1fr}.dg{grid-template-columns:1fr 1fr}.mg{grid-template-columns:1fr 1fr}.hi{padding:10px 16px}#main{padding:20px 16px 40px}}
 </style>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
-</head>
+  </head>
 <body>
 <div id="hdr"><div class="hi">
   <svg width="46" height="46" viewBox="0 0 52 52" fill="none">
@@ -224,6 +222,16 @@ select:focus{border-color:var(--gold)}
   <span class="fm">THE PIONEER CACHE &middot; OFFLINE EDITION &middot; V1.0</span>
 </div>
 <script>
+
+// Error display for debugging
+window.onerror = function(msg, src, line, col, err) {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c00;color:#fff;padding:10px;font-family:monospace;font-size:12px;z-index:99999;word-break:break-all';
+    d.textContent = 'JS ERROR: ' + msg + ' (line ' + line + ')';
+    document.body.appendChild(d);
+    return false;
+};
+
 
 
 
