@@ -222,6 +222,9 @@ select:focus{border-color:var(--gold)}
   <span class="fm">THE PIONEER CACHE &middot; OFFLINE EDITION &middot; V1.0</span>
 </div>
 <script>
+
+
+
 const MN=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const RN={pacific:'Pacific Coast',southwest:'Southwest Desert',mountain:'Mountain West',midwest:'Midwest/Plains',southeast:'Southeast',northeast:'Northeast',midatlantic:'Mid-Atlantic',texas:'Texas/Gulf',alaska:'Alaska',hawaii:'Hawaii'};
 
@@ -2117,14 +2120,14 @@ function initMapControls(){
     // Hover effects via delegation
     svg.addEventListener('mouseover', function(e){
       var t = e.target;
-      if(t && t.classList && t.classList.contains('statepath')){
+      if(t && t.classList && t.classList.contains('sp')){
         t.style.filter='brightness(1.6)';
         t.style.opacity='1';
       }
     });
     svg.addEventListener('mouseout', function(e){
       var t = e.target;
-      if(t && t.classList && t.classList.contains('statepath')){
+      if(t && t.classList && t.classList.contains('sp')){
         t.style.filter='';
         // Restore opacity based on whether it\'s selected
         var sel = window._selectedState;
@@ -2787,98 +2790,6 @@ ${(r==='southeast'||r==='texas'||r==='midatlantic')?`
 // ================================================================
 
 
-PAGES.livestock = function(r,m){
-return `
-<div class="ph"><span class="pi">🐓</span><h2>Raising Livestock</h2>
-<p class="sub">Chickens, rabbits, goats, cows, pigs, horses, ducks — how to raise, feed, and keep them healthy from what your land provides.</p></div>
-
-<div class="kb"><h3>🐓 Chickens — The Homestead Foundation Animal</h3>
-<p>Chickens are the first animal for any homestead. They produce eggs, meat, pest control, and fertilizer from minimal inputs.</p>
-<ul>
-<li><strong>Breeds for dual purpose (eggs + meat):</strong> Rhode Island Red, Plymouth Rock, Sussex, Wyandotte. Avoid pure layers (Leghorn) or pure meat birds (Cornish Cross) if you want both.</li>
-<li><strong>Housing:</strong> 4 sq ft per bird inside the coop, 10 sq ft in the run. Must be completely predator-proof — raccoons, foxes, weasels, and hawks kill chickens easily. Hardware cloth (not chicken wire) on all openings.</li>
-<li><strong>Feeding from your land:</strong> Free-range chickens supplement heavily on insects, worms, grass, and seeds. Grow sunflowers and let them stand — chickens will harvest seeds themselves. Black soldier fly larvae in a compost bin produce 50%+ protein feed. Ferment grain scraps (wheat, corn, barley soaked 3 days) — increases nutrition 20% and reduces feed needs.</li>
-<li><strong>Homegrown feed recipe:</strong> Cracked corn 40% + wheat 30% + sunflower seeds 15% + dried insects 10% + wood ash + calcium (crushed oyster shell or dried eggshells back to them) 5%. Laying hens need calcium daily — without it, shells thin and production drops.</li>
-<li><strong>Water:</strong> Clean water daily, always. In freezing temps, heated waterers or change water 3x/day.</li>
-<li><strong>Egg production:</strong> Drops sharply under 14 hours of light. Add a lamp in winter or accept seasonal reduction (natural and healthier).</li>
-</ul>
-<div class="kb"><h3>&#128138; Chicken Diseases — Natural Treatment</h3>
-<table class="tbl">
-<tr><th>Disease</th><th>Symptoms</th><th>Natural Treatment</th></tr>
-<tr><td>Respiratory infection (MG, CRD)</td><td>Rattling breath, watery eyes, lethargy</td><td>Oregano oil in water (natural antibiotic). Apple cider vinegar 1 tbsp/gallon water. Isolate immediately.</td></tr>
-<tr><td>Coccidiosis</td><td>Bloody droppings, lethargy, hunched posture</td><td>Apple cider vinegar in water. Thyme added to feed. Oregano. Keep bedding dry — wet conditions breed it.</td></tr>
-<tr><td>Lice/Mites</td><td>Feather loss, scratching, pale comb</td><td>Diatomaceous earth (DE) dusted in nesting boxes and on birds. Wood ash bath area. Neem oil diluted on skin.</td></tr>
-<tr><td>Sour crop</td><td>Swollen crop, sour smell from beak</td><td>Massage crop downward. Olive oil down throat. Withhold feed 12 hrs. ACV in water ongoing prevention.</td></tr>
-<tr><td>Bumblefoot</td><td>Swollen black scab on foot pad</td><td>Soak in warm Epsom salt water. Remove scab, clean wound, pack with honey, bandage. Clean perches.</td></tr>
-<tr><td>Worms (internal parasites)</td><td>Weight loss, pale yolks, lethargy</td><td>Pumpkin seeds ground into feed (natural dewormer — cucurbitacin paralyzes worms). Garlic in water weekly.</td></tr>
-</table></div></div>
-
-<div class="kb"><h3>🐇 Meat Rabbits</h3>
-<p>Rabbits are the most efficient meat animal per sq ft. They convert feed to meat 4x more efficiently than cattle. A doe produces 4–6 litters/year of 6–10 kits each.</p>
-<ul>
-<li><strong>Best breeds:</strong> New Zealand White, Californian, Rex. These reach butcher weight (5 lbs) in 8–12 weeks.</li>
-<li><strong>Housing:</strong> Wire-bottom cages 30" x 36" minimum per adult. Elevated for air circulation and waste management. Shade essential — rabbits die quickly above 85°F.</li>
-<li><strong>Feeding from your land:</strong> Rabbits thrive on fresh forage. Grow: clover (high protein, they love it), kale, comfrey, chicory, plantain, sunflower leaves, dandelion, grass hay. Cut and dry summer grass into hay for winter — same process as cattle hay. Comfrey especially is called "the rabbit herb" — high protein, they eat it eagerly.</li>
-<li><strong>Hay making:</strong> Cut grass/clover/alfalfa before it seeds. Spread in thin rows. Turn daily for 3–5 days until completely dry and crackly throughout. Bale loosely or store in dry covered piles. Never store damp hay — mold kills rabbits.</li>
-<li><strong>Breeding:</strong> Bring doe to the buck\'s cage, never reverse — bucks get territorial. Leave 30 minutes. Kindle (birth) in 28–32 days. Provide nest box 28 days after breeding filled with hay.</li>
-</ul>
-<div class="kb"><h3>&#128138; Rabbit Diseases</h3>
-<table class="tbl">
-<tr><th>Disease</th><th>Symptoms</th><th>Natural Treatment</th></tr>
-<tr><td>GI Stasis</td><td>No droppings, hunched, not eating</td><td>Massage abdomen. Fresh grass hay immediately. Remove pellets. Gentle movement/exercise. Critical emergency.</td></tr>
-<tr><td>Ear Mites</td><td>Head shaking, dark crust in ears</td><td>Mineral oil dropped into ear, massage gently. Repeat weekly 3 weeks.</td></tr>
-<tr><td>Snuffles (Pasteurella)</td><td>Runny nose, sneezing, wet front paws</td><td>Improve ventilation. Reduce stress. Echinacea in water. Oregano oil. Isolate — highly contagious.</td></tr>
-<tr><td>Coccidiosis</td><td>Diarrhea, weight loss, lethargy</td><td>Apple cider vinegar 1 tsp/gallon water. Keep hutch dry. Remove young from infected doe.</td></tr>
-<tr><td>Wool block</td><td>Reduced droppings, loss of appetite</td><td>Fresh papaya or pineapple — enzymes break down fur mass. Increase hay. Brush regularly.</td></tr>
-</table></div></div>
-
-<div class="kb"><h3>🐐 Goats</h3>
-<p>Goats are the most versatile small homestead animal — milk, meat, hide, and land clearing. A pair of Nigerian Dwarf does produces 1–2 quarts of rich milk daily.</p>
-<ul>
-<li><strong>Dairy breeds:</strong> Nubian (rich butterfat), Nigerian Dwarf (small, efficient), LaMancha, Alpine</li>
-<li><strong>Meat breeds:</strong> Boer, Kiko, Spanish</li>
-<li><strong>Fencing:</strong> Goats test every fence constantly. 5-strand high-tensile electric or 4" no-climb woven wire minimum. They will escape anything less.</li>
-<li><strong>Feeding:</strong> Goats are browsers not grazers — they prefer brush, weeds, tree bark, and leaves over grass. Plant multi-flora rose, willow, blackberry, elderberry along fence lines as living feed. Supplement with hay (1.5–2 lbs/day), and grain only for milking does (1 lb grain per quart milk produced). Goats have copper requirements — a copper mineral block is non-negotiable or they develop serious deficiencies.</li>
-<li><strong>Milking:</strong> Milk twice daily 12 hours apart. Clean udder with warm water before milking. Strip first 3 squirts (mastitis check — lumpy or bloody = mastitis). Milk into clean metal pail. Chill immediately.</li>
-<li><strong>Making butter from goat milk:</strong> Let milk sit 12–24 hours in fridge (or cool place). Skim cream from top. Put cream in jar with lid and shake vigorously 15–20 minutes until it separates into butter and buttermilk. Rinse butter in cold water, knead out all buttermilk (or it goes rancid quickly). Salt lightly. Store cold.</li>
-</ul></div>
-
-<div class="kb"><h3>🐄 Cattle</h3>
-<ul>
-<li><strong>Best homestead breeds:</strong> Dexter (small, dual purpose, efficient), Jersey (best milk butterfat), Angus or Hereford (meat), Scottish Highland (cold-hardy, rough forage)</li>
-<li><strong>Land requirement:</strong> 1–2 acres per cow depending on pasture quality. Rotate pastures — never graze below 4 inches or it won\'t regrow properly.</li>
-<li><strong>Making hay for your cattle:</strong> Need hay baler (mechanical) OR cut and stack loose hay in covered shed. Plan for 25–30 lbs hay per cow per winter day. A 1,000 lb cow needs 1.5–2 tons of hay for a 5-month winter. Grow alfalfa, orchardgrass, timothy, or brome for best quality. Let alfalfa reach 10% bloom before cutting for maximum protein.</li>
-<li><strong>Supplemental feed from the homestead:</strong> Corn silage (whole corn plants chopped and fermented in a pit or bags). Turnips and beets grown and fed whole in winter. Kelp meal if near coast (excellent minerals). Apples, pumpkins, squash as treats.</li>
-<li><strong>Basic cattle diseases — natural treatment:</strong> Pink eye: isolate, dilute aloe vera or honey water eyewash. Bloat: walk the animal, drench with 1 cup vegetable oil or mineral oil to break gas bubble. Foot rot: clean wound, pack with pine tar. Worms: rotate pastures constantly — most important prevention. Pumpkin seeds, black walnut hull tea as natural dewormers.</li>
-</ul></div>
-
-<div class="kb"><h3>🐷 Pigs</h3>
-<ul>
-<li><strong>Best breeds:</strong> Berkshire (exceptional flavor), Tamworth (foraging breed), Duroc, Heritage crosses. Avoid commercial breeds (Yorkshire, Landrace) — they require high-input grain diets to perform well.</li>
-<li><strong>Two pigs minimum:</strong> Pigs are social and suffer alone. Raise at least two together.</li>
-<li><strong>Feeding from the homestead:</strong> Pigs are the ultimate recyclers. They thrive on: kitchen scraps, garden waste, whey from cheese-making, acorns (they will harvest these themselves if given forest access), compost, spent garden plants, fermented grain. Supplement with corn, barley, and foraged roots. A pig on pasture with forest access needs 50% less supplemental feed than a confined pig.</li>
-<li><strong>Fermented feed:</strong> Soak grain 3–5 days in water until sour smell develops. Fermented grain increases digestibility by 40% and reduces feed cost significantly. Pigs also prefer the sour taste.</li>
-<li><strong>Butcher weight:</strong> 250–300 lbs live weight (180–220 lbs hanging weight). Reached at 5–6 months on good feed.</li>
-</ul></div>
-
-<div class="kb"><h3>🐴 Horses &amp; Donkeys</h3>
-<ul>
-<li><strong>Horses for homestead work:</strong> Draft breeds (Percheron, Belgian, Clydesdale) for plowing and logging. Lighter breeds (Quarter Horse, Morgan) for riding and lighter work.</li>
-<li><strong>Donkeys:</strong> Excellent guard animals against coyotes and foxes. Lower maintenance than horses. Need company — pair with another donkey or friendly livestock.</li>
-<li><strong>Hay from your land:</strong> Horses need 1.5–2% of body weight in forage daily. A 1,000 lb horse needs 15–20 lbs hay/day. Grow orchardgrass, timothy, brome, or fescue for horse hay. Cut at early head stage for best nutrition. Dry 3–5 days in field — horses are very susceptible to mold in hay (heaves).</li>
-<li><strong>Pasture management:</strong> Rotate pastures every 2–3 weeks. Rest pastures 4–6 weeks to regrow. Horses are hard on pasture — they graze closer to the ground than cattle.</li>
-<li><strong>Hoof care:</strong> Clean hooves daily. Trim every 6–8 weeks (learn basic hoof trimming — farrier skills are essential homestead knowledge). Pack thrush-infected hooves with pine tar or dilute oregano oil.</li>
-<li><strong>Common horse conditions:</strong> Colic (stomach pain — walk constantly, do not let lie down, call vet if severe), Thrush (black foul-smelling hoof rot — clean and pack with pine tar), Rain rot (skin scabs — keep dry, apple cider vinegar spray), Heaves (respiratory from moldy hay — provide dust-free hay, never feed round bales that may be moldy inside).</li>
-</ul></div>
-
-<div class="kb"><h3>🦆 Ducks</h3>
-<ul>
-<li><strong>Best breeds:</strong> Pekin (meat), Khaki Campbell (exceptional egg layer — 300+ eggs/yr), Welsh Harlequin (dual purpose), Muscovy (foraging, meat, no quack)</li>
-<li><strong>Advantages over chickens:</strong> Cold-hardy, more disease-resistant, excellent foragers, produce larger eggs with richer yolks, superb pest control especially for slugs and mosquito larvae</li>
-<li><strong>Water requirements:</strong> Ducks need water deep enough to submerge their heads to clean their nostrils. A small tub or kiddie pool works. Change water frequently — they foul it quickly.</li>
-<li><strong>Feeding from land:</strong> Ducks forage heavily on slugs, snails, insects, worms, and aquatic plants if near water. Supplement with same grain mix as chickens. Ducks do not need grit if free-ranging.</li>
-</ul></div>`;
-};
 PAGES.butchering = function(r,m){
 return `
 <div class="ph"><span class="pi">🔪</span><h2>Hunting, Skinning &amp; Butchering</h2>
@@ -3173,227 +3084,6 @@ return `
 
 PAGES.mapview = function(r,m){
   var sel = window._selectedState || null;
-  var view = window._mapView || 'overview'; // 'overview' | 'geo' | 'info'
-  var sd = sel ? STATE_DATA[sel] : null;
-
-  // State detail panels
-  function stateInfoHTML(code){
-    var d = STATE_DATA[code];
-    if(!d) return '';
-    var lm = getLandmarks(d.region)||[];
-    return `
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:18px">
-  <div class="card">
-    <div class="ct">&#128167; Major Rivers</div>
-    ${d.rivers.map(function(r){return '<p style="margin-bottom:4px;font-size:.83rem">&bull; '+r+'</p>';}).join('')}
-  </div>
-  <div class="card">
-    <div class="ct">&#127956; Mountains &amp; Elevation</div>
-    ${d.mountains.map(function(m){return '<p style="margin-bottom:4px;font-size:.83rem">&bull; '+m+'</p>';}).join('')}
-  </div>
-  <div class="card">
-    <div class="ct">&#127795; Key Landmarks</div>
-    ${d.landmarks.map(function(l){return '<p style="margin-bottom:4px;font-size:.83rem">&bull; '+l+'</p>';}).join('')}
-  </div>
-</div>
-<div class="tip" style="margin-top:12px">
-  <strong>Survival value:</strong> Rivers are your water and navigation corridors — always follow drainages downhill. 
-  Mountain ranges create weather shadows, altitude zones, and defensible terrain. 
-  National forests are your best foraging, hunting, and shelter zones.
-</div>`;
-  }
-
-  // Build state SVG paths — highlighted state gets gold, others dimmed
-  function buildStates(selectedCode){
-    return Object.entries(US_SVG_PATHS).map(function(entry){
-      var code = entry[0], path = entry[1];
-      var isSel = code === selectedCode;
-      var reg = (STATE_DATA[code]||{}).region||'midwest';
-      var rc = {pacific:'#1a4a2a',southwest:'#4a2a0a',mountain:'#0a2a4a',midwest:'#1a3a0a',
-                southeast:'#3a1a0a',northeast:'#0a1a3a',midatlantic:'#2a1a3a',
-                texas:'#3a1a1a',alaska:'#0a3a4a',hawaii:'#2a0a3a'};
-      var fill = isSel ? '#b8922a' : (selectedCode ? '#0d1a12' : (rc[reg]||'#1a2020'));
-      var stroke = isSel ? '#ffd700' : (selectedCode ? 'rgba(150,200,255,.15)' : 'rgba(150,200,255,.4)');
-      var sw = isSel ? '2' : '0.8';
-      var op = isSel ? '1' : (selectedCode ? '0.35' : '0.9');
-      return '<path d="'+path+'" fill="'+fill+'" stroke="'+stroke
-        +'" stroke-width="'+sw+'" opacity="'+op
-        +'" data-state="'+code+'" class="statepath" style="cursor:pointer"/>';
-    }).join('');
-  }
-
-  // State labels
-  function buildLabels(){
-    return Object.entries(US_SVG_PATHS).filter(function(e){return e[0]!=='AK'&&e[0]!=='HI'&&e[0]!=='DC';}).map(function(entry){
-      var code = entry[0], path = entry[1];
-      var nums = (path.match(/[\d.]+/g)||[]).map(Number);
-      var xs=[],ys=[];
-      for(var i=0;i<nums.length-1;i+=2){xs.push(nums[i]);ys.push(nums[i+1]);}
-      if(!xs.length) return '';
-      var cx=((Math.min.apply(null,xs)+Math.max.apply(null,xs))/2).toFixed(1);
-      var cy=((Math.min.apply(null,ys)+Math.max.apply(null,ys))/2+2).toFixed(1);
-      return '<text x="'+cx+'" y="'+cy+'" style="pointer-events:none">'+code+'</text>';
-    }).join('') + '<text x="175" y="465" style="pointer-events:none">AK</text><text x="250" y="518" style="pointer-events:none">HI</text>';
-  }
-
-  var stateOptions = Object.entries(STATE_DATA).sort(function(a,b){return a[1].name.localeCompare(b[1].name);}).map(function(e){
-    return '<option value="'+e[0]+'"'+(e[0]===sel?' selected':'')+'>'+e[1].name+'</option>';
-  }).join('');
-
-  return `
-<div class="ph">
-  <span class="pi">&#128506;&#65039;</span>
-  <h2>US Geographic Map</h2>
-  <p class="sub">Click any state to zoom in, explore geography, rivers, mountains and landmarks.</p>
-</div>
-
-<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
-  <select id="stateSelect" onchange="window.mapSelectState(this.value)" style="font-size:.9rem;padding:7px 12px;min-width:190px">
-    <option value="">&#8212; Select a State &#8212;</option>
-    ${stateOptions}
-  </select>
-  <button onclick="window.mapSelectState('')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 14px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.1em">OVERVIEW</button>
-  <button onclick="window.mapZoom(1.35)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 13px;cursor:pointer;border-radius:3px;font-size:1rem;font-weight:bold">+</button>
-  <button onclick="window.mapZoom(0.74)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 13px;cursor:pointer;border-radius:3px;font-size:1rem;font-weight:bold">&#8722;</button>
-  ${sel ? `<div style="display:flex;gap:8px">
-    <button onclick="window.setMapView('overview')" style="background:${view==='overview'?'rgba(184,146,42,.3)':'#1a2840'};border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:6px 12px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.08em">MAP</button>
-    <button onclick="window.setMapView('geo')" style="background:${view==='geo'?'rgba(184,146,42,.3)':'#1a2840'};border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:6px 12px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.08em">GEOGRAPHY</button>
-    <button onclick="window.setMapView('info')" style="background:${view==='info'?'rgba(184,146,42,.3)':'#1a2840'};border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:6px 12px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.08em">DETAILS</button>
-  </div>` : ''}
-  ${sel ? `<span style="font-family:Cinzel,serif;font-size:.8rem;color:var(--gold);letter-spacing:.1em">&#9733; ${(sd||{}).name||''}</span>` : ''}
-</div>
-
-${view === 'info' && sel ? `
-<div class="rn" style="margin-bottom:16px">&#128205; <strong>${(sd||{}).name}</strong> — Detailed geographic reference</div>
-${stateInfoHTML(sel)}
-<div style="margin-top:16px;text-align:center">
-  <button onclick="window.setMapView('overview')" style="background:rgba(184,146,42,.1);border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:8px 20px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.1em">&#8592; BACK TO MAP</button>
-</div>
-` : `
-<div id="mapwrap" style="background:#060d1a;border:1px solid rgba(100,150,220,.2);border-radius:4px;overflow:hidden;position:relative;touch-action:none">
-  <svg id="usmap" viewBox="80 95 640 400" style="width:100%;height:500px;cursor:grab;display:block"
-       xmlns="http://www.w3.org/2000/svg"
-       onmousedown="window.mapDragStart(event)" onmousemove="window.mapDragMove(event)"
-       onmouseup="window.mapDragEnd()" onmouseleave="window.mapDragEnd()">
-    <rect width="100%" height="100%" fill="#060d1a"/>
-    <!-- Grid -->
-    <g stroke="rgba(100,150,220,.06)" stroke-width=".5">
-      <line x1="80" y1="150" x2="720" y2="150"/><line x1="80" y1="200" x2="720" y2="200"/>
-      <line x1="80" y1="250" x2="720" y2="250"/><line x1="80" y1="300" x2="720" y2="300"/>
-      <line x1="80" y1="350" x2="720" y2="350"/><line x1="80" y1="400" x2="720" y2="400"/>
-      <line x1="150" y1="95" x2="150" y2="495"/><line x1="220" y1="95" x2="220" y2="495"/>
-      <line x1="290" y1="95" x2="290" y2="495"/><line x1="360" y1="95" x2="360" y2="495"/>
-      <line x1="430" y1="95" x2="430" y2="495"/><line x1="500" y1="95" x2="500" y2="495"/>
-      <line x1="570" y1="95" x2="570" y2="495"/><line x1="640" y1="95" x2="640" y2="495"/>
-    </g>
-    <!-- Rivers -->
-    <g stroke="#2a5a8a" stroke-width="1.3" fill="none" opacity=".65" stroke-linecap="round">
-      <path d="M515,130 C510,160 507,200 505,240 C503,270 500,300 502,330 C504,355 512,380 510,410"/>
-      <path d="M240,172 C280,175 360,185 400,188 C440,192 475,200 510,225"/>
-      <path d="M575,228 C590,245 618,260 648,268"/>
-      <path d="M220,230 C215,260 195,320 160,365"/>
-      <path d="M280,295 C330,345 365,420 375,440"/>
-      <path d="M95,130 C150,138 175,140 205,148"/>
-      <path d="M195,180 C225,190 255,200 278,210"/>
-      <path d="M335,285 C370,290 410,295 450,295 C480,295 505,298 512,300"/>
-      <path d="M527,305 C540,308 578,305 615,302"/>
-      <path d="M130,445 C160,448 210,455 255,456"/>
-    </g>
-    <!-- Mountains -->
-    <g fill="rgba(120,160,100,.22)" stroke="rgba(120,160,100,.5)" stroke-width=".9">
-      <polygon points="240,130 250,110 260,130"/><polygon points="260,140 270,120 280,140"/>
-      <polygon points="280,150 290,130 300,150"/><polygon points="300,160 310,140 320,160"/>
-      <polygon points="320,170 330,150 340,170"/><polygon points="240,175 250,155 260,175"/>
-      <polygon points="260,185 270,165 280,185"/><polygon points="280,200 290,180 300,200"/>
-      <polygon points="115,180 125,160 135,180"/><polygon points="130,200 140,180 150,200"/>
-      <polygon points="115,220 125,200 135,220"/><polygon points="120,240 130,220 140,240"/>
-      <polygon points="115,105 125,90 135,105"/><polygon points="135,115 145,100 155,115"/>
-      <polygon points="115,130 125,115 135,130"/>
-      <polygon points="575,165 582,150 589,165"/><polygon points="589,175 596,160 603,175"/>
-      <polygon points="575,195 582,180 589,195"/><polygon points="562,215 569,200 576,215"/>
-      <polygon points="575,240 582,225 589,240"/><polygon points="568,260 575,245 582,260"/>
-      <polygon points="568,280 575,265 582,280"/><polygon points="570,300 577,285 584,300"/>
-      <polygon points="155,442 165,425 175,442"/><polygon points="175,447 185,430 195,447"/>
-      <polygon points="195,450 205,433 215,450"/>
-      <polygon points="490,270 497,258 504,270"/><polygon points="500,280 507,268 514,280"/>
-      <polygon points="400,165 407,153 414,165"/>
-    </g>
-    <!-- State fills -->
-    <g id="states">
-      ${buildStates(sel)}
-    </g>
-    <!-- State labels -->
-    <g font-family="sans-serif" font-size="6" fill="rgba(220,235,255,.8)" text-anchor="middle">
-      ${buildLabels()}
-    </g>
-    <!-- Compass -->
-    <g transform="translate(690,118)">
-      <circle r="15" fill="rgba(6,13,26,.85)" stroke="rgba(100,150,220,.35)" stroke-width="1.2"/>
-      <polygon points="0,-12 -3,-4 3,-4" fill="#c8d8f0"/>
-      <polygon points="0,12 -3,4 3,4" fill="rgba(100,150,220,.35)"/>
-      <polygon points="-12,0 -4,-3 -4,3" fill="rgba(100,150,220,.35)"/>
-      <polygon points="12,0 4,-3 4,3" fill="rgba(100,150,220,.35)"/>
-      <text y="-16" text-anchor="middle" font-size="7" fill="#c8d8f0" font-family="sans-serif">N</text>
-    </g>
-    <!-- Legend -->
-    <g transform="translate(83,458)">
-      <rect width="175" height="30" fill="rgba(6,13,26,.85)" rx="3"/>
-      <line x1="6" y1="10" x2="30" y2="10" stroke="#2a5a8a" stroke-width="1.5"/>
-      <text x="34" y="13" font-size="7" fill="#8ab4d4" font-family="sans-serif">Rivers</text>
-      <polygon points="50,18 54,10 58,18" fill="rgba(120,160,100,.3)" stroke="rgba(120,160,100,.6)" stroke-width=".8"/>
-      <text x="62" y="21" font-size="7" fill="#8ab4d4" font-family="sans-serif">Mountains</text>
-      <rect x="110" y="6" width="8" height="8" fill="#b8922a"/>
-      <text x="122" y="13" font-size="7" fill="#b8922a" font-family="sans-serif">Selected</text>
-    </g>
-    <!-- Landmark dots for selected state -->
-    ${sel ? (function(){
-      var lms = getLandmarks((STATE_DATA[sel]||{}).region||'midwest');
-      if(!lms||!lms.length) return '';
-      // We can\'t easily convert lat/lng to SVG coords accurately without a projection
-      // Show a note instead
-      return '';
-    })() : ''}
-  </svg>
-</div>
-
-${sel ? `
-<div style="background:#0a1628;border:1px solid rgba(100,150,220,.15);border-radius:3px;padding:14px 18px;margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-  <div>
-    <div style="font-family:Cinzel,serif;font-size:.9rem;color:var(--gold);letter-spacing:.08em;margin-bottom:4px">${(sd||{}).name}</div>
-    <div style="font-size:.82rem;color:var(--ash)">${(sd||{}).mountains&&sd.mountains[0]||''}</div>
-  </div>
-  <button onclick="window.setMapView('geo')" style="background:rgba(61,92,46,.2);border:1px solid rgba(61,92,46,.4);color:#a8d48a;padding:8px 16px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em">VIEW GEOGRAPHY &#9654;</button>
-  <button onclick="window.setMapView('info')" style="background:rgba(184,146,42,.1);border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:8px 16px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em">RIVERS &amp; LANDMARKS &#9654;</button>
-</div>` : `
-<div class="tip" style="margin-top:12px"><strong>Click any state</strong> on the map to zoom in and explore its geography, rivers, mountains, and survival landmarks. Use + / &#8722; to zoom, drag to pan.</div>`}
-
-${view === 'geo' && sel ? `
-<div class="kb" style="margin-top:20px">
-  <h3>&#127956; ${(sd||{}).name} — Geographic Overview</h3>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-    <div>
-      <h4 style="color:var(--gold);font-family:Cinzel,serif;font-size:.78rem;letter-spacing:.1em;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid rgba(184,146,42,.15)">&#128167; RIVERS &amp; WATERWAYS</h4>
-      ${(sd||{rivers:[]}).rivers.map(function(r){return '<div style="padding:6px 0;border-bottom:1px solid rgba(184,146,42,.06);font-size:.88rem;color:rgba(242,232,213,.82)">&bull; '+r+'</div>';}).join('')}
-    </div>
-    <div>
-      <h4 style="color:var(--gold);font-family:Cinzel,serif;font-size:.78rem;letter-spacing:.1em;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid rgba(184,146,42,.15)">&#127956; MOUNTAINS &amp; ELEVATION</h4>
-      ${(sd||{mountains:[]}).mountains.map(function(m){return '<div style="padding:6px 0;border-bottom:1px solid rgba(184,146,42,.06);font-size:.88rem;color:rgba(242,232,213,.82)">&bull; '+m+'</div>';}).join('')}
-    </div>
-  </div>
-  <div style="margin-top:16px">
-    <h4 style="color:var(--gold);font-family:Cinzel,serif;font-size:.78rem;letter-spacing:.1em;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid rgba(184,146,42,.15)">&#127795; KEY LANDMARKS, FORESTS &amp; SURVIVAL ZONES</h4>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">
-      ${(sd||{landmarks:[]}).landmarks.map(function(l){return '<div style="background:#0d1a12;border:1px solid rgba(61,92,46,.25);border-radius:3px;padding:8px 12px;font-size:.85rem;color:rgba(242,232,213,.82)">&#127975; '+l+'</div>';}).join('')}
-    </div>
-  </div>
-  <div class="tip" style="margin-top:14px">
-    <strong>Elevation note:</strong> Higher elevations mean shorter growing seasons, harder winters, and different plant/animal species every 1,000 ft of gain. Mountain passes are critical travel corridors — know yours. River valleys are historically where settlements form: water, flat land, game corridors, and trade routes all converge there.
-  </div>
-</div>` : ''}
-`}`;
-};
-PAGES.mapview = function(r,m){
-  var sel = window._selectedState || null;
   var view = window._mapView || 'map';
   var sd = sel ? STATE_DATA[sel] : null;
 
@@ -3471,7 +3161,7 @@ PAGES.mapview = function(r,m){
     +(sel ? '<span style="font-family:Cinzel,serif;font-size:.82rem;color:var(--gold);letter-spacing:.1em">&#9733; '+sd.name+'</span>' : '')
     +'</div>'
     +'<div id="mapwrap" style="background:#060d1a;border:1px solid rgba(100,150,220,.2);border-radius:4px;overflow:hidden;touch-action:none">'
-    +'<svg id="usmap" viewBox="80 95 640 400" style="width:100%;height:490px;cursor:grab;display:block" xmlns="http://www.w3.org/2000/svg">'
+    +'<svg id="usmap" viewBox="80 95 640 400" style="width:100%;height:490px;display:block" xmlns="http://www.w3.org/2000/svg">'
     +'<rect width="100%" height="100%" fill="#060d1a"/>'
     // grid
     +'<g stroke="rgba(100,150,220,.05)" stroke-width=".5">'
@@ -3543,7 +3233,261 @@ PAGES.mapview = function(r,m){
     );
 
   return mapHTML;
+};function initMapControls(){
+  var svg = document.getElementById('usmap');
+  if(!svg) return;
+
+  // Drag state
+  var dragging = false, moved = false;
+  var lastX = 0, lastY = 0, scale = 1, tx = 0, ty = 0;
+  var statesG = document.getElementById('states');
+
+  function applyTransform(){
+    if(statesG) statesG.setAttribute('transform',
+      'translate('+tx+','+ty+') scale('+scale+')');
+  }
+
+  window.mapZoom = function(factor){
+    scale = Math.min(12, Math.max(0.3, scale * factor));
+    applyTransform();
+  };
+
+  window.mapReset = function(){
+    scale = 1; tx = 0; ty = 0; applyTransform();
+  };
+
+  // Mouse drag
+  svg.addEventListener('mousedown', function(e){
+    dragging = true; moved = false;
+    lastX = e.clientX; lastY = e.clientY;
+    svg.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+
+  svg.addEventListener('mousemove', function(e){
+    if(!dragging) return;
+    var dx = e.clientX - lastX;
+    var dy = e.clientY - lastY;
+    if(Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
+    tx += dx / scale; ty += dy / scale;
+    lastX = e.clientX; lastY = e.clientY;
+    applyTransform();
+  });
+
+  svg.addEventListener('mouseup', function(e){
+    svg.style.cursor = 'grab';
+    if(!moved){
+      // It was a click — find data-state
+      var t = e.target;
+      while(t && t !== svg){
+        var code = t.getAttribute && t.getAttribute('data-state');
+        if(code){ window.mapSelectState(code); break; }
+        t = t.parentNode;
+      }
+    }
+    dragging = false; moved = false;
+  });
+
+  svg.addEventListener('mouseleave', function(){
+    dragging = false; moved = false;
+    svg.style.cursor = 'grab';
+  });
+
+  // Touch support
+  var touchStartX = 0, touchStartY = 0;
+  svg.addEventListener('touchstart', function(e){
+    if(e.touches.length === 1){
+      dragging = true; moved = false;
+      touchStartX = lastX = e.touches[0].clientX;
+      touchStartY = lastY = e.touches[0].clientY;
+    }
+    e.preventDefault();
+  }, {passive:false});
+
+  svg.addEventListener('touchmove', function(e){
+    if(!dragging || e.touches.length !== 1) return;
+    var dx = e.touches[0].clientX - lastX;
+    var dy = e.touches[0].clientY - lastY;
+    if(Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
+    tx += dx / scale; ty += dy / scale;
+    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+    applyTransform();
+    e.preventDefault();
+  }, {passive:false});
+
+  svg.addEventListener('touchend', function(e){
+    if(!moved){
+      var touch = e.changedTouches[0];
+      var el = document.elementFromPoint(touch.clientX, touch.clientY);
+      while(el && el !== svg){
+        var code = el.getAttribute && el.getAttribute('data-state');
+        if(code){ window.mapSelectState(code); break; }
+        el = el.parentNode;
+      }
+    }
+    dragging = false; moved = false;
+  });
+
+  // Hover highlight
+  svg.addEventListener('mouseover', function(e){
+    var t = e.target;
+    if(t && t.classList && t.classList.contains('sp')){
+      t.style.filter = 'brightness(2)';
+      t.style.opacity = '1';
+    }
+  });
+
+  svg.addEventListener('mouseout', function(e){
+    var t = e.target;
+    if(t && t.classList && t.classList.contains('sp')){
+      t.style.filter = '';
+      var code = t.getAttribute('data-state');
+      var sel = window._selectedState;
+      t.style.opacity = (code === sel) ? '1' : (sel ? '0.25' : '0.9');
+    }
+  });
+
+  svg.style.cursor = 'grab';
+}
+
+function getLandmarks(r){
+  var lm = {
+    pacific:[[37.8651,-119.5383,"Yosemite"],[36.4864,-118.5658,"Mt Whitney"],[44.4280,-110.5885,"Yellowstone"],[48.7596,-121.8090,"North Cascades"],[37.9061,-122.5455,"Mt Tamalpais"],[41.2132,-122.3117,"Mt Shasta"],[46.8523,-121.7603,"Mt Rainier"],[44.0521,-121.3153,"Bend OR"],[40.3400,-124.0023,"King Range CA"]],
+    southwest:[[36.1069,-112.1129,"Grand Canyon"],[33.4734,-112.0400,"Phoenix"],[32.2217,-110.9265,"Tucson"],[35.6870,-105.9378,"Santa Fe"],[36.8858,-111.5116,"Lake Powell"],[37.2982,-113.0263,"Zion Canyon"],[38.6830,-109.5441,"Canyonlands"],[36.4472,-116.8659,"Death Valley"],[35.0174,-111.0228,"Winslow AZ"]],
+    mountain:[[44.4280,-110.5885,"Yellowstone"],[43.7904,-110.6818,"Grand Teton"],[39.7392,-104.9903,"Denver"],[37.2753,-107.8801,"Mesa Verde"],[39.1911,-106.8175,"Aspen CO"],[47.9253,-113.9972,"Glacier NP"],[46.8652,-113.9857,"Missoula MT"],[44.0682,-114.7420,"Sawtooth ID"],[38.8339,-105.0424,"Pikes Peak"]],
+    midwest:[[47.9500,-90.9200,"Boundary Waters"],[43.9800,-89.9500,"Wisconsin Dells"],[46.7867,-90.8251,"Apostle Islands"],[41.8781,-87.6298,"Chicago"],[44.9778,-93.2650,"Minneapolis"],[38.6270,-90.1994,"St Louis"],[41.4993,-81.6944,"Cleveland"],[46.4753,-84.3553,"Sault Ste Marie"]],
+    southeast:[[35.6117,-83.4895,"Great Smoky Mtns"],[25.2867,-80.9812,"Everglades"],[30.3322,-81.6557,"Jacksonville"],[32.0809,-81.0912,"Savannah"],[29.9511,-90.0715,"New Orleans"],[30.4213,-87.2169,"Pensacola"],[27.9506,-82.4572,"Tampa"],[34.2257,-77.9447,"Wilmington NC"]],
+    northeast:[[45.9044,-68.9213,"Katahdin ME"],[44.2706,-71.3033,"Mt Washington NH"],[43.0481,-76.1474,"Syracuse NY"],[44.4759,-73.2121,"Burlington VT"],[42.3601,-71.0589,"Boston"],[41.7658,-72.6851,"Hartford CT"],[43.6591,-70.2568,"Portland ME"],[44.5588,-72.5778,"Montpelier VT"]],
+    midatlantic:[[38.8951,-77.0364,"Washington DC"],[39.2904,-76.6122,"Baltimore"],[38.5382,-78.0136,"Shenandoah NP"],[37.0000,-80.0000,"New River Gorge"],[37.2296,-80.4139,"Roanoke VA"],[39.9526,-75.1652,"Philadelphia"],[40.7128,-74.0060,"New York City"],[38.9530,-78.1928,"Front Royal VA"]],
+    texas:[[29.1869,-103.2419,"Big Bend"],[29.4241,-98.4936,"San Antonio"],[31.7619,-106.4850,"El Paso"],[30.2672,-97.7431,"Austin"],[32.7767,-96.7970,"Dallas"],[31.5500,-97.1467,"Waco"],[31.3200,-100.4100,"San Angelo"],[25.9000,-97.4500,"Brownsville"]],
+    alaska:[[63.0695,-151.0074,"Denali"],[64.2008,-165.4063,"Nome"],[58.3005,-134.4197,"Juneau"],[61.2176,-149.8997,"Anchorage"],[64.8378,-147.7164,"Fairbanks"],[59.6425,-151.5483,"Kenai Peninsula"],[56.4575,-132.3831,"Ketchikan"],[60.5500,-145.7500,"Cordova"]],
+    hawaii:[[20.7984,-156.3319,"Haleakala"],[19.4194,-155.2885,"Kilauea"],[20.0198,-155.6788,"Waimea HI"],[21.3069,-157.8583,"Honolulu"],[22.2170,-159.5261,"Waimea Canyon Kauai"],[21.0942,-156.6001,"Molokai"],[20.8783,-156.6825,"Maui"],[22.0783,-160.1332,"Na Pali Coast"]]
+  };
+  return lm[r]||lm.midwest;
+}
+
+
+// ================================================================
+// EXPANDED LIVESTOCK — Full disease treatment + seasonal health calendars
+// ================================================================
+function getLandmarks(r){
+  var lm = {
+    pacific:[[37.8651,-119.5383,"Yosemite"],[36.4864,-118.5658,"Mt Whitney"],[44.4280,-110.5885,"Yellowstone"],[48.7596,-121.8090,"North Cascades"],[37.9061,-122.5455,"Mt Tamalpais"],[41.2132,-122.3117,"Mt Shasta"],[46.8523,-121.7603,"Mt Rainier"],[44.0521,-121.3153,"Bend OR"],[40.3400,-124.0023,"King Range CA"]],
+    southwest:[[36.1069,-112.1129,"Grand Canyon"],[33.4734,-112.0400,"Phoenix"],[32.2217,-110.9265,"Tucson"],[35.6870,-105.9378,"Santa Fe"],[36.8858,-111.5116,"Lake Powell"],[37.2982,-113.0263,"Zion Canyon"],[38.6830,-109.5441,"Canyonlands"],[36.4472,-116.8659,"Death Valley"],[35.0174,-111.0228,"Winslow AZ"]],
+    mountain:[[44.4280,-110.5885,"Yellowstone"],[43.7904,-110.6818,"Grand Teton"],[39.7392,-104.9903,"Denver"],[37.2753,-107.8801,"Mesa Verde"],[39.1911,-106.8175,"Aspen CO"],[47.9253,-113.9972,"Glacier NP"],[46.8652,-113.9857,"Missoula MT"],[44.0682,-114.7420,"Sawtooth ID"],[38.8339,-105.0424,"Pikes Peak"]],
+    midwest:[[47.9500,-90.9200,"Boundary Waters"],[43.9800,-89.9500,"Wisconsin Dells"],[46.7867,-90.8251,"Apostle Islands"],[41.8781,-87.6298,"Chicago"],[44.9778,-93.2650,"Minneapolis"],[38.6270,-90.1994,"St Louis"],[41.4993,-81.6944,"Cleveland"],[46.4753,-84.3553,"Sault Ste Marie"]],
+    southeast:[[35.6117,-83.4895,"Great Smoky Mtns"],[25.2867,-80.9812,"Everglades"],[30.3322,-81.6557,"Jacksonville"],[32.0809,-81.0912,"Savannah"],[29.9511,-90.0715,"New Orleans"],[30.4213,-87.2169,"Pensacola"],[27.9506,-82.4572,"Tampa"],[34.2257,-77.9447,"Wilmington NC"]],
+    northeast:[[45.9044,-68.9213,"Katahdin ME"],[44.2706,-71.3033,"Mt Washington NH"],[43.0481,-76.1474,"Syracuse NY"],[44.4759,-73.2121,"Burlington VT"],[42.3601,-71.0589,"Boston"],[41.7658,-72.6851,"Hartford CT"],[43.6591,-70.2568,"Portland ME"],[44.5588,-72.5778,"Montpelier VT"]],
+    midatlantic:[[38.8951,-77.0364,"Washington DC"],[39.2904,-76.6122,"Baltimore"],[38.5382,-78.0136,"Shenandoah NP"],[37.0000,-80.0000,"New River Gorge"],[37.2296,-80.4139,"Roanoke VA"],[39.9526,-75.1652,"Philadelphia"],[40.7128,-74.0060,"New York City"],[38.9530,-78.1928,"Front Royal VA"]],
+    texas:[[29.1869,-103.2419,"Big Bend"],[29.4241,-98.4936,"San Antonio"],[31.7619,-106.4850,"El Paso"],[30.2672,-97.7431,"Austin"],[32.7767,-96.7970,"Dallas"],[31.5500,-97.1467,"Waco"],[31.3200,-100.4100,"San Angelo"],[25.9000,-97.4500,"Brownsville"]],
+    alaska:[[63.0695,-151.0074,"Denali"],[64.2008,-165.4063,"Nome"],[58.3005,-134.4197,"Juneau"],[61.2176,-149.8997,"Anchorage"],[64.8378,-147.7164,"Fairbanks"],[59.6425,-151.5483,"Kenai Peninsula"],[56.4575,-132.3831,"Ketchikan"],[60.5500,-145.7500,"Cordova"]],
+    hawaii:[[20.7984,-156.3319,"Haleakala"],[19.4194,-155.2885,"Kilauea"],[20.0198,-155.6788,"Waimea HI"],[21.3069,-157.8583,"Honolulu"],[22.2170,-159.5261,"Waimea Canyon Kauai"],[21.0942,-156.6001,"Molokai"],[20.8783,-156.6825,"Maui"],[22.0783,-160.1332,"Na Pali Coast"]]
+  };
+  return lm[r]||lm.midwest;
+}
+
+
+// ================================================================
+// EXPANDED LIVESTOCK — Full disease treatment + seasonal health calendars
+// ================================================================
+// Top-level map functions — always available, no dependency on initMapControls
+window.mapSelectState = function(code){
+  window._selectedState = code || null;
+  window._mapView = 'map';
+  var sel = document.getElementById('stateSelect');
+  if(sel) sel.value = code || '';
+  if(PAGES.mapview){
+    document.getElementById('content').innerHTML = PAGES.mapview(R(),M());
+    setTimeout(initMapControls, 60);
+  }
 };
+
+window.setMapView = function(v){
+  window._mapView = v;
+  if(PAGES.mapview){
+    document.getElementById('content').innerHTML = PAGES.mapview(R(),M());
+    if(v !== 'geo') setTimeout(initMapControls, 60);
+    else window.scrollTo({top:0,behavior:'smooth'});
+  }
+};
+
+function initMapControls(){
+  var dragging=false, lastX=0, lastY=0, scale=1, tx=0, ty=0;
+  var svg = document.getElementById('usmap');
+  var statesG = document.getElementById('states');
+
+  function applyTransform(){
+    if(statesG) statesG.setAttribute('transform','translate('+tx+','+ty+') scale('+scale+')');
+  }
+
+  window.mapZoom = function(factor){
+    scale = Math.min(12, Math.max(0.3, scale*factor));
+    applyTransform();
+  };
+  window.mapReset = function(){
+    scale=1; tx=0; ty=0; applyTransform();
+  };
+  window.mapDragStart = function(e){
+    dragging=true; lastX=e.clientX; lastY=e.clientY;
+    if(svg) svg.style.cursor='grabbing';
+  };
+  window.mapDragMove = function(e){
+    if(!dragging) return;
+    tx += (e.clientX-lastX)/scale;
+    ty += (e.clientY-lastY)/scale;
+    lastX=e.clientX; lastY=e.clientY;
+    applyTransform();
+  };
+  window.mapDragEnd = function(){
+    dragging=false;
+    if(svg) svg.style.cursor='grab';
+  };
+
+  // Click delegation on SVG — handles state path clicks via data-state
+  if(svg){
+    // Remove old listener by cloning
+    var newSvg = svg.cloneNode(true);
+    svg.parentNode.replaceChild(newSvg, svg);
+    svg = newSvg;
+    statesG = document.getElementById('states');
+
+    svg.addEventListener('mousedown', function(e){ window.mapDragStart(e); });
+    svg.addEventListener('mousemove', function(e){ window.mapDragMove(e); });
+    svg.addEventListener('mouseup', function(e){ window.mapDragEnd(); });
+    svg.addEventListener('mouseleave', function(e){ window.mapDragEnd(); });
+
+    svg.addEventListener('click', function(e){
+      if(Math.abs(tx-(window._mapLastTx||0)) > 5 || Math.abs(ty-(window._mapLastTy||0)) > 5) return;
+      var t = e.target;
+      while(t && t !== svg){
+        var code = t.getAttribute && t.getAttribute('data-state');
+        if(code){
+          window.mapSelectState(code);
+          return;
+        }
+        t = t.parentNode;
+      }
+    });
+
+    svg.addEventListener('mouseover', function(e){
+      var t = e.target;
+      if(t && t.classList && t.classList.contains('sp')){
+        t.style.filter='brightness(1.8)';
+        t.style.opacity='1';
+      }
+    });
+    svg.addEventListener('mouseout', function(e){
+      var t = e.target;
+      if(t && t.classList && t.classList.contains('sp')){
+        t.style.filter='';
+        var code = t.getAttribute('data-state');
+        var selCode = window._selectedState;
+        t.style.opacity = (code===selCode) ? '1' : (selCode ? '0.3' : '0.9');
+      }
+    });
+  }
+}
+
 PAGES.animalhealth = function(r,m){
   const season = [12,1,2].includes(m)?'winter':[3,4,5].includes(m)?'spring':[6,7,8].includes(m)?'summer':'fall';
   const sName = season.charAt(0).toUpperCase()+season.slice(1);
@@ -3602,6 +3546,9 @@ ${Object.entries(st).map(([animal,taskList])=>`
 <tr><td>Scours / diarrhea (young)</td><td>Calves, kids, chicks</td><td>Oral electrolytes: 1 tsp salt + 1 tsp baking soda + 1 qt warm water. Kaolin clay. Yogurt with live cultures. Withhold milk 12 hrs, replace with electrolytes.</td><td>Dehydration kills faster than the infection. Electrolytes first, always.</td></tr>
 </table></div>`;
 };
+
+
+
 
 
 
