@@ -221,6 +221,18 @@ select:focus{border-color:var(--gold)}
     </div>
   </div>
 
+  <div class="catbox">
+    <div class="catbox-hdr"><span class="chi">&#127381;</span><h2>Preparedness</h2><p>Stock up &amp; plan ahead</p></div>
+    <div class="catbox-items">
+      <div class="ci-btn" onclick="go('foodstorage')"><span class="ico">&#127993;</span><span class="lbl">Food Storage</span></div>
+      <div class="ci-btn" onclick="go('power')"><span class="ico">&#9889;</span><span class="lbl">Off-Grid Power</span></div>
+      <div class="ci-btn" onclick="go('snares')"><span class="ico">&#129332;</span><span class="lbl">Snares &amp; Traps</span></div>
+      <div class="ci-btn" onclick="go('barter')"><span class="ico">&#129724;</span><span class="lbl">Barter &amp; Trade</span></div>
+      <div class="ci-btn" onclick="go('bugout')"><span class="ico">&#128652;</span><span class="lbl">Bug Out vs Bug In</span></div>
+    </div>
+  </div>
+
+
 </div>
 <div id="content"></div>
 </div>
@@ -229,6 +241,7 @@ select:focus{border-color:var(--gold)}
   <span class="fm">THE PIONEER CACHE &middot; OFFLINE EDITION &middot; V1.0</span>
 </div>
 <script>
+
 
 
 
@@ -2642,6 +2655,282 @@ function printPage(){
   w.document.write('<!DOCTYPE html><html><head><title>Pioneer Cache</title><style>body{font-family:Georgia,serif;font-size:13px;color:#111;padding:20px;max-width:800px;margin:0 auto}h2,h3{color:#333}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:#eee;padding:7px;text-align:left;border:1px solid #ccc}td{padding:7px;border:1px solid #ddd}ul,ol{padding-left:20px}li{margin-bottom:4px}.warn{background:#fff3f0;padding:8px;border-left:3px solid #c44;margin:10px 0}.tip{background:#fffbe0;padding:8px;border-left:3px solid #884;margin:10px 0}@media print{button{display:none}}</style></head><body><div style="text-align:center;margin-bottom:20px;border-bottom:2px solid #333;padding-bottom:12px"><h1 style="margin:0">THE PIONEER CACHE</h1></div>'+c.innerHTML+'</body></html>');
   w.document.close();setTimeout(function(){w.print();},400);
 }
+
+
+
+// ── 1. FOOD STORAGE ──
+PAGES.foodstorage = function(r,m){
+var h = '<div class="ph"><span class="pi">&#127993;</span><h2>Long-Term Food Storage</h2>'
+  +'<p class="sub">How to store food for 5, 10, even 30 years. Mylar bags, oxygen absorbers, rotation systems, and what to buy first.</p></div>'
+  +'<div class="warn"><strong>Most important rule:</strong> Store what you eat, eat what you store. Exotic survival food you have never cooked is useless in a crisis. Build your stockpile around your actual diet.</div>'
+  +'<div class="kb"><h3>&#127981; The Priority Stockpile — Buy These First</h3>'
+  +'<table class="tbl"><tr><th>Food</th><th>Shelf Life (sealed Mylar)</th><th>Calories/lb</th><th>Notes</th></tr>'
+  +'<tr><td><strong>White rice</strong></td><td>25-30 years</td><td>1,650</td><td>Most calories per dollar of any storable food. Buy in 50 lb bags, repack into 1-gallon Mylar.</td></tr>'
+  +'<tr><td><strong>Dry beans (pinto, black, kidney)</strong></td><td>25-30 years</td><td>1,550</td><td>Complete protein when combined with rice. Store variety — taste fatigue is real.</td></tr>'
+  +'<tr><td><strong>Rolled oats</strong></td><td>20-30 years</td><td>1,800</td><td>Breakfast, thickener, energy. Extremely calorie-dense.</td></tr>'
+  +'<tr><td><strong>White flour</strong></td><td>10-15 years</td><td>1,650</td><td>Freeze 48 hours before sealing to kill insect eggs. Whole wheat flour only lasts 5 years (oil content).</td></tr>'
+  +'<tr><td><strong>Pasta (dry)</strong></td><td>20-30 years</td><td>1,700</td><td>Fast to cook, morale booster. Store variety of shapes.</td></tr>'
+  +'<tr><td><strong>Salt</strong></td><td>Indefinite</td><td>—</td><td>Preservative, electrolytes, flavor. Store 10+ lbs per person. Does NOT need oxygen absorbers.</td></tr>'
+  +'<tr><td><strong>Sugar (white)</strong></td><td>Indefinite</td><td>—</td><td>Calories, preservative, morale, barter. Does NOT need oxygen absorbers — will brick up.</td></tr>'
+  +'<tr><td><strong>Honey</strong></td><td>Indefinite</td><td>—</td><td>Only food that literally never expires. Antibacterial. Heals wounds. Barter gold.</td></tr>'
+  +'<tr><td><strong>Hard winter wheat berries</strong></td><td>30+ years</td><td>1,500</td><td>Grind fresh into flour. Higher nutrition than white flour. Requires a hand grain mill.</td></tr>'
+  +'<tr><td><strong>Powdered milk</strong></td><td>2-10 years</td><td>—</td><td>Non-fat powder lasts longer. Critical for children. Use within 2 years for best quality.</td></tr>'
+  +'<tr><td><strong>Lard or coconut oil (canned)</strong></td><td>2-5 years</td><td>4,000</td><td>Fat is critical for survival calories. Highest calorie density of any stored food. Rotate regularly.</td></tr>'
+  +'<tr><td><strong>Freeze-dried vegetables and fruits</strong></td><td>25 years</td><td>varies</td><td>Nutrition and variety. Expensive but worth it for long-term morale and health.</td></tr>'
+  +'</table></div>'
+  +'<div class="kb"><h3>&#129514; The Mylar Bag System — Step by Step</h3>'
+  +'<p>Mylar bags are metallic-coated bags that block light, oxygen, and moisture. Combined with oxygen absorbers, they create a near-zero-oxygen environment that stops all spoilage, insect hatching, and oxidation.</p>'
+  +'<ol><li><strong>Get your supplies:</strong> 1-gallon Mylar bags (5 mil thickness), 300cc oxygen absorbers, food-grade 5-gallon buckets with lids, a flat iron or hair straightener for sealing, permanent marker.</li>'
+  +'<li><strong>Freeze first:</strong> For flour, cornmeal, and oats — freeze in original bag for 48 hours. This kills 99% of insect eggs. Let warm fully before opening to prevent condensation.</li>'
+  +'<li><strong>Work fast with absorbers:</strong> Oxygen absorbers start working the moment they hit air. Have all your bags pre-labeled and open before opening the absorber pack. Seal unused absorbers in a jar of rice immediately.</li>'
+  +'<li><strong>Fill bags:</strong> Pour food into Mylar bags. Leave 2-3 inches at top for sealing. Drop in one 300cc absorber per gallon.</li>'
+  +'<li><strong>Remove air and seal:</strong> Gently press out excess air, fold top over, run hot flat iron across in one firm pass. Check seal by pressing — no air should escape. Double-seal if unsure.</li>'
+  +'<li><strong>Label everything:</strong> Contents, pack date, best-by date (add stated shelf life to pack date). Store oldest in front.</li>'
+  +'<li><strong>Pack in buckets:</strong> Sealed bags go inside 5-gallon food-grade buckets with lids. This protects from rodents, physical damage, and light.</li>'
+  +'</ol>'
+  +'<div class="tip"><strong>Absorber sizing:</strong> 300cc per 1-gallon bag. 2,000-3,000cc for a full 5-gallon bucket of rice. When in doubt, use a slightly larger absorber — the cost is trivial, the protection is everything.</div></div>'
+  +'<div class="kb"><h3>&#127968; Where and How to Store</h3>'
+  +'<ul><li><strong>Temperature is everything:</strong> For every 10°F cooler your storage location, shelf life roughly doubles. A basement at 55°F stores food twice as long as a hot garage at 75°F. Never store food in a hot attic.</li>'
+  +'<li><strong>Dark and dry:</strong> Light degrades vitamins and can heat food through containers. Use opaque buckets or store in a dark room.</li>'
+  +'<li><strong>Off the floor:</strong> Store on pallets or shelves, never directly on concrete. Moisture wicks up from floors and concrete can cause temperature cycling that damages seals.</li>'
+  +'<li><strong>Spread it out:</strong> Do not store all your food in one location. A flood, fire, or theft that takes one cache should not take everything.</li>'
+  +'<li><strong>Rotation system:</strong> Newest in the back, oldest in the front. Open one sealed bag per food type each year — cook it, taste it, confirm quality. Log the result.</li>'
+  +'</ul></div>'
+  +'<div class="kb"><h3>&#128197; How Much to Store — Per Person Per Year</h3>'
+  +'<table class="tbl"><tr><th>Food</th><th>Per Person / Year</th><th>Approx. Cost</th></tr>'
+  +'<tr><td>White rice</td><td>300 lbs</td><td>$150-200</td></tr>'
+  +'<tr><td>Dry beans (mixed)</td><td>100 lbs</td><td>$80-120</td></tr>'
+  +'<tr><td>Oats</td><td>100 lbs</td><td>$60-90</td></tr>'
+  +'<tr><td>Flour or wheat berries</td><td>150 lbs</td><td>$80-120</td></tr>'
+  +'<tr><td>Pasta</td><td>50 lbs</td><td>$50-80</td></tr>'
+  +'<tr><td>Salt</td><td>10 lbs</td><td>$5-10</td></tr>'
+  +'<tr><td>Sugar</td><td>50 lbs</td><td>$30-50</td></tr>'
+  +'<tr><td>Oil/Fat</td><td>10 lbs</td><td>$20-40</td></tr>'
+  +'<tr><td>Canned goods (rotation)</td><td>200+ cans</td><td>$200-400</td></tr>'
+  +'<tr><td><strong>Total baseline</strong></td><td><strong>~1 year supply</strong></td><td><strong>~$700-1,100</strong></td></tr>'
+  +'</table>'
+  +'<div class="tip">Build in 6-month increments. Do not try to buy a year of food all at once. Add $20-50 of storage food per grocery trip until you reach your target. Within 6-12 months most households can reach a full year supply without feeling the financial strain.</div></div>'
+  +'<div class="kb"><h3>&#9888;&#65039; What NOT to Store in Mylar Bags</h3>'
+  +'<ul><li><strong>Brown rice</strong> — high oil content goes rancid in 1-2 years even sealed. Store white rice instead.</li>'
+  +'<li><strong>Moist foods</strong> — any food with more than 10% moisture sealed with an oxygen absorber creates perfect botulism conditions. Dried goods ONLY.</li>'
+  +'<li><strong>Nuts</strong> — oils go rancid. Rotate every 1-2 years maximum.</li>'
+  +'<li><strong>Whole-wheat flour</strong> — only 5-year shelf life due to germ oils. Store wheat berries and grind fresh instead.</li>'
+  +'<li><strong>Sugar and salt</strong> — do not use oxygen absorbers with these. They will become a solid brick.</li>'
+  +'</ul></div>';
+return h;
+};
+
+// ── 2. POWER & ENERGY ──
+PAGES.power = function(r,m){
+var h = '<div class="ph"><span class="pi">&#9889;</span><h2>Off-Grid Power &amp; Energy</h2>'
+  +'<p class="sub">Solar, batteries, generators, and hand-crank power. How to have electricity when the grid is gone.</p></div>'
+  +'<div class="kb"><h3>&#9889; The Four Components of Any Off-Grid System</h3>'
+  +'<table class="tbl"><tr><th>Component</th><th>What It Does</th><th>Entry-Level</th></tr>'
+  +'<tr><td><strong>Solar panels</strong></td><td>Convert sunlight to DC electricity</td><td>2x 200W panels (~$200)</td></tr>'
+  +'<tr><td><strong>Charge controller</strong></td><td>Regulates power flowing into batteries, prevents overcharge</td><td>MPPT 30A controller (~$40)</td></tr>'
+  +'<tr><td><strong>Battery bank</strong></td><td>Stores electricity for night and cloudy days</td><td>2x 100Ah LiFePO4 (~$300)</td></tr>'
+  +'<tr><td><strong>Inverter</strong></td><td>Converts DC battery power to AC for normal appliances</td><td>1000W pure sine wave (~$100)</td></tr>'
+  +'</table>'
+  +'<p style="margin-top:10px;font-size:.9rem">These four parts work together. The panel charges the battery through the controller. The inverter draws from the battery to power your devices. Without any one of the four, the system does not work.</p></div>'
+  +'<div class="kb"><h3>&#128161; Tier 1 — Survival Basics (~$200)</h3>'
+  +'<p>Start here if you have nothing. Covers lights, phone charging, radio, and a fan. Enough to maintain communications and basic comfort indefinitely.</p>'
+  +'<ul><li><strong>100W folding solar panel</strong> with MC4 connectors ($60-80)</li>'
+  +'<li><strong>500-1,000Wh portable power station</strong> (Jackery, Bluetti, EcoFlow) with built-in inverter and charge controller ($150-300). These are all-in-one units — just plug in the panel and devices.</li>'
+  +'<li>Powers: 6 hours of LED lighting, phone charges, NOAA radio, small fan. About 1-2 days of basic use on a full charge.</li>'
+  +'</ul>'
+  +'<div class="tip">A 1,000Wh power station is the easiest starting point. No wiring, no setup. Charge it with the solar panel during the day, use it at night. Upgrade later.</div></div>'
+  +'<div class="kb"><h3>&#127968; Tier 2 — Home Essentials (~$800-1,500)</h3>'
+  +'<p>Powers a refrigerator, lights throughout the house, phone charging, laptop, water pump, and HAM radio. Covers most grid-down scenarios for weeks to months.</p>'
+  +'<ul><li><strong>400-800W solar array</strong> (2-4 panels, 200W each)</li>'
+  +'<li><strong>MPPT charge controller</strong> (40A, handles up to 600W of panels)</li>'
+  +'<li><strong>200-400Ah LiFePO4 battery bank</strong> (lithium iron phosphate — safer, longer life, deeper discharge than lead-acid)</li>'
+  +'<li><strong>2,000W pure sine wave inverter</strong> (handles starting surge of refrigerator compressors)</li>'
+  +'<li>Powers: Full-size refrigerator (cycles on 2-3 hours/day), LED lights, charging, fan, water pump</li>'
+  +'</ul></div>'
+  +'<div class="kb"><h3>&#128268; Battery Types — What to Buy</h3>'
+  +'<table class="tbl"><tr><th>Type</th><th>Lifespan</th><th>Depth of Discharge</th><th>Verdict</th></tr>'
+  +'<tr><td><strong>LiFePO4 (lithium iron phosphate)</strong></td><td>3,000-5,000 cycles</td><td>80-100%</td><td><span style="color:#5a9a5a">Best choice.</span> Safe, long-lived, lightweight. Higher upfront cost but cheapest per cycle.</td></tr>'
+  +'<tr><td>Lithium-ion (NMC)</td><td>1,000-2,000 cycles</td><td>80%</td><td>Fine for portable stations. Fire risk at high temperatures — not ideal for large fixed banks.</td></tr>'
+  +'<tr><td>AGM lead-acid</td><td>400-800 cycles</td><td>50%</td><td>Cheaper upfront, heavy, shorter life. Acceptable backup if LiFePO4 is out of budget.</td></tr>'
+  +'<tr><td>Flooded lead-acid</td><td>300-600 cycles</td><td>50%</td><td>Cheapest. Requires maintenance (add distilled water), vents hydrogen gas — ventilate well.</td></tr>'
+  +'</table></div>'
+  +'<div class="kb"><h3>&#127981; Calculating Your Power Needs</h3>'
+  +'<p>List everything you want to power and multiply wattage by hours per day:</p>'
+  +'<table class="tbl"><tr><th>Device</th><th>Watts</th><th>Hours/Day</th><th>Watt-Hours/Day</th></tr>'
+  +'<tr><td>LED bulbs (x5)</td><td>50W total</td><td>5h</td><td>250Wh</td></tr>'
+  +'<tr><td>Phone charging (x2)</td><td>20W</td><td>2h</td><td>40Wh</td></tr>'
+  +'<tr><td>Laptop</td><td>45W</td><td>4h</td><td>180Wh</td></tr>'
+  +'<tr><td>Refrigerator (efficient)</td><td>150W</td><td>8h cycle</td><td>1,200Wh</td></tr>'
+  +'<tr><td>HAM radio</td><td>10W</td><td>2h</td><td>20Wh</td></tr>'
+  +'<tr><td>Water pump</td><td>500W</td><td>0.5h</td><td>250Wh</td></tr>'
+  +'<tr><td><strong>Daily total (example)</strong></td><td></td><td></td><td><strong>~2,000Wh</strong></td></tr>'
+  +'</table>'
+  +'<p style="margin-top:10px;font-size:.88rem">With 2,000Wh/day and 5 hours of peak sun: need 2,000 / 5 = <strong>400W of solar panels minimum</strong>. Add 25% buffer = 500W. For 2 days of battery backup: 2,000 x 2 = <strong>4,000Wh (4kWh) of battery storage</strong>.</p></div>'
+  +'<div class="kb"><h3>&#128138; Generator Backup</h3>'
+  +'<ul><li><strong>Dual-fuel generator</strong> (gasoline + propane) is the best choice. Propane stores indefinitely unlike gasoline which degrades in 6-12 months.</li>'
+  +'<li><strong>Sizing:</strong> A 3,500W generator covers a well pump, refrigerator, and basic lighting simultaneously.</li>'
+  +'<li><strong>Runtime:</strong> A 1-gallon propane tank runs a 3,500W generator about 1-2 hours at full load.</li>'
+  +'<li><strong>Storage:</strong> Keep 20-gallon propane tanks x2-4. Rotate use. Propane never expires.</li>'
+  +'<li><strong>Noise:</strong> Generators are loud and announce your location. Use only when necessary. Solar + battery eliminates this problem.</li>'
+  +'<li><strong>EMP concern:</strong> Generators with electronic fuel injection may be disabled by EMP. Keep an older carburetor-based generator as backup.</li>'
+  +'</ul></div>'
+  +'<div class="kb"><h3>&#9729; Hand-Crank &amp; No-Power Options</h3>'
+  +'<ul><li><strong>Hand-crank radio:</strong> NOAA weather alerts and AM/FM. 1 minute of cranking gives 10-15 minutes of radio. Essential even with a full solar system.</li>'
+  +'<li><strong>Hand-crank phone charger:</strong> Emergency only — 10 minutes of cranking gives about 1% battery charge. Enough for a short emergency call.</li>'
+  +'<li><strong>Oil lamps:</strong> Kerosene, vegetable oil, or rendered fat. 1 quart of kerosene burns 40+ hours. Silent, no electronics.</li>'
+  +'<li><strong>Beeswax candles:</strong> 8-hour burn time, bright light, long shelf life, no petroleum needed.</li>'
+  +'</ul></div>';
+return h;
+};
+
+// ── 3. SNARES & TRAPS (improve existing trapping) ──
+PAGES.snares = function(r,m){
+var h = '<div class="ph"><span class="pi">&#129332;</span><h2>Snares &amp; Primitive Traps</h2>'
+  +'<p class="sub">Traps work while you sleep. One person with 20 snares out outproduces any single hunter. This is how people fed themselves for thousands of years.</p></div>'
+  +'<div class="warn"><strong>Legal note:</strong> Trapping regulations exist in normal times. In a survival emergency, these skills may be legally justified. Know your state laws for normal use.</div>'
+  +'<div class="kb"><h3>&#129332; The Simple Wire Snare</h3>'
+  +'<p>The most effective, lowest-effort trap ever invented. Works on rabbits, squirrels, and groundhogs. One snare takes 2 minutes to make.</p>'
+  +'<ol><li><strong>Material:</strong> 24-26 gauge wire, 24-30 inches long. Brass snare wire is best. Picture-hanging wire works. Do NOT use string — animals chew through it.</li>'
+  +'<li><strong>Make the loop:</strong> Bend 2 inches of wire back on itself to form a fixed eye. Thread the long end through this eye to form an adjustable loop. The loop should be about 4 inches in diameter for rabbits, 3 inches for squirrels.</li>'
+  +'<li><strong>Set the height:</strong> For rabbits — set loop 4 inches above the ground, centered in a trail. For squirrels — set on a leaning branch or log they travel on.</li>'
+  +'<li><strong>Anchor it:</strong> Tie the free end to a branch, root, or stake driven firmly in the ground. The snare must be anchored or the animal will run off with it.</li>'
+  +'<li><strong>Find the right spot:</strong> Look for worn trails in grass, narrow gaps in brush, tracks in mud, droppings. Animals use the same paths repeatedly. Set on the path, not near it.</li>'
+  +'</ol>'
+  +'<div class="tip"><strong>Numbers matter:</strong> Set 15-20 snares minimum. Expect to catch 1 in 5-10 snares per day. Check every 12 hours — caught animals attract predators and other animals will steal your catch.</div></div>'
+  +'<div class="kb"><h3>&#127795; Figure-4 Deadfall</h3>'
+  +'<p>Kills using the weight of a flat rock or log. Good for small mammals and large birds. Zero materials needed beyond what nature provides.</p>'
+  +'<ol><li><strong>Find a flat heavy rock</strong> 10-20 lbs. The heavier the better.</li>'
+  +'<li><strong>Carve three sticks:</strong> A vertical post with a diagonal notch near the top. A horizontal arm with a diagonal notch at one end and a hook at the other. A short diagonal brace connecting them.</li>'
+  +'<li><strong>Assembly:</strong> The vertical post stands on the ground. The horizontal arm rests on the post at the diagonal notches. The diagonal brace holds the rock at an angle. The whole assembly is in tension — just barely balanced.</li>'
+  +'<li><strong>Bait:</strong> Tie bait to the horizontal arm where it contacts the ground. When an animal moves the bait, the arm tips, the brace falls, the rock drops.</li>'
+  +'<li><strong>Practice first:</strong> Build and trigger 10 times before setting in the field. The balance is subtle. It should fall with 2-3 ounces of pressure on the trigger stick.</li>'
+  +'</ol></div>'
+  +'<div class="kb"><h3>&#128063; Spring Snare (Squirrel Pole)</h3>'
+  +'<p>The squirrel pole is the most productive small-game trap per hour of effort. One pole can have 8-10 wire snares and catches multiple animals in one night.</p>'
+  +'<ol><li>Find a dead tree or log leaning against a live tree at 45-60 degrees. Squirrels and chipmunks naturally run up and down these to access the canopy.</li>'
+  +'<li>Attach 6-10 wire snares along the length of the pole, spaced 12 inches apart. Each loop should be 3 inches in diameter, centered on the pole with the loop perpendicular to the pole surface.</li>'
+  +'<li>As the animal runs up the pole, it hits a snare and as it struggles, it falls off the pole and hangs, tightening the snare.</li>'
+  +'<li>Check every morning. You will often find multiple catches on a single pole.</li>'
+  +'</ol></div>'
+  +'<div class="kb"><h3>&#127754; Fish Trap (Bottle or Basket Trap)</h3>'
+  +'<p>Catches fish passively, 24 hours a day, with zero effort after setup.</p>'
+  +'<ol><li><strong>Bottle trap:</strong> Cut a plastic bottle at the shoulder. Invert the cone into the bottle body and tape or tie it in place. The funnel opening faces inward — fish swim in following bait and cannot find the small opening to escape.</li>'
+  +'<li><strong>Basket weir trap:</strong> Weave a cone of green branches or wire mesh. Wide open end faces upstream. Narrow end faces downstream. Fish swim in with the current searching for food and cannot back out.</li>'
+  +'<li><strong>Placement:</strong> Anchor in 1-3 feet of water at stream edges, behind rocks, or along undercut banks. Bait with bread, corn, earthworms, or fish entrails.</li>'
+  +'<li>Check every 6-12 hours. Empty and reset.</li>'
+  +'</ol></div>'
+  +'<div class="kb"><h3>&#128269; Reading Sign — Finding Where to Set</h3>'
+  +'<ul><li><strong>Runs:</strong> Worn paths in grass or weeds. Set wire snares directly in the path, anchored firmly.</li>'
+  +'<li><strong>Droppings:</strong> Fresh scat nearby = active animal. Set within 20 feet of fresh scat in a natural travel corridor.</li>'
+  +'<li><strong>Tracks:</strong> Mud at water edges, soft soil in trails. Tells you what animal, how large, how recently, and which direction it travels.</li>'
+  +'<li><strong>Beds:</strong> Flattened grass or leaf piles under dense brush. Set snares on the trails leading to and from beds.</li>'
+  +'<li><strong>Rubs and scratches:</strong> Bark rubbed off lower branches = deer trail. Claw marks on trees = climbing animals.</li>'
+  +'</ul></div>';
+return h;
+};
+
+// ── 4. BARTER & TRADE ──
+PAGES.barter = function(r,m){
+var h = '<div class="ph"><span class="pi">&#129724;</span><h2>Barter &amp; Trade After the Grid</h2>'
+  +'<p class="sub">When money stops working, skills and goods become currency. What to stockpile, how to negotiate, and how to avoid becoming a target.</p></div>'
+  +'<div class="kb"><h3>&#129524; What Becomes Currency</h3>'
+  +'<p>In every documented grid-down event, the same categories of goods become immediately tradable. The pattern is consistent from post-war Europe to hurricane-ravaged cities to economic collapse scenarios.</p>'
+  +'<table class="tbl"><tr><th>Category</th><th>Specific Items</th><th>Why It Works</th></tr>'
+  +'<tr><td><strong>Tobacco</strong></td><td>Cigarettes, rolling tobacco, cigars</td><td>Addictive. Non-smokers stock it even if they do not smoke. Most documented barter good in every conflict zone.</td></tr>'
+  +'<tr><td><strong>Alcohol</strong></td><td>Liquor (high proof), wine, beer ingredients</td><td>Morale, antiseptic, anesthetic, social lubricant. Distilling gives you an ongoing supply.</td></tr>'
+  +'<tr><td><strong>Coffee and tea</strong></td><td>Whole beans, instant coffee, tea bags</td><td>Caffeine addiction is widespread. Morale item. High trade value disproportionate to weight.</td></tr>'
+  +'<tr><td><strong>Salt</strong></td><td>Iodized and non-iodized, bulk bags</td><td>Preservative for meat and vegetables. Historically used as literal currency. Light, cheap, infinite shelf life.</td></tr>'
+  +'<tr><td><strong>Medications</strong></td><td>Antibiotics, pain relievers, insulin, antifungals</td><td>Life-saving. People will trade almost anything for a working antibiotic when they are infected.</td></tr>'
+  +'<tr><td><strong>Seeds</strong></td><td>Heirloom vegetable seeds, open-pollinated</td><td>One pack of seeds can feed a family for a year. By year two they are saving seeds themselves.</td></tr>'
+  +'<tr><td><strong>Ammunition</strong></td><td>Common calibers: .22 LR, 9mm, 12 gauge, .308</td><td>Trade only with extreme caution — you are arming the person you are trading with.</td></tr>'
+  +'<tr><td><strong>Fuel</strong></td><td>Gasoline (stabilized), propane, kerosene</td><td>Transport and heating. Incredibly valuable in the first weeks before people adapt.</td></tr>'
+  +'<tr><td><strong>Hygiene items</strong></td><td>Soap, toothbrushes, feminine products, toilet paper</td><td>People overlook these when prepping. Scarcity comes fast. Demand is universal.</td></tr>'
+  +'<tr><td><strong>Tools</strong></td><td>Hand tools, wire, nails, rope</td><td>Irreplaceable for rebuilding. A good hammer is worth more than gold to someone building a shelter.</td></tr>'
+  +'</table></div>'
+  +'<div class="kb"><h3>&#129504; Skills Are Better Than Goods</h3>'
+  +'<p>Goods run out. Skills do not. The most valuable people in any post-grid community will be those who can produce what others need.</p>'
+  +'<ul><li><strong>Medical skills:</strong> A nurse or doctor becomes the most sought-after person in any community. First aid training pays dividends forever.</li>'
+  +'<li><strong>Mechanical repair:</strong> Fixing engines, pumps, and generators. When nothing new can be ordered, the person who can make things work again is invaluable.</li>'
+  +'<li><strong>Food production:</strong> Someone who knows how to grow, preserve, and store food consistently becomes essential to any group.</li>'
+  +'<li><strong>Construction:</strong> Carpentry, masonry, roofing. Shelter needs constant maintenance and expansion.</li>'
+  +'<li><strong>Security/Leadership:</strong> Organizing group defense and decision-making. People will trade food for protection.</li>'
+  +'<li><strong>Distilling:</strong> Making alcohol is both a trade good and a medical supply. Learn fermentation now.</li>'
+  +'</ul></div>'
+  +'<div class="kb"><h3>&#9888;&#65039; Barter Safety Rules</h3>'
+  +'<ul><li><strong>Never reveal your total stockpile.</strong> If people know how much you have, you become a target. Trade in small quantities from off-site if possible.</li>'
+  +'<li><strong>Never trade at your home.</strong> Meet at a neutral location. Do not let trading partners map your supplies.</li>'
+  +'<li><strong>Bring backup.</strong> Never barter alone. Two-person minimum, ideally three.</li>'
+  +'<li><strong>Trade surplus, never necessities.</strong> Do not trade away anything you cannot afford to lose. Only trade genuine surplus.</li>'
+  +'<li><strong>Be aware of desperation dynamics.</strong> Desperate people do not follow social norms. If someone needs something badly enough, they may take it rather than trade for it.</li>'
+  +'<li><strong>Build a community before you need one.</strong> Your neighbors who know and trust you are your greatest security asset. Trading with known people is far safer than trading with strangers.</li>'
+  +'</ul></div>'
+  +'<div class="kb"><h3>&#129520; Negotiation Basics</h3>'
+  +'<ul><li><strong>Know what you need before you arrive.</strong> Never negotiate when desperate. If you urgently need something, you will overpay or make bad decisions.</li>'
+  +'<li><strong>First offer is never final.</strong> Whatever someone offers, counter with 50-60% of the ask. Meet somewhere in the middle.</li>'
+  +'<li><strong>Silence is a tool.</strong> After making an offer, say nothing. The first person to speak after a counteroffer usually concedes.</li>'
+  +'<li><strong>Bundle to your advantage.</strong> Combine high-value items with low-value items. Make the bundle feel generous.</li>'
+  +'<li><strong>Walk away power.</strong> Always be willing to walk away from a trade. The moment you cannot walk away, you have no leverage.</li>'
+  +'</ul></div>';
+return h;
+};
+
+// ── 5. BUG OUT VS BUG IN ──
+PAGES.bugout = function(r,m){
+var h = '<div class="ph"><span class="pi">&#128652;</span><h2>Bug Out vs Bug In</h2>'
+  +'<p class="sub">The most important survival decision you will ever make. Getting it wrong either way can be fatal.</p></div>'
+  +'<div class="warn"><strong>The default answer is always: stay.</strong> Bugging out on foot without a destination, a vehicle, supplies, and a plan is one of the most dangerous things you can do. Most people who bug out aimlessly die on the road.</div>'
+  +'<div class="kb"><h3>&#127968; Bug In — Stay in Place</h3>'
+  +'<p>Bugging in means sheltering in your home and riding out the crisis there. This is the right choice in the vast majority of scenarios.</p>'
+  +'<p><strong>Bug in when:</strong></p>'
+  +'<ul><li>The threat is not directly targeting your location (power outage, economic collapse, pandemic)</li>'
+  +'<li>You have supplies where you are (food, water, medical)</li>'
+  +'<li>You have no confirmed safe destination to go to</li>'
+  +'<li>You have elderly, disabled, or very young family members with you</li>'
+  +'<li>Roads are gridlocked — leaving puts you in traffic with thousands of panicking people</li>'
+  +'<li>The weather outside is dangerous (blizzard, hurricane, extreme heat)</li>'
+  +'<li>You have defensible shelter, good neighbors, and community roots</li>'
+  +'</ul>'
+  +'<p><strong>Advantages of bugging in:</strong> Your supplies are there. You know the terrain. You have shelter. You are not exposed on roads. Your community relationships are local. You have tools and garden space.</p></div>'
+  +'<div class="kb"><h3>&#128652; Bug Out — Leave</h3>'
+  +'<p>Bugging out means leaving your home for a safer location. This is the right call in specific scenarios but requires preparation to do successfully.</p>'
+  +'<p><strong>Bug out when:</strong></p>'
+  +'<ul><li>Your home is directly in danger (wildfire approaching, flood rising, building compromised)</li>'
+  +'<li>Your area is becoming lawless and you cannot defend your position</li>'
+  +'<li>You have a confirmed destination — a specific location, with a person expecting you, with supplies there</li>'
+  +'<li>You have a reliable vehicle, fuel, and a route planned with alternates</li>'
+  +'<li>You are being ordered to evacuate by authorities for an actual known threat</li>'
+  +'</ul>'
+  +'<div class="tip"><strong>The golden rule:</strong> Never bug out to the woods. The woods are not a destination. Bug out to a specific person at a specific address. A prepared friend or family member 50 miles away beats any wilderness scenario.</div></div>'
+  +'<div class="kb"><h3>&#127381; The 10-Minute Bug-Out Bag</h3>'
+  +'<p>If you have to leave in 10 minutes, what do you grab? Have this bag pre-packed and by the door.</p>'
+  +'<table class="tbl"><tr><th>Category</th><th>Items</th><th>Notes</th></tr>'
+  +'<tr><td><strong>Water</strong></td><td>2L water, Sawyer Squeeze filter</td><td>Filter will work even if you run out of stored water</td></tr>'
+  +'<tr><td><strong>Food</strong></td><td>3-day supply of high-calorie compact food</td><td>Peanut butter, bars, jerky — no cooking required</td></tr>'
+  +'<tr><td><strong>Shelter</strong></td><td>Tarp (8x10), emergency bivy, 550 paracord</td><td>Can build shelter in any terrain</td></tr>'
+  +'<tr><td><strong>Fire</strong></td><td>3 lighters, ferro rod, waterproof matches</td><td>Triple redundancy — you must be able to make fire</td></tr>'
+  +'<tr><td><strong>Navigation</strong></td><td>Compass, laminated local map, this guide</td><td>Do not rely on phone — batteries die and towers go down</td></tr>'
+  +'<tr><td><strong>Medical</strong></td><td>Tourniquet, Israeli bandage, antibiotic ointment, OTC meds, prescription meds</td><td>Trauma first, then illness</td></tr>'
+  +'<tr><td><strong>Tools</strong></td><td>Fixed-blade knife, folding saw, multi-tool</td><td>One of each. Do not bring only a multi-tool.</td></tr>'
+  +'<tr><td><strong>Documents</strong></td><td>Copies of ID, insurance, bank info, emergency contacts</td><td>Laminated or in waterproof bag</td></tr>'
+  +'<tr><td><strong>Communication</strong></td><td>Charged phone, backup battery bank, hand-crank radio</td><td>NOAA for emergency broadcasts</td></tr>'
+  +'<tr><td><strong>Cash</strong></td><td>$200-500 in small bills</td><td>Cards may not work. Small bills for flexibility.</td></tr>'
+  +'</table></div>'
+  +'<div class="kb"><h3>&#128663; Vehicle Bug-Out</h3>'
+  +'<ul><li><strong>Always have a full tank.</strong> A vehicle on a quarter tank is a liability. Get in the habit of refueling at half tank during normal times.</li>'
+  +'<li><strong>Have two alternate routes planned.</strong> Main route will be gridlocked. Know the back roads.</li>'
+  +'<li><strong>Carry extra fuel.</strong> Two 5-gallon fuel cans treated with fuel stabilizer. Enough to double your range.</li>'
+  +'<li><strong>Vehicle is a weapon and a target.</strong> In a prolonged collapse, vehicles attract attention. Be aware of roadblocks and checkpoints.</li>'
+  +'<li><strong>Leave early.</strong> The difference between getting out and being stuck in traffic is often a 2-hour head start. Hesitation kills. If the decision is borderline, go.</li>'
+  +'</ul></div>'
+  +'<div class="kb"><h3>&#129504; The Decision Framework</h3>'
+  +'<p>Ask these questions in order:</p>'
+  +'<ol><li><strong>Is there an immediate physical danger to my home or neighborhood right now?</strong> If no — stay. If yes, go to 2.</li>'
+  +'<li><strong>Do I have a specific destination with a specific person?</strong> If no — stay and fortify. If yes, go to 3.</li>'
+  +'<li><strong>Can I reach that destination safely given current conditions?</strong> If no — stay until conditions change. If yes, go.</li>'
+  +'<li><strong>Do I have supplies for the journey?</strong> If no — stay and acquire them. If yes, go now — do not delay.</li>'
+  +'</ol></div>';
+return h;
+};
 
 </script>
 </body>
