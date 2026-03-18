@@ -121,6 +121,15 @@ select:focus{border-color:var(--gold)}
   </select>
   <span style="color:rgba(184,146,42,.3)">|</span>
   <span id="ctx" style="font-size:.78rem;color:var(--gold);font-style:italic"></span>
+  <div style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <input id="searchInput" type="text" placeholder="&#128269; Search all pages..."
+      style="background:#1e1710;color:var(--parchment);border:1px solid rgba(184,146,42,.3);padding:5px 10px;font-family:Crimson Pro,serif;font-size:.85rem;border-radius:2px;width:190px"
+      onkeydown="if(event.key==='Enter')doSearch(this.value)">
+    <button onclick="doSearch(document.getElementById('searchInput').value)"
+      style="background:var(--moss);color:#fff;border:none;padding:5px 12px;cursor:pointer;border-radius:2px;font-family:Cinzel,serif;font-size:.62rem;letter-spacing:.1em">GO</button>
+    <button onclick="printPage()"
+      style="background:#1e1710;color:var(--ash);border:1px solid rgba(184,146,42,.2);padding:5px 10px;cursor:pointer;border-radius:2px;font-family:Cinzel,serif;font-size:.62rem;letter-spacing:.08em">&#128438; PRINT</button>
+  </div>
 </div></div>
 <div id="backbar">
   <div id="backbtn" onclick="showHome()">&#8592;&nbsp; Back to All Categories</div>
@@ -155,7 +164,6 @@ select:focus{border-color:var(--gold)}
       <div class="ci-btn" onclick="go('stars')"><span class="ico">&#11088;</span><span class="lbl">Stars &amp; Sky</span></div>
       <div class="ci-btn" onclick="go('mapcompass')"><span class="ico">&#129517;</span><span class="lbl">Map &amp; Compass</span></div>
       <div class="ci-btn" onclick="go('terrain')"><span class="ico">&#128506;&#65039;</span><span class="lbl">Reading Terrain</span></div>
-      <div class="ci-btn" onclick="go('mapview')"><span class="ico">&#128506;&#65039;</span><span class="lbl">US Geographic Map</span></div>
     </div>
   </div>
 
@@ -210,7 +218,6 @@ select:focus{border-color:var(--gold)}
     <div class="catbox-hdr"><span class="chi">&#127795;</span><h2>Trees &amp; Map</h2><p>Regional trees, US geography</p></div>
     <div class="catbox-items">
       <div class="ci-btn" onclick="go('trees')"><span class="ico">&#127795;</span><span class="lbl">Trees by Region</span></div>
-      <div class="ci-btn" onclick="go('mapview')"><span class="ico">&#128506;&#65039;</span><span class="lbl">Interactive US Map</span></div>
     </div>
   </div>
 
@@ -222,6 +229,15 @@ select:focus{border-color:var(--gold)}
   <span class="fm">THE PIONEER CACHE &middot; OFFLINE EDITION &middot; V1.0</span>
 </div>
 <script>
+
+
+
+
+
+
+
+
+
 
 // Error display for debugging
 window.onerror = function(msg, src, line, col, err) {
@@ -273,7 +289,6 @@ function go(p){
   _currentPage = p;
   document.getElementById('navgrid').style.display='none';
   document.getElementById('content').innerHTML = fn(R(),M());
-  if(p==='mapview'){ setTimeout(window.initLeafletMap,200); }
   document.getElementById('content').classList.add('show');
   document.getElementById('backbar').classList.add('show');
   window.scrollTo({top:0,behavior:'smooth'});
@@ -1501,35 +1516,7 @@ r==='alaska'?'Snowshoe hare — most abundant small game in boreal forest, massi
 <li>Cook all wild game thoroughly — most carry parasites that are invisible to the naked eye</li>
 </ul></div>`,
 
-fishing:(r,m)=>`
-<div class="ph"><span class="pi">&#127907;</span><h2>Wilderness Fishing</h2><p class="sub">Water concentrates food. With minimal or improvised gear, fishing can be your most consistent protein source.</p></div>
-<div class="kb"><h3>&#129693; Improvised Hooks &amp; Line</h3>
-<ul>
-<li><strong>Gorge hook:</strong> Carve a hardwood or bone stick 1–2 inches long, sharpened at both ends, notched in the center for the line. When baited and swallowed, pulling the line taut causes it to lodge crosswise.</li>
-<li><strong>Bent metal:</strong> Any stiff bent wire, safety pin, or carved hardwood thorn bent into a hook shape. Fish in still water will take almost any hook when hungry.</li>
-<li><strong>Line:</strong> Paracord inner strand (6 strands inside 550 cord), thread from clothing, or twisted plant fiber cordage</li>
-</ul></div>
-<div class="kb"><h3>&#9971; Passive Fishing — Work While You Sleep</h3>
-<ul>
-<li><strong>Trotline:</strong> String a line across or along a creek with multiple hooks at varying depths. Anchor both ends. Bait all hooks. Check every few hours. Works passively overnight.</li>
-<li><strong>Fish weir / trap:</strong> Build a funnel of sticks and rocks in a stream narrowing to a dead-end corral. Fish follow the current into the funnel and can\'t find the exit. Check daily.</li>
-<li><strong>Set lines:</strong> Tie individual baited hooks to overhanging branches so hooks hang just at water surface. Set several along a productive bank simultaneously.</li>
-</ul>
-<div class="tip"><strong>Passive fishing works while you do other survival tasks.</strong> Set 5–10 rigs simultaneously rather than actively fishing from one spot.</div></div>
-<div class="kb"><h3>&#128032; Where Fish Hold</h3>
-<ul>
-<li><strong>Cover and shade:</strong> Under undercut banks, beneath fallen logs and root systems, in deep shaded pools. Fish avoid open sunny water during midday heat.</li>
-<li><strong>Current seams:</strong> Where fast water meets slow water — called "seams" or "edges." Fish station here to intercept food washing through without fighting the full current.</li>
-<li><strong>Inlets and outlets:</strong> Where water enters or exits a lake or pond. Food concentrates at these transition points.</li>
-<li><strong>Best times:</strong> Dawn and dusk. Fish feed most aggressively in low light. These are your highest-yield windows.</li>
-</ul></div>
-<div class="kb"><h3>&#129408; Other Aquatic Food Sources</h3>
-<ul>
-<li><strong>Crayfish:</strong> Under rocks in clear streams and lake edges. Overturn rocks quickly and grab from behind. Boil thoroughly. Excellent protein-dense food.</li>
-<li><strong>Frogs:</strong> Along water edges at dusk. Bullfrog legs are substantial eating. Gig with a sharp stick at night using a light source.</li>
-<li><strong>Mussels and freshwater clams:</strong> Sift through gravel in streams. Boil all shellfish thoroughly. Avoid coastal shellfish during red tide events.</li>
-<li><strong>Aquatic insects:</strong> Caddisfly and stonefly larvae under rocks in clean streams are edible boiled. High protein, easy to collect in quantity.</li>
-</ul></div>`,
+fishing:(r,m)=>PAGES.fishing(r,m),
 
 planting:(r,m)=>`
 <div class="ph"><span class="pi">&#127793;</span><h2>Planting Calendar</h2><p class="sub">Knowing what to plant and when turns a patch of dirt into a food supply. Timing your region\'s frost dates is everything.</p></div>
@@ -1609,46 +1596,68 @@ compost:(r,m)=>`
 </ul></div>`,
 
 stars:(r,m)=>`
-<div class="ph"><span class="pi">&#11088;</span><h2>Stars &amp; Sky Navigation</h2><p class="sub">The stars guided human beings across continents and oceans for thousands of years before any instrument was invented. They will guide you too.</p></div>
-<div class="kb"><h3>&#11088; Finding Polaris — The North Star</h3>
-<p>Polaris sits almost directly above Earth\'s North Pole. It is the only star in the northern sky that appears completely stationary throughout the night. When you find it and drop an imaginary vertical line straight down to the horizon — that direction is true north.</p>
-<div class="star-sky">        ★ POLARIS (North Star)
-        ↑ extend line ~5x this gap
-       ▲ ▲  ← Merak &amp; Dubhe
-      (outer edge of Big Dipper cup)
-     these "pointer stars" aim at Polaris
-
-   ╔═══════════╗
-   ║ BIG DIPPER ║  Ursa Major
-   ╚═══════════╝
-   7 bright stars, never sets in northern sky</div>
+<div class="ph"><span class="pi">&#11088;</span><h2>Stars &amp; Sky Navigation</h2>
+<p class="sub">The stars guided humans across continents and oceans for thousands of years. No tools required — just knowing what to look for.</p></div>
+<div class="kb"><h3>&#11088; How to Find True North at Night</h3>
+<p>The Big Dipper is a group of 7 bright stars shaped like a large soup ladle. The two stars forming the outer edge of the cup are called <strong>Dubhe</strong> (top) and <strong>Merak</strong> (bottom). Draw an imaginary line from Merak through Dubhe and keep going in the same direction for about 5 times that distance. You will land on <strong>Polaris — the North Star</strong>. Drop a line straight down from Polaris to the horizon and that is <strong>true north</strong>.</p>
+<div style="background:#03070f;border:1px solid rgba(100,150,220,.2);border-radius:6px;padding:16px;margin:14px 0;text-align:center">
+<svg viewBox="0 0 480 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:480px;display:block;margin:0 auto">
+<rect width="480" height="240" fill="#03070f"/>
+<circle cx="28" cy="18" r="1" fill="rgba(200,220,255,.2)"/><circle cx="75" cy="42" r="1.2" fill="rgba(200,220,255,.2)"/><circle cx="420" cy="28" r="1" fill="rgba(200,220,255,.2)"/><circle cx="460" cy="12" r="0.9" fill="rgba(200,220,255,.2)"/>
+<line x1="82" y1="195" x2="110" y2="213" stroke="rgba(100,140,255,.4)" stroke-width="1.2"/>
+<line x1="110" y1="213" x2="134" y2="185" stroke="rgba(100,140,255,.4)" stroke-width="1.2"/>
+<line x1="134" y1="185" x2="107" y2="163" stroke="rgba(100,140,255,.4)" stroke-width="1.2"/>
+<line x1="107" y1="163" x2="82" y2="195" stroke="rgba(100,140,255,.4)" stroke-width="1.2"/>
+<line x1="134" y1="185" x2="178" y2="170" stroke="rgba(100,140,255,.4)" stroke-width="1.2"/>
+<line x1="178" y1="170" x2="222" y2="150" stroke="rgba(100,140,255,.4)" stroke-width="1.2"/>
+<line x1="222" y1="150" x2="256" y2="122" stroke="rgba(100,140,255,.4)" stroke-width="1.2"/>
+<circle cx="82" cy="195" r="5.5" fill="#7080ee"/>
+<circle cx="110" cy="213" r="4.5" fill="#7080ee"/>
+<circle cx="134" cy="185" r="3.5" fill="#7080ee"/>
+<circle cx="107" cy="163" r="6.5" fill="#a0b0ff"/>
+<circle cx="178" cy="170" r="4" fill="#7080ee"/>
+<circle cx="222" cy="150" r="4" fill="#7080ee"/>
+<circle cx="256" cy="122" r="3.5" fill="#7080ee"/>
+<line x1="82" y1="195" x2="107" y2="163" stroke="#ffd700" stroke-width="1.5" stroke-dasharray="5,3"/>
+<line x1="107" y1="163" x2="52" y2="55" stroke="#ffd700" stroke-width="1.5" stroke-dasharray="7,4"/>
+<polygon points="52,42 45,60 59,60" fill="#ffd700"/>
+<circle cx="52" cy="36" r="8" fill="#ffffff" opacity=".95"/>
+<circle cx="52" cy="36" r="13" fill="none" stroke="rgba(255,215,0,.6)" stroke-width="1.5" stroke-dasharray="3,3"/>
+<line x1="52" y1="36" x2="52" y2="230" stroke="rgba(255,215,0,.1)" stroke-width="1"/>
+<line x1="0" y1="230" x2="480" y2="230" stroke="rgba(100,150,220,.15)" stroke-width="1"/>
+<text x="52" y="26" fill="#fff" font-family="serif" font-size="9" text-anchor="middle" font-weight="bold">POLARIS</text>
+<text x="52" y="238" fill="#ffd700" font-family="serif" font-size="8" text-anchor="middle">TRUE NORTH</text>
+<text x="93" y="158" fill="rgba(200,220,255,.7)" font-family="serif" font-size="8">Dubhe</text>
+<text x="60" y="204" fill="rgba(200,220,255,.7)" font-family="serif" font-size="8">Merak</text>
+<text x="22" y="88" fill="#ffd700" font-family="serif" font-size="7">5x gap</text>
+<text x="175" y="205" fill="rgba(160,185,255,.65)" font-family="serif" font-size="9">BIG DIPPER</text>
+<text x="300" y="150" fill="rgba(200,220,255,.9)" font-family="serif" font-size="10" font-weight="bold">HOW TO FIND NORTH:</text>
+<text x="300" y="168" fill="rgba(180,200,255,.7)" font-family="serif" font-size="9">1. Find the Big Dipper</text>
+<text x="300" y="185" fill="rgba(180,200,255,.7)" font-family="serif" font-size="9">2. Locate Dubhe and Merak</text>
+<text x="300" y="202" fill="rgba(180,200,255,.7)" font-family="serif" font-size="9">3. Extend line Merak to Dubhe x5</text>
+<text x="300" y="219" fill="#ffd700" font-family="serif" font-size="9" font-weight="bold">4. Polaris = True North</text>
+</svg>
+</div>
+<div class="tip"><strong>Remember:</strong> Dubhe and Merak are the two stars on the outer edge of the Big Dipper cup (the side away from the handle). The line through them always points to Polaris.</div></div>
+<div class="kb"><h3>&#9728; Daytime Navigation — Shadow Stick</h3>
 <ol>
-<li>Find the <strong>Big Dipper</strong> — 7 bright stars forming a ladle shape. It never sets below the horizon in the northern US and is always visible on clear nights.</li>
-<li>Identify the two stars forming the outer edge of the cup — the side farthest from the handle. These are Dubhe (top) and Merak (bottom).</li>
-<li>Draw an imaginary line from Merak through Dubhe and extend it approximately 5 times the distance between them</li>
-<li>The moderately bright star at the end of that line is Polaris — the last and brightest star in the Little Dipper\'s handle</li>
-<li>Drop a vertical line from Polaris straight down to the horizon — that direction is true north</li>
+<li>Push a straight stick vertically into flat ground in sunlight.</li>
+<li>Mark the tip of the shadow with a rock or stick.</li>
+<li>Wait 15-20 minutes and mark the shadow tip again.</li>
+<li>The line connecting your two marks runs <strong>west to east</strong> (first mark = west, second = east).</li>
+<li>Stand with your left foot on the first mark and right foot on the second — you are now facing north.</li>
 </ol>
-<div class="tip"><strong>Confirm Polaris:</strong> Cassiopeia (shaped like a W or M) always appears on the opposite side of Polaris from the Big Dipper. The two constellations rotate around Polaris together throughout the night. If both are visible, Polaris is exactly between them.</div></div>
-<div class="kb"><h3>&#128207; Finding Your Latitude Using Polaris</h3>
-<p>Wherever you stand in the northern hemisphere, Polaris is the same number of degrees above the horizon as your latitude north of the equator. At Miami (25°N) it sits 25° up. At Seattle (48°N) it sits 48° up.</p>
-<p><strong>Measure with your fist:</strong> Extend your arm toward the horizon, closed fist. Each fist-width represents approximately 10 degrees. Stack fists from horizon to Polaris and multiply by 10 — that\'s your approximate latitude.</p></div>
-<div class="kb"><h3>&#11088; Cassiopeia — When the Big Dipper Is Low</h3>
-<p>Cassiopeia looks like a distinct W or M shape in the sky (changes appearance based on time and season). It rotates on the opposite side of Polaris from the Big Dipper. When the Big Dipper is near the horizon and partly obscured, use Cassiopeia — draw a line from the center star of the W straight outward. This line points toward Polaris.</p></div>
-<div class="kb"><h3>&#9733; Orion — Finding East &amp; West</h3>
-<p>Orion the Hunter is visible in the winter night sky across the entire Northern Hemisphere. His three-belt stars are one of the most useful navigation features in the entire sky:</p>
-<ul>
-<li>The middle belt star Alnilam rises almost exactly due east and sets almost exactly due west, regardless of your latitude anywhere on Earth</li>
-<li>Watch where Orion\'s belt first appears above the horizon — that is east</li>
-<li>Watch where it sets — that is west</li>
-<li>For the belt star to be useful for this, it needs to be near the horizon at rising or setting</li>
-</ul></div>
-<div class="kb"><h3>&#9728;&#65039; Daytime Navigation</h3>
-<ul>
-<li><strong>Shadow stick method:</strong> Push a straight stick vertically into flat ground. Mark the tip of its shadow with a stone. Wait 15 minutes, mark the new shadow tip. The line from first mark to second mark runs roughly west to east (first mark = west, second = east).</li>
-<li><strong>Analog watch method:</strong> Point the hour hand at the sun. The midpoint between the hour hand and 12 o\'clock points roughly south in the Northern Hemisphere.</li>
-<li><strong>Solar arc:</strong> The sun rises in the east and sets in the west. Note: This is exact only at the equinoxes. In summer it rises northeast and sets northwest across the US.</li>
-</ul></div>`,
+<p>This works anywhere on Earth, in any season, as long as there is a shadow.</p></div>
+<div class="kb"><h3>&#127769; Quick Reference</h3>
+<table class="tbl"><tr><th>What You See</th><th>What It Tells You</th></tr>
+<tr><td>Polaris (North Star)</td><td>True north — always. Height above horizon = your latitude in degrees north.</td></tr>
+<tr><td>Sun at noon</td><td>Due south (Northern Hemisphere) / due north (Southern Hemisphere)</td></tr>
+<tr><td>Sun rising</td><td>Roughly east (exact position shifts with season)</td></tr>
+<tr><td>Sun setting</td><td>Roughly west (exact position shifts with season)</td></tr>
+<tr><td>Crescent moon horn tips</td><td>Line through tips points roughly south (Northern Hemisphere)</td></tr>
+<tr><td>Star twinkling</td><td>It is a star (atmosphere scatters its point of light)</td></tr>
+<tr><td>Steady non-twinkling light</td><td>It is a planet (Venus, Jupiter, Mars, Saturn, Mercury)</td></tr>
+</table></div>`,
 
 mapcompass:(r,m)=>`
 <div class="ph"><span class="pi">&#129517;</span><h2>Map &amp; Compass Navigation</h2><p class="sub">A compass and topo map work without batteries, signal, or satellites. Master these and you can navigate anywhere on Earth.</p></div>
@@ -2075,492 +2084,95 @@ function showHome(){
 // ================================================================
 
 // Track which states have been cached
-window.MAP_CACHE_STATUS = {};
 
-// Check localStorage for previously cached states
-(function(){
-  try {
-    var stored = localStorage.getItem('pioneer_map_cache');
-    if(stored) window.MAP_CACHE_STATUS = JSON.parse(stored);
-  } catch(e) {}
-})();
+PAGES.trees = function(r,m){
+  var TD = {
+    pacific:[
+      {n:'Douglas Fir',id:'Soft needles, cones with 3-pronged bracts sticking out',u:'Excellent firewood, resin for fire-starting and wound sealing, bark for shelter',e:'Young spring tips for vitamin C tea, inner bark in emergency'},
+      {n:'Western Red Cedar',id:'Scale-like leaves, stringy fibrous red-brown bark, flattened sprays',u:'Inner bark strips into strong cordage; best natural fire board; shelter material',e:'Inner bark in emergency (bland), berries for birds only'},
+      {n:'Bigleaf Maple',id:'Very large 5-lobed leaves (up to 12 inches), paired winged seeds',u:'Good firewood, sap for syrup in early spring',e:'Sap (Feb-Mar), young flower clusters, seeds'},
+      {n:'Pacific Madrone',id:'Smooth red-orange peeling bark, leathery evergreen oval leaves',u:'Extremely dense firewood (burns very hot), hard wood for tools',e:'Red berries in fall — edible but bland'},
+      {n:'Oregon White Oak',id:'Deeply lobed leaves with rounded tips, acorns with shallow saucer caps',u:'Superior firewood, acorn flour after leaching, bark for tannin',e:'Acorns — lowest tannin of oaks, leach in water, dry and grind to flour'}
+    ],
+    mountain:[
+      {n:'Ponderosa Pine',id:'Long needles in 3s, vanilla-scented bark plates on mature trees',u:'Resin for fire-starting, fatwood burns in any weather, bark strips for shelter',e:'Inner bark in spring, pine nuts (harvest fall), needles for vitamin C tea'},
+      {n:'Quaking Aspen',id:'Round leaves that tremble in slightest breeze, chalky white bark with dark scars',u:'Quick-burning firewood, bark for cordage, straight poles for shelter',e:'Inner bark (bitter emergency food), catkins in spring'},
+      {n:'Engelmann Spruce',id:'Sharp blue-green 4-sided needles, small egg-shaped cones, high elevation',u:'Shelter construction timber, spruce gum seals wounds and waterproofs leather',e:'Young tips in spring (vitamin C), inner bark, gum edible'},
+      {n:'Lodgepole Pine',id:'Needles in 2s, small cones with sharp prickle, often dense uniform stands',u:'Straight poles perfect for shelter, fatwood for fire in wet conditions',e:'Inner bark, small pine nuts, needles for tea'},
+      {n:'Subalpine Fir',id:'Flat needles with rounded tips, erect purple cones that disintegrate on tree',u:'Best bough insulation for ground beds, shelter poles',e:'Inner bark, young needles brewed as tea'}
+    ],
+    southwest:[
+      {n:'Pinyon Pine',id:'Short needles in 2s or 3s, small round cones with large seeds',u:'Dense resinous firewood, resin for adhesive and waterproofing',e:'Pinyon nuts — highest calorie density of any wild food, harvest Sept-Oct. Critical survival food.'},
+      {n:'One-Seed Juniper',id:'Scale-like bluish-green leaves, round blue-gray berries, shreddy bark',u:'Very dense hot firewood, shredded bark as tinder bundle, berries for flavoring',e:'Berries edible (piney, use sparingly), inner bark in emergency'},
+      {n:'Velvet Mesquite',id:'Compound tiny leaflets, long tan seed pods, thorny branches',u:'Extremely hard dense firewood, straight poles, shade in desert',e:'Ripe dried pods ground into sweet nutritious meal — critical survival food in Sonoran desert'},
+      {n:'Desert Willow',id:'Long narrow leaves, orchid-like pink flowers, always near washes and water',u:'Indicator of subsurface water — follow washes to find it, flexible branches for weaving',e:'Flowers edible, young seeds edible, bark tea'},
+      {n:'Cottonwood',id:'Triangular leaves, cottony seeds in late spring, always near water',u:'Best friction fire board (soft dry wood), quick poles',e:'Inner bark in emergency, catkins in spring'}
+    ],
+    midwest:[
+      {n:'White Oak',id:'Rounded leaf lobes (no bristle tips), gray scaly bark, acorns in one season',u:'Superior firewood (highest BTU of eastern hardwoods), acorn flour, bark for tannin',e:'Acorns — lowest tannin oak, leach in multiple water changes, dry and grind'},
+      {n:'Sugar Maple',id:'5-lobed leaves, opposite branching, gray furrowed bark, brilliant fall color',u:'Best firewood of deciduous trees, sap for syrup and sugar (40:1 ratio)',e:'Sap Feb-Mar, inner bark, seeds boiled or roasted'},
+      {n:'American Basswood',id:'Heart-shaped large leaves, extremely fibrous inner bark, fragrant summer flowers',u:'BEST natural cordage — inner bark peels into strong fiber strips for rope',e:'Young leaves edible raw, flowers make pleasant tea, small nutlets'},
+      {n:'Black Walnut',id:'Compound leaves 15-23 leaflets, round green husked fruit, very dark ridged bark',u:'Hardest eastern wood for tools, husks for dye and natural insect repellent',e:'Walnuts — high calorie, harvest after first frost in Oct-Nov'},
+      {n:'Shagbark Hickory',id:'Very shaggy peeling bark strips, compound leaves, round thick-husked nuts',u:'Best firewood after oak (extremely dense), excellent tool handles — flexible and tough',e:'Hickory nuts — rich, calorie-dense, harvest Oct-Nov'}
+    ],
+    southeast:[
+      {n:'Longleaf Pine',id:'Needles 10-18 inches in 3s, very large cones, open parklike stands',u:'Fatwood (resin-saturated heartwood) = best natural fire-starter available. Burns even when wet. Tar for waterproofing.',e:'Inner bark, needles for vitamin C tea, pine nuts'},
+      {n:'Live Oak',id:'Small oval evergreen leaves (does not fully drop), massive spreading crown',u:'Incredibly hard dense wood for tools, weapons, and structural use',e:'Acorns — moderate tannin, leach and grind to nutritious flour'},
+      {n:'Cabbage Palm',id:'Fan-shaped leaves, rough fibrous trunk, state tree of Florida and SC',u:'Leaves for thatch, baskets, and cordage; fronds for shelter',e:'Heart of palm (terminal bud) — edible and nutritious, but harvesting kills the tree'},
+      {n:'Sweetgum',id:'Star-shaped 5-lobed leaves (like a maple star), spiky ball fruits',u:'Dried sap (storax) is an antiseptic wound sealant — one of the best natural ones',e:'Dried resin edible in small amounts, seeds edible'},
+      {n:'Saw Palmetto',id:'Fan-shaped spiny-stemmed leaves, grows in dense thickets, low shrub',u:'Thatch and cordage, berry clusters as landmark for water proximity',e:'Berries edible (strong flavor), heart of palm edible'}
+    ],
+    northeast:[
+      {n:'Paper Birch',id:'Brilliant white peeling papery bark, triangular toothed leaves',u:'Bark fires even when wet (oils resist moisture) — best northeast tinder. Canoe building.',e:'Inner bark nutritious in spring, sap (weaker than maple), catkins'},
+      {n:'Yellow Birch',id:'Yellowish-bronze peeling bark, wintergreen smell when twig scratched',u:'Excellent firewood, bark as tinder, sap in spring',e:'Inner bark, birch twig tea (natural salicin — pain relief), young leaves'},
+      {n:'Sugar Maple',id:'5-lobed leaves, gray furrowed bark, opposite branching',u:'Best firewood of northeast hardwoods, prime sap source',e:'Sap Feb-Mar (40:1 for syrup), inner bark, seeds'},
+      {n:'Eastern Hemlock',id:'Small flat needles with white stripes underneath, tiny cones, drooping top',u:'Bough insulation for ground beds (best northeastern insulating material), bark tannin',e:'Young tips for vitamin C tea — NOT poison hemlock (different plant entirely)'},
+      {n:'White Ash',id:'Compound opposite leaves, diamond-furrowed bark, canoe-paddle seeds',u:'Best wood for tool handles and weapons — tough, flexible, shock-resistant',e:'Inner bark in emergency, seeds edible'}
+    ],
+    midatlantic:[
+      {n:'White Oak',id:'Rounded leaf lobes, gray furrowed bark',u:'Superior firewood, acorn flour (lowest tannin oak), hide tanning',e:'Acorns — leach and grind to flour, important calorie source'},
+      {n:'Pawpaw',id:'Large tropical-looking leaves (12 inches), green kidney-shaped fruit clusters',u:'Bark fiber strips into strong cordage',e:'Fruit — largest native North American fruit, ripe in September, sweet and nutritious'},
+      {n:'Tulip Poplar',id:'Unique tulip-shaped 4-lobed leaves, straight tall trunk, greenish-yellow flowers',u:'Straight lightweight poles for shelter construction',e:'Inner bark, flower nectar, seeds'},
+      {n:'Black Locust',id:'Compound leaves, deeply furrowed dark bark, fragrant white flower clusters',u:'Hardest most rot-resistant eastern wood — fence posts last 50+ years untreated',e:'Flowers edible raw or fried (sweet and fragrant). Seeds and bark toxic — flowers only.'},
+      {n:'Spicebush',id:'Small shrub/tree, spicy aromatic crushed leaves, bright red berries',u:'Berries as allspice substitute, aromatic bark deters insects, easy fire-starter',e:'Dried berries as spice, leaves for tea, young twigs for flavoring meat'}
+    ],
+    texas:[
+      {n:'Mesquite',id:'Compound tiny leaflets, long tan seed pods, thorny, drought-tolerant',u:'Best firewood in arid Texas (very hot and long-burning), shelter poles',e:'Dried pods ground to sweet nutritious meal — historically critical survival food. High protein and sugar.'},
+      {n:'Post Oak',id:'Distinctive cross-shaped 5-lobed leaves, rough gray bark, small acorns',u:'Dense firewood, acorn flour',e:'Acorns — moderate leaching needed, good flour'},
+      {n:'Texas Live Oak',id:'Small oval evergreen leaves, low twisted gnarled form, natural windbreak',u:'Dense firewood, natural shelter from wind and heat in open country',e:'Acorns — moderate tannin, process into flour'},
+      {n:'Pecan',id:'Compound leaves with 9-17 leaflets, distinctive ribbed nuts, tall stately tree',u:'Excellent firewood and smoking wood',e:'Pecans — very high calorie nut, harvest October-November'},
+      {n:'Bald Cypress',id:'Feathery deciduous needles, knobby root knees rising from water, near rivers',u:'Extremely rot-resistant wood for water containers and structures',e:'Inner bark in emergency, seeds edible'}
+    ],
+    alaska:[
+      {n:'White Spruce',id:'Short blue-green needles, small cylindrical cones, common boreal tree',u:'Main shelter tree of boreal Alaska, spruce gum seals and waterproofs, excellent firewood that splits easily when frozen',e:'Young tips very high in vitamin C (prevents scurvy), inner bark, gum edible'},
+      {n:'Paper Birch',id:'White papery peeling bark, triangular toothed leaves, often multi-stemmed',u:'Bark fires in any weather condition (waterproof oils), inner bark for emergency food',e:'Inner bark nutritious in spring (peel thin white layers), sap, catkins'},
+      {n:'Balsam Poplar',id:'Triangular leaves, very fragrant sticky buds in spring, smooth gray bark',u:'Quick-burning firewood for fast heat, straight poles, buds for antiseptic salve',e:'Buds and inner bark in spring, catkins'},
+      {n:'Alder',id:'Oval toothed leaves, small woody cone-like catkins persist on branches, grows near water',u:'Best smoking wood for fish and meat — traditional Alaskan smoke-preservation wood',e:'Inner bark, catkins in spring, nitrogen-fixer (indicates fertile soil for plants)'},
+      {n:'Willow (various)',id:'Long narrow leaves, flexible branches, catkins, always near water',u:'Basket weaving and lashing cordage, natural aspirin from bark',e:'Inner bark nutritious in spring, catkins edible, young leaves, bark tea for pain relief'}
+    ],
+    hawaii:[
+      {n:'Kukui (Candlenut)',id:'Large light-green maple-like leaves, whitish coating underneath, round nuts',u:'Nut oil burned as candles and lamps for centuries, oil for cooking and skin',e:'Roasted nuts edible (raw are strongly laxative), oil for cooking'},
+      {n:'Hala (Pandanus)',id:'Long spiky spiraling leaves, pineapple-like orange fruit, aerial prop roots',u:'Leaves woven into mats, baskets, cordage, and thatch — essential traditional material',e:'Ripe fruit sections edible (scrape flesh from segments), seeds edible roasted'},
+      {n:'Guava',id:'Smooth pinkish peeling bark, oval leaves with prominent veins, yellow-green fruit',u:'Hard wood for tools, abundant fruit in any season',e:'Fruit extremely high in vitamin C — ripe when yellow and fragrant, eat raw or cook'},
+      {n:'Coconut Palm',id:'Classic tall feathered palm, large green-brown nuts, found near coast',u:'Fronds for thatch and weaving, shell for containers, fiber for cordage',e:'Young coconut water for hydration, meat for calories and fat, sprouted nut edible'},
+      {n:'Ohia Lehua',id:'Small leathery oval leaves, brilliant red pompom flowers, lava fields and forest',u:'Hardest Hawaiian wood — tools, weapons, digging sticks',e:'Flowers edible raw, honey from flowers is traditional Hawaiian food'}
+    ]
+  };
 
-function saveMapCacheStatus(){
-  try {
-    localStorage.setItem('pioneer_map_cache', JSON.stringify(window.MAP_CACHE_STATUS));
-  } catch(e){}
-}
+  var trees = TD[r]||TD.midwest;
+  var rows = trees.map(function(t){
+    return '<tr><td><strong>'+t.n+'</strong></td><td>'+t.id+'</td><td>'+t.u+'</td><td>'+t.e+'</td></tr>';
+  }).join('');
 
-function getCachedCount(){
-  return Object.values(window.MAP_CACHE_STATUS).filter(function(v){ return v; }).length;
-}
-
-// State center data for map positioning
-var MAP_CENTERS = {
-  AL:{lat:32.8,lng:-86.8,z:7},AK:{lat:64.2,lng:-153.0,z:4},AZ:{lat:34.3,lng:-111.1,z:7},
-  AR:{lat:34.8,lng:-92.2,z:7},CA:{lat:36.8,lng:-119.4,z:6},CO:{lat:39.0,lng:-105.5,z:7},
-  CT:{lat:41.6,lng:-72.7,z:9},DE:{lat:39.0,lng:-75.5,z:9},FL:{lat:28.5,lng:-82.0,z:7},
-  GA:{lat:32.7,lng:-83.4,z:7},HI:{lat:20.5,lng:-157.0,z:7},ID:{lat:44.3,lng:-114.5,z:6},
-  IL:{lat:40.0,lng:-89.2,z:7},IN:{lat:39.9,lng:-86.3,z:7},IA:{lat:42.1,lng:-93.5,z:7},
-  KS:{lat:38.5,lng:-98.4,z:7},KY:{lat:37.5,lng:-85.3,z:7},LA:{lat:31.0,lng:-91.8,z:7},
-  ME:{lat:45.4,lng:-69.2,z:7},MD:{lat:39.0,lng:-76.8,z:8},MA:{lat:42.3,lng:-71.8,z:8},
-  MI:{lat:44.5,lng:-85.0,z:7},MN:{lat:46.4,lng:-94.0,z:7},MS:{lat:32.7,lng:-89.7,z:7},
-  MO:{lat:38.5,lng:-92.5,z:7},MT:{lat:47.0,lng:-109.5,z:6},NE:{lat:41.5,lng:-99.8,z:7},
-  NV:{lat:39.5,lng:-116.5,z:7},NH:{lat:43.7,lng:-71.6,z:8},NJ:{lat:40.1,lng:-74.5,z:8},
-  NM:{lat:34.5,lng:-106.0,z:7},NY:{lat:43.0,lng:-75.0,z:7},NC:{lat:35.6,lng:-79.4,z:7},
-  ND:{lat:47.5,lng:-100.5,z:7},OH:{lat:40.4,lng:-82.8,z:7},OK:{lat:35.5,lng:-97.5,z:7},
-  OR:{lat:44.0,lng:-120.5,z:7},PA:{lat:41.0,lng:-77.5,z:7},RI:{lat:41.7,lng:-71.5,z:10},
-  SC:{lat:33.8,lng:-80.9,z:8},SD:{lat:44.0,lng:-100.2,z:7},TN:{lat:35.9,lng:-86.4,z:7},
-  TX:{lat:31.5,lng:-99.3,z:6},UT:{lat:39.5,lng:-111.1,z:7},VT:{lat:44.1,lng:-72.7,z:8},
-  VA:{lat:37.5,lng:-79.0,z:7},WA:{lat:47.4,lng:-120.5,z:7},WV:{lat:38.7,lng:-80.6,z:8},
-  WI:{lat:44.5,lng:-89.5,z:7},WY:{lat:43.0,lng:-107.5,z:7},DC:{lat:38.9,lng:-77.0,z:12}
+  return '<div class="ph"><span class="pi">&#127795;</span><h2>Trees by Region</h2>'
+    +'<p class="sub">Identification, survival uses, and edible parts for your region.</p></div>'
+    +'<div class="rn">&#127758; Showing trees for <strong>'+RN[r]+'</strong>. Change region selector above to update.</div>'
+    +'<div class="kb"><h3>&#127795; Key Trees — '+RN[r]+'</h3>'
+    +'<table class="tbl"><tr><th>Tree</th><th>How to Identify</th><th>Survival Uses</th><th>Edible Parts</th></tr>'
+    +rows
+    +'</table></div>'
+    +'<div class="tip"><strong>Safety rule:</strong> Never eat any plant product without 100% ID confirmation using at least 3 separate features. Some edible trees have toxic lookalikes.</div>';
 };
-
-// ── LEAFLET MAP INIT ──
-window._leafletMap = null;
-
-window.initLeafletMap = function(){
-  // Use requestAnimationFrame to ensure DOM is painted before Leaflet init
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      window._doInitLeafletMap();
-    });
-  });
-};
-
-window._doInitLeafletMap = function(){
-  var container = document.getElementById('leaflet-map');
-  if(!container) return;
-  var msg = document.getElementById('map-offline-msg');
-
-  if(typeof L === 'undefined'){
-    if(msg){ msg.style.display='flex'; }
-    return;
-  }
-
-  if(window._leafletMap){
-    try{ window._leafletMap.remove(); }catch(e){}
-    window._leafletMap = null;
-  }
-
-  var sel = window._selectedState;
-  var sm = MAP_CENTERS[sel] || {lat:39.5,lng:-98.3,z:5};
-  var view = window._mapView || 'map';
-
-  var tileUrl, attr;
-  if(view === 'terrain'){
-    tileUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
-    attr = 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap';
-  } else if(view === 'satellite'){
-    tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-    attr = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP';
-  } else {
-    tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-  }
-
-  try {
-    var map = L.map(container, { zoomControl:true, scrollWheelZoom:true })
-      .setView([sm.lat, sm.lng], sm.z);
-
-    var layer = L.tileLayer(tileUrl, { maxZoom:18, attribution:attr });
-
-    var tileErrors = 0;
-    layer.on('tileerror', function(){
-      tileErrors++;
-      if(tileErrors > 5 && msg) msg.style.display = 'flex';
-    });
-    layer.on('tileload', function(){
-      tileErrors = 0;
-      if(msg) msg.style.display = 'none';
-      // Mark this state as cached
-      if(sel && !window.MAP_CACHE_STATUS[sel]){
-        window.MAP_CACHE_STATUS[sel] = true;
-        saveMapCacheStatus();
-        // Update any cache counter on screen
-        var counter = document.getElementById('cache-count');
-        if(counter) counter.textContent = getCachedCount() + '/50';
-      }
-    });
-
-    layer.addTo(map);
-    window._leafletMap = map;
-    setTimeout(function(){ map.invalidateSize(); }, 150);
-
-  } catch(e){
-    console.error('Leaflet init error:', e);
-    if(msg) msg.style.display = 'flex';
-  }
-};
-
-// ── MAPVIEW PAGE ──
-window.mapSelectState = function(code){
-  window._selectedState = code || null;
-  window._mapView = code ? 'map' : 'grid';
-  var el = document.getElementById('stateSelect');
-  if(el) el.value = code || '';
-  if(PAGES.mapview){
-    document.getElementById('content').innerHTML = PAGES.mapview(R(), M());
-    window.scrollTo({top:0, behavior:'smooth'});
-    if(code) setTimeout(window.initLeafletMap, 200);
-  }
-};
-
-window.setMapView = function(v){
-  window._mapView = v;
-  if(PAGES.mapview){
-    document.getElementById('content').innerHTML = PAGES.mapview(R(), M());
-    window.scrollTo({top:0, behavior:'smooth'});
-    if(window._selectedState && v!=='grid' && v!=='geo' && v!=='setup'){
-      setTimeout(window.initLeafletMap, 200);
-    }
-  }
-};
-
-PAGES.mapview = function(r,m){
-  var sel = window._selectedState || null;
-  var view = window._mapView || 'grid';
-  var sd = sel ? STATE_DATA[sel] : null;
-  var cached = getCachedCount();
-
-  var SR = {WA:'pacific',OR:'pacific',CA:'pacific',MT:'mountain',ID:'mountain',WY:'mountain',CO:'mountain',UT:'mountain',NV:'mountain',ND:'midwest',SD:'midwest',NE:'midwest',KS:'midwest',MN:'midwest',IA:'midwest',MO:'midwest',WI:'midwest',IL:'midwest',IN:'midwest',OH:'midwest',MI:'midwest',AZ:'southwest',NM:'southwest',TX:'texas',OK:'texas',AR:'southeast',LA:'southeast',TN:'southeast',MS:'southeast',AL:'southeast',GA:'southeast',FL:'southeast',SC:'southeast',NC:'midatlantic',VA:'midatlantic',WV:'midatlantic',KY:'southeast',MD:'midatlantic',DE:'midatlantic',PA:'midatlantic',NJ:'midatlantic',NY:'northeast',CT:'northeast',RI:'northeast',MA:'northeast',VT:'northeast',NH:'northeast',ME:'northeast',AK:'alaska',HI:'hawaii',DC:'midatlantic'};
-  var RC = {pacific:'#1a4a2a',southwest:'#4a2a0a',mountain:'#0a2a4a',midwest:'#1a3a0a',southeast:'#3a1a0a',northeast:'#0a1a3a',midatlantic:'#2a1a3a',texas:'#3a1a1a',alaska:'#0a3a4a',hawaii:'#2a0a3a'};
-
-  function makeTile(code){
-    if(!code) return '<div style="width:52px;height:44px"></div>';
-    var isSel=code===sel;
-    var isCached=!!window.MAP_CACHE_STATUS[code];
-    var nm=(STATE_DATA[code]||{}).name||code;
-    var bg=isSel?'#b8922a':(sel?'rgba(15,25,15,.5)':RC[SR[code]]||'#1a2a1a');
-    var bd=isSel?'2px solid #ffd700':(isCached?'1px solid rgba(61,150,61,.5)':'1px solid rgba(150,200,255,.2)');
-    var op=(!sel||isSel)?'1':'0.35';
-    return '<div onclick="window.mapSelectState(\''+code+'\')" title="'+nm+(isCached?' (cached)':'')+'" style="width:52px;height:44px;background:'+bg+';border:'+bd+';border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;opacity:'+op+';transition:all .15s;gap:2px">'
-      +'<span style="font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.05em;color:'+(isSel?'#111':'rgba(220,235,255,.85)')+';font-weight:'+(isSel?'bold':'400')+'">'+code+'</span>'
-      +(isCached?'<span style="font-size:.45rem;color:rgba(100,220,100,.7)">&#9679;</span>':'')
-      +'</div>';
-  }
-
-  var rows=[
-    [null,'WA','MT','ND','MN',null,null,null,'ME',null,null],
-    [null,'OR','ID','WY','SD','WI','MI',null,'VT','NH',null],
-    [null,'CA','NV','CO','NE','IA','IN','OH','PA','NY','MA'],
-    [null,null,'UT','KS','MO','IL','KY','WV','VA','NJ','CT'],
-    [null,'AZ','NM','OK','AR','TN','NC','MD','DE','RI',null],
-    [null,null,'TX',null,'LA','MS','AL','GA','SC',null,null],
-    [null,null,null,null,null,null,null,'FL',null,null,null],
-    [null,null,null,null,null,null,null,null,null,null,null],
-    ['AK',null,null,'HI',null,null,null,null,null,null,null]
-  ];
-
-  var opts=Object.entries(STATE_DATA).sort(function(a,b){return a[1].name.localeCompare(b[1].name);})
-    .map(function(e){ return '<option value="'+e[0]+'"'+(e[0]===sel?' selected':'')+'>'+e[1].name+'</option>'; }).join('');
-
-  // ── SETUP / DOWNLOAD VIEW ──
-  if(view === 'setup'){
-    return '<div class="ph"><span class="pi">&#11015;&#65039;</span><h2>Download Maps for Offline Use</h2>'
-      +'<p class="sub">Cache all 50 state maps while connected to internet. After that, maps work completely offline on your USB.</p></div>'
-      +'<div style="background:linear-gradient(135deg,#0a1a0a,#0a0d1a);border:1px solid rgba(184,146,42,.3);border-radius:6px;padding:24px;margin-bottom:20px">'
-      // How it works
-      +'<h3 style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold);letter-spacing:.1em;margin-bottom:14px">&#128712; HOW IT WORKS</h3>'
-      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px">'
-      +'<div style="background:rgba(184,146,42,.08);border:1px solid rgba(184,146,42,.2);border-radius:4px;padding:12px">'
-      +'<div style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold);margin-bottom:6px">STEP 1 — CONNECT</div>'
-      +'<div style="font-size:.85rem;color:rgba(242,232,213,.75);line-height:1.6">Connect your device to internet (WiFi or mobile data). You only need to do this once.</div>'
-      +'</div>'
-      +'<div style="background:rgba(184,146,42,.08);border:1px solid rgba(184,146,42,.2);border-radius:4px;padding:12px">'
-      +'<div style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold);margin-bottom:6px">STEP 2 — DOWNLOAD</div>'
-      +'<div style="font-size:.85rem;color:rgba(242,232,213,.75);line-height:1.6">Click the button below. The app downloads map tiles for all 50 states and saves them to your device\'s browser cache.</div>'
-      +'</div>'
-      +'<div style="background:rgba(184,146,42,.08);border:1px solid rgba(184,146,42,.2);border-radius:4px;padding:12px">'
-      +'<div style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold);margin-bottom:6px">STEP 3 — OFFLINE</div>'
-      +'<div style="font-size:.85rem;color:rgba(242,232,213,.75);line-height:1.6">Disconnect. All maps now load instantly from your local cache. Full zoom, terrain, satellite — no internet needed.</div>'
-      +'</div>'
-      +'</div>'
-      // Cache status
-      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap">'
-      +'<div style="font-family:Cinzel,serif;font-size:.8rem;color:var(--ash)">MAPS CACHED:</div>'
-      +'<div style="font-family:Cinzel,serif;font-size:1.4rem;color:var(--gold)" id="setup-cache-count">'+cached+'/50</div>'
-      +'<div style="flex:1;height:12px;background:rgba(100,150,220,.15);border-radius:6px;overflow:hidden;min-width:100px">'
-      +'<div id="setup-cache-bar" style="height:100%;background:linear-gradient(90deg,var(--moss),#5a9a5a);border-radius:6px;width:'+(cached*2)+'%;transition:width .5s"></div>'
-      +'</div>'
-      +(cached===50?'<div style="color:#5a9a5a;font-family:Cinzel,serif;font-size:.75rem">&#10003; ALL MAPS CACHED</div>':'')
-      +'</div>'
-      // Main download button
-      +'<div id="setup-controls">'
-      +(cached < 50
-        ? '<button id="dl-all-btn" onclick="window.startDownloadAll()" style="background:var(--moss);color:#fff;border:none;padding:14px 32px;cursor:pointer;border-radius:4px;font-family:Cinzel,serif;font-size:.85rem;letter-spacing:.12em;margin-right:12px;margin-bottom:10px">&#11015; DOWNLOAD ALL 50 STATES</button>'
-        : '<button onclick="window.startDownloadAll()" style="background:#1a3a1a;color:#5a9a5a;border:1px solid rgba(61,150,61,.4);padding:14px 32px;cursor:pointer;border-radius:4px;font-family:Cinzel,serif;font-size:.85rem;letter-spacing:.12em;margin-right:12px;margin-bottom:10px">&#11015; RE-DOWNLOAD ALL MAPS</button>'
-      )
-      +'<button onclick="window.setMapView(\'grid\')" style="background:#1a2840;color:#a0c4f0;border:1px solid rgba(100,150,220,.3);padding:14px 24px;cursor:pointer;border-radius:4px;font-family:Cinzel,serif;font-size:.75rem;letter-spacing:.1em">SKIP — USE ONLINE ONLY</button>'
-      +'</div>'
-      // Progress area (hidden until download starts)
-      +'<div id="dl-progress-area" style="display:none;margin-top:20px">'
-      +'<div style="font-family:Cinzel,serif;font-size:.8rem;color:var(--gold);letter-spacing:.1em;margin-bottom:10px" id="dl-status-text">Starting download...</div>'
-      +'<div style="height:16px;background:rgba(100,150,220,.15);border-radius:8px;overflow:hidden;margin-bottom:8px">'
-      +'<div id="dl-progress-fill" style="height:100%;background:linear-gradient(90deg,#1a6a2a,#3a9a5a);border-radius:8px;width:0%;transition:width .4s;position:relative">'
-      +'<div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.6rem;color:rgba(255,255,255,.8);font-family:Cinzel,serif" id="dl-pct">0%</div>'
-      +'</div>'
-      +'</div>'
-      +'<div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--ash);margin-bottom:14px">'
-      +'<span id="dl-current-state">Preparing...</span>'
-      +'<span id="dl-count">0 / 50 states</span>'
-      +'</div>'
-      // Live state grid showing download progress
-      +'<div id="dl-state-grid" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">'
-      +Object.keys(MAP_CENTERS).sort().map(function(code){
-        return '<div id="dlst-'+code+'" title="'+((STATE_DATA[code]||{}).name||code)+'" style="width:36px;height:28px;background:'+(window.MAP_CACHE_STATUS[code]?'rgba(61,150,61,.5)':'rgba(30,50,30,.6)')+';border:1px solid '+(window.MAP_CACHE_STATUS[code]?'rgba(61,150,61,.6)':'rgba(100,150,100,.2)')+';border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:Cinzel,serif;font-size:.55rem;color:'+(window.MAP_CACHE_STATUS[code]?'#80e880':'rgba(150,200,150,.5)')+'">'+code+'</div>';
-      }).join('')
-      +'</div>'
-      +'<button id="dl-cancel-btn" onclick="window.cancelDownload()" style="display:none;background:#3a1a1a;color:#e88080;border:1px solid rgba(220,100,100,.3);padding:8px 20px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em;margin-top:12px">&#9632; STOP DOWNLOAD</button>'
-      +'</div>'
-      +'</div>'
-      +'<button onclick="window.setMapView(\'grid\')" style="background:#1a2840;color:#a0c4f0;border:1px solid rgba(100,150,220,.3);padding:8px 18px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em">&#8592; BACK TO MAP</button>';
-  }
-
-  // ── STATE MAP VIEW ──
-  if(sel && view !== 'grid'){
-    var isGeo = view === 'geo';
-    var ts = function(active){ return 'padding:8px 16px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.08em;border:1px solid '+(active?'rgba(184,146,42,.5)':'rgba(100,150,220,.25)')+';background:'+(active?'rgba(184,146,42,.2)':'#0d1520')+';color:'+(active?'var(--gold)':'#8ab4cc')+';margin-right:6px;margin-bottom:6px'; };
-
-    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">'
-      +'<button onclick="window.setMapView(\'grid\')" style="'+ts(false)+'">&#8592; ALL STATES</button>'
-      +'<span style="font-family:Cinzel,serif;font-size:1rem;color:var(--gold)">&#9733; '+sd.name+'</span>'
-      +(window.MAP_CACHE_STATUS[sel]?'<span style="font-size:.7rem;color:#5a9a5a;font-family:Cinzel,serif">&#9679; CACHED</span>':'<span style="font-size:.7rem;color:var(--ash);font-family:Cinzel,serif">&#9675; not cached</span>')
-      +'</div>'
-      +'<div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap">'
-      +'<button onclick="window.setMapView(\'map\')" style="'+ts(view==='map')+'">&#128506; STREET</button>'
-      +'<button onclick="window.setMapView(\'terrain\')" style="'+ts(view==='terrain')+'">&#127956; TERRAIN</button>'
-      +'<button onclick="window.setMapView(\'satellite\')" style="'+ts(view==='satellite')+'">&#128640; SATELLITE</button>'
-      +'<button onclick="window.setMapView(\'geo\')" style="'+ts(isGeo)+'">&#127807; INFO</button>'
-      +'</div>'
-      +(isGeo
-        ? '<div class="cg">'
-          +'<div class="card"><div class="ct">&#128167; Rivers</div>'+sd.rivers.map(function(v){return '<p style="margin-bottom:4px;font-size:.85rem">&bull; '+v+'</p>';}).join('')+'</div>'
-          +'<div class="card"><div class="ct">&#127956; Mountains</div>'+sd.mountains.map(function(v){return '<p style="margin-bottom:4px;font-size:.85rem">&bull; '+v+'</p>';}).join('')+'</div>'
-          +'<div class="card"><div class="ct">&#127975; Key Zones</div>'+sd.landmarks.slice(0,5).map(function(v){return '<p style="margin-bottom:4px;font-size:.85rem">&bull; '+v+'</p>';}).join('')+'</div>'
-          +'</div>'
-        : '<div style="position:relative;border-radius:4px;overflow:hidden;border:1px solid rgba(100,150,220,.2)">'
-          +'<div id="leaflet-map" style="height:480px;width:100%;background:#1a2a3a"></div>'
-          +'<div id="map-offline-msg" style="display:none;position:absolute;inset:0;background:rgba(6,13,26,.95);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;gap:14px">'
-          +'<div style="font-size:2.5rem">&#127758;</div>'
-          +'<div style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold);letter-spacing:.12em">CONNECT TO INTERNET FOR MAPS</div>'
-          +'<div style="font-size:.82rem;line-height:1.8;color:rgba(200,220,200,.65);max-width:380px">Download maps once while online and they\'ll work offline forever on this device.</div>'
-          +'<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px">'
-          +'<button onclick="window.initLeafletMap()" style="background:var(--moss);color:#fff;border:none;padding:10px 20px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.1em">&#128257; TRY AGAIN</button>'
-          +'<button onclick="window.setMapView(\'setup\')" style="background:#0a2a4a;color:#a0c4f0;border:1px solid rgba(100,150,220,.4);padding:10px 20px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.1em">&#11015; DOWNLOAD MAPS</button>'
-          +'</div></div>'
-          +'</div>'
-          +'<div style="font-size:.75rem;color:var(--ash);margin-top:6px;font-style:italic">&#128269; Scroll to zoom &nbsp;&#8226;&nbsp; Drag to pan &nbsp;&#8226;&nbsp; <span style="color:#5a9a5a">&#9679;</span> = cached for offline</div>'
-      )
-      +'<div class="kb" style="margin-top:18px"><h3>&#127807; Survival Resource Zones</h3>'
-      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">'
-      +sd.landmarks.map(function(l){return '<div style="background:#0d1a12;border:1px solid rgba(61,92,46,.3);border-radius:3px;padding:9px 13px;font-size:.85rem;color:rgba(242,232,213,.85)">&#127975; '+l+'</div>';}).join('')
-      +'</div></div>';
-  }
-
-  // ── GRID VIEW ──
-  var gridHTML = '<div style="overflow-x:auto;padding:4px"><div style="display:inline-block;padding:14px">';
-  rows.forEach(function(row,ri){
-    gridHTML += '<div style="display:flex;gap:5px;margin-bottom:5px">';
-    row.forEach(function(c){ gridHTML += makeTile(c); });
-    gridHTML += '</div>';
-    if(ri===6) gridHTML += '<div style="height:8px;border-top:1px dashed rgba(150,200,255,.1);margin:5px 0"></div>';
-  });
-  gridHTML += '</div></div>';
-
-  return '<div class="ph"><span class="pi">&#128506;&#65039;</span><h2>US Interactive Map</h2>'
-    +'<p class="sub">Real maps — streets, terrain, satellite. Click any state. Green dot = cached for offline.</p></div>'
-    // Offline setup banner
-    +'<div style="background:linear-gradient(135deg,rgba(10,42,74,.3),rgba(26,74,42,.2));border:1px solid rgba(100,150,220,.25);border-radius:4px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'
-    +'<div>'
-    +'<div style="font-family:Cinzel,serif;font-size:.75rem;color:var(--gold);letter-spacing:.1em;margin-bottom:3px">MAP CACHE STATUS: <span id="cache-count">'+cached+'</span>/50 states downloaded</div>'
-    +'<div style="font-size:.8rem;color:rgba(200,220,200,.6)">Download maps once with internet — then all 50 states work fully offline.</div>'
-    +'</div>'
-    +'<button onclick="window.setMapView(\'setup\')" style="background:var(--moss);color:#fff;border:none;padding:9px 20px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.12em;white-space:nowrap">&#11015; DOWNLOAD MAPS</button>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">'
-    +'<select id="stateSelect" onchange="window.mapSelectState(this.value)" style="font-size:.88rem;padding:7px 11px;min-width:180px">'
-    +'<option value="">&#8212; Select a State &#8212;</option>'+opts+'</select>'
-    +(sel?'<button onclick="window.mapSelectState(\'\')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 13px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.1em">CLEAR</button>':'')
-    +'</div>'
-    +'<div style="background:#060d1a;border:1px solid rgba(100,150,220,.2);border-radius:4px">'+gridHTML+'</div>'
-    +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:.7rem;font-family:Cinzel,serif;letter-spacing:.08em">'
-    +Object.entries({Pacific:'#1a4a2a',Southwest:'#4a2a0a',Mountain:'#0a2a4a',Midwest:'#1a3a0a',Southeast:'#3a1a0a',Northeast:'#0a1a3a',"Mid-Atlantic":'#2a1a3a',Texas:'#3a1a1a'})
-      .map(function(e){return '<span style="display:flex;align-items:center;gap:5px;color:rgba(220,235,255,.6)"><span style="width:10px;height:10px;background:'+e[1]+';border:1px solid rgba(150,200,255,.3);border-radius:2px;display:inline-block"></span>'+e[0]+'</span>';}).join('')
-    +'<span style="display:flex;align-items:center;gap:5px;color:rgba(100,220,100,.6)"><span style="font-size:.9rem">&#9679;</span>Cached offline</span>'
-    +'</div>';
-};
-
-// ── DOWNLOAD ALL MAPS ──
-var _downloadCancelled = false;
-var _downloadActive = false;
-
-window.cancelDownload = function(){
-  _downloadCancelled = true;
-  _downloadActive = false;
-  var btn = document.getElementById('dl-cancel-btn');
-  if(btn) btn.style.display = 'none';
-  var statusText = document.getElementById('dl-status-text');
-  if(statusText) statusText.textContent = 'Download paused. Click Download to resume.';
-  var dlBtn = document.getElementById('dl-all-btn');
-  if(dlBtn){ dlBtn.textContent = '\u2193 RESUME DOWNLOAD'; dlBtn.disabled = false; }
-};
-
-window.startDownloadAll = function(){
-  if(_downloadActive) return;
-  _downloadCancelled = false;
-  _downloadActive = true;
-
-  var progressArea = document.getElementById('dl-progress-area');
-  if(progressArea) progressArea.style.display = 'block';
-
-  var dlBtn = document.getElementById('dl-all-btn');
-  if(dlBtn){ dlBtn.disabled = true; dlBtn.textContent = 'Downloading...'; }
-
-  var cancelBtn = document.getElementById('dl-cancel-btn');
-  if(cancelBtn) cancelBtn.style.display = 'inline-block';
-
-  var states = Object.keys(MAP_CENTERS);
-  var total = states.length;
-  var completed = getCachedCount();
-  var i = 0;
-
-  // Skip already-cached states
-  function findNext(){
-    while(i < states.length && window.MAP_CACHE_STATUS[states[i]]) i++;
-    return i < states.length ? states[i] : null;
-  }
-
-  function updateUI(code, done, total){
-    var pct = Math.round((done/total)*100);
-    var fill = document.getElementById('dl-progress-fill');
-    var pctEl = document.getElementById('dl-pct');
-    var countEl = document.getElementById('dl-count');
-    var currentEl = document.getElementById('dl-current-state');
-    var setupCount = document.getElementById('setup-cache-count');
-    var setupBar = document.getElementById('setup-cache-bar');
-    var mainCount = document.getElementById('cache-count');
-
-    if(fill) fill.style.width = pct + '%';
-    if(pctEl) pctEl.textContent = pct + '%';
-    if(countEl) countEl.textContent = done + ' / ' + total + ' states';
-    if(currentEl) currentEl.textContent = code ? 'Downloading: ' + (STATE_DATA[code]||{}).name + ' (' + code + ')' : 'Complete!';
-    if(setupCount) setupCount.textContent = done + '/50';
-    if(setupBar) setupBar.style.width = (done*2) + '%';
-    if(mainCount) mainCount.textContent = done;
-
-    // Update the state tile in the grid
-    if(code){
-      var tile = document.getElementById('dlst-' + code);
-      if(tile){
-        tile.style.background = 'rgba(61,150,61,.5)';
-        tile.style.border = '1px solid rgba(61,150,61,.6)';
-        tile.style.color = '#80e880';
-      }
-    }
-  }
-
-  function downloadState(code){
-    return new Promise(function(resolve){
-      if(!code || _downloadCancelled){ resolve(); return; }
-
-      var sm = MAP_CENTERS[code];
-      var tempDiv = document.createElement('div');
-      tempDiv.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:600px;height:400px;visibility:hidden';
-      document.body.appendChild(tempDiv);
-
-      var tilesLoaded = 0;
-      var tilesTotal = 0;
-      var timeout = null;
-
-      try {
-        var tmpMap = L.map(tempDiv, {zoomControl:false,attributionControl:false})
-          .setView([sm.lat, sm.lng], sm.z);
-
-        var layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18});
-
-        layer.on('loading', function(){ tilesTotal++; });
-        layer.on('tileload', function(){
-          tilesLoaded++;
-          if(tilesLoaded >= Math.max(tilesTotal, 1)){
-            clearTimeout(timeout);
-            finish();
-          }
-        });
-        layer.on('tileerror', function(){
-          tilesLoaded++;
-          if(tilesLoaded >= Math.max(tilesTotal, 1)){
-            clearTimeout(timeout);
-            finish();
-          }
-        });
-
-        layer.addTo(tmpMap);
-
-        function finish(){
-          try{ tmpMap.remove(); }catch(e){}
-          try{ document.body.removeChild(tempDiv); }catch(e){}
-          window.MAP_CACHE_STATUS[code] = true;
-          saveMapCacheStatus();
-          resolve();
-        }
-
-        // Timeout after 8 seconds regardless
-        timeout = setTimeout(function(){
-          finish();
-        }, 8000);
-
-      } catch(e){
-        try{ document.body.removeChild(tempDiv); }catch(err){}
-        resolve();
-      }
-    });
-  }
-
-  function next(){
-    var code = findNext();
-    if(!code || _downloadCancelled){
-      _downloadActive = false;
-      var done = getCachedCount();
-      var statusText = document.getElementById('dl-status-text');
-      if(statusText){
-        statusText.textContent = _downloadCancelled
-          ? 'Download paused at ' + done + '/50 states.'
-          : '&#10003; All ' + done + ' states cached! Maps now work fully offline.';
-        statusText.innerHTML = statusText.textContent;
-      }
-      var cancelBtn = document.getElementById('dl-cancel-btn');
-      if(cancelBtn) cancelBtn.style.display = 'none';
-      var dlBtn = document.getElementById('dl-all-btn');
-      if(dlBtn){ dlBtn.disabled = false; dlBtn.textContent = done===50 ? '&#10003; ALL CACHED' : '\u2193 RESUME DOWNLOAD'; }
-      return;
-    }
-
-    var statusText = document.getElementById('dl-status-text');
-    if(statusText) statusText.textContent = 'Downloading maps for ' + ((STATE_DATA[code]||{}).name||code) + '...';
-
-    downloadState(code).then(function(){
-      i++;
-      var done = getCachedCount();
-      updateUI(code, done, total);
-      setTimeout(next, 300); // Brief pause between states
-    });
-  }
-
-  next();
-};
-
-
-
-PAGES.security = function(r,m){return `<div class="ph"><span class="pi">&#128270;</span><h2>Security &amp; Alert Systems</h2><p class="sub">Perimeter warning, deterrents, and situational awareness.</p></div><div class="kb"><h3>&#128270; Primitive Perimeter Systems</h3><ul><li><strong>Tripwire &amp; cans:</strong> Monofilament at ankle height tied to cans with pebbles. Invisible at night.</li><li><strong>Gravel paths:</strong> Loose gravel around sleeping areas — footsteps unmistakable.</li><li><strong>Dogs:</strong> Most effective alarm. Detects threats far earlier than any mechanical system.</li><li><strong>Clear sight lines:</strong> Remove brush within 30-50 feet. Anyone approaching must cross open ground.</li></ul></div><div class="kb"><h3>&#128065; Awareness Principles</h3><ul><li><strong>Watch wildlife:</strong> Deer and birds alarm before humans hear anything.</li><li><strong>Fire management:</strong> Fire visible for miles. Dakota holes (underground fire) for concealed cooking.</li><li><strong>Vary routines:</strong> Predictable behavior is exploitable.</li></ul></div>`;};
-
-PAGES.livestock = function(r,m){return `<div class="ph"><span class="pi">&#128023;</span><h2>Livestock &amp; Homestead Animals</h2><p class="sub">Chickens, rabbits, goats, cattle, pigs — keeping them alive and productive.</p></div><div class="kb"><h3>&#128020; Chickens</h3><ul><li><strong>Best breeds:</strong> Rhode Island Red, Plymouth Rock, Australorp. Lay well and produce good meat.</li><li><strong>Free-range cuts feed costs 30-50%.</strong> Supplement with kitchen scraps and insects.</li><li><strong>Diseases to watch:</strong> Respiratory (rattling breathing), coccidiosis (bloody droppings), mites (pale comb).</li></ul></div><div class="kb"><h3>&#128007; Rabbits</h3><ul><li><strong>Best meat-to-feed ratio</strong> of any animal. Ready at 8-10 weeks. Silent. Small footprint.</li><li><strong>Heat kills:</strong> Die rapidly above 85F. Frozen water bottles and shade in summer.</li></ul></div><div class="kb"><h3>&#128016; Goats</h3><ul><li><strong>Milk breeds:</strong> Nigerian Dwarf, LaMancha, Nubian — 1-3 quarts per day.</li><li><strong>Parasites are the #1 killer.</strong> FAMACHA score monthly. Rotate pastures every 21 days.</li></ul></div>`;};
-
-PAGES.butchering = function(r,m){return `<div class="ph"><span class="pi">&#129482;</span><h2>Hunting, Skinning &amp; Butchering</h2><p class="sub">From the field to the table. Nothing wasted.</p></div><div class="kb"><h3>&#129482; Field Dressing Deer</h3><ol><li>Roll deer on back. Shallow cut sternum to tail — two fingers tent skin away from organs.</li><li>Sever the diaphragm separating chest from abdomen.</li><li>Grip windpipe, pull all organs out in one motion.</li><li>Sever rectum, tie off. Prop cavity open with stick to cool.</li></ol><div class="warn"><strong>Temperature:</strong> Meat must cool below 40F within 4 hours. In warm weather quarter immediately.</div></div><div class="kb"><h3>&#128007; Small Game</h3><ol><li>Pinch skin on back, make 2-inch cut through skin only.</li><li>Pull in opposite directions — skin tears clean both ways.</li><li>Pull skin off like a sock. Remove head and feet at joints.</li></ol></div><div class="kb"><h3>&#127993; Preserving</h3><ul><li><strong>Smoking:</strong> Salt 24 hours, smoke over hardwood 6-12 hours at 150-175F. Lasts months.</li><li><strong>Rendering fat:</strong> Slow-heat with water. Pour off clean tallow for cooking, candles, waterproofing.</li></ul></div>`;};
-
-PAGES.crafts = function(r,m){return `<div class="ph"><span class="pi">&#129534;</span><h2>Homestead Crafts</h2><p class="sub">Soap, butter, candles — making essentials from what you have.</p></div><div class="kb"><h3>&#129534; Soap from Wood Ash Lye</h3><ol><li>Pack hardwood ash in bucket with holes. Pour rainwater through — collect the drip (lye water).</li><li>Test: fresh egg floats at surface = correct strength.</li><li>Melt animal fat. Heat lye to same temperature. Slowly pour lye into fat — never reverse.</li><li>Stir until mixture traces (leaves trail). Pour into molds. Cure 4-6 weeks.</li></ol></div><div class="kb"><h3>&#129370; Butter</h3><ol><li>Skim cream from whole milk after 12-24 hours rest.</li><li>Fill jar half full, seal tight. Shake vigorously 10-20 minutes.</li><li>When butter granules appear, drain buttermilk. Knead in cold water until clear. Salt and store.</li></ol></div>`;};
-
-PAGES.trees = function(r,m){return `<div class="ph"><span class="pi">&#127795;</span><h2>Trees by Region</h2><p class="sub">Identification, survival uses, and edible parts for ${RN[r]}.</p></div><div class="rn">&#127758; Region: <strong>${RN[r]}</strong>. Change region selector above to update.</div><div class="kb"><h3>&#127795; Key Trees</h3><table class="tbl"><tr><th>Tree</th><th>ID Features</th><th>Survival Uses</th><th>Edible Parts</th></tr><tr><td>White Oak</td><td>Rounded leaf lobes, gray scaly bark</td><td>Superior firewood, bark for tannin</td><td>Acorns — leach tannins in multiple water changes, dry and grind to flour</td></tr><tr><td>Sugar Maple</td><td>5-lobed leaves, winged seeds</td><td>Excellent firewood, tap for syrup (40:1 ratio)</td><td>Sap in early spring, inner bark</td></tr><tr><td>Black Walnut</td><td>Compound leaves, round green husked nuts</td><td>Hard wood for tools, husks for dye</td><td>Walnuts — very calorie dense, harvest Oct-Nov</td></tr><tr><td>Pine (various)</td><td>Needles in bundles, resinous bark</td><td>Resin for firestarter, fatwood in any conditions</td><td>Inner bark, pine nuts (some species), needles for vitamin C tea</td></tr><tr><td>Eastern Cottonwood</td><td>Triangular leaves, cottony seeds</td><td>Friction fire board, quick shelter poles</td><td>Inner bark in emergency, spring buds</td></tr></table></div>`;};
 
 PAGES.naturaltp = function(r,m){return `<div class="ph"><span class="pi">&#127807;</span><h2>Natural Hygiene Plants</h2><p class="sub">Plants that clean, heal, and maintain hygiene without modern products.</p></div><div class="kb"><h3>&#129494; Natural Toothbrushes</h3><ul><li><strong>Willow or birch twig:</strong> Chew end until fibrous. Willow contains natural salicin (antiseptic).</li><li><strong>Charcoal powder:</strong> Grind hardwood charcoal fine. Kills bacteria and removes stains.</li><li><strong>Salt water rinse:</strong> 1 tsp salt in 8oz water kills oral bacteria.</li></ul></div><div class="kb"><h3>&#127798; Natural Soap Alternatives</h3><ul><li><strong>Yucca root:</strong> Crush and add water — rich lather. Found across Southwest and Plains.</li><li><strong>Soapwort:</strong> Crush leaves in water. Gentle lather good for skin and hair.</li><li><strong>Wood ash wash:</strong> Mix with water for lye wash. Cuts grease, kills bacteria.</li></ul></div><div class="kb"><h3>&#127774; Insect Repellents</h3><ul><li><strong>Yarrow:</strong> Crush leaves, rub on skin. Effective against mosquitoes.</li><li><strong>Black walnut husks:</strong> Rub on skin. Repels insects and is antifungal.</li><li><strong>Smoke:</strong> Oldest repellent. Sleep near a low smoky fire in bug season.</li></ul></div>`;};
 
@@ -2576,6 +2188,460 @@ PAGES.animalhealth = function(r,m){
   var st=tasks[season]||tasks.winter;
   return `<div class="ph"><span class="pi">&#128197;</span><h2>Livestock Health Calendar</h2><p class="sub">${MN[m]} — ${sName} health protocols for your animals.</p></div><div class="rn">&#127758; <strong>${sName.toUpperCase()}</strong> tasks for <strong>${MN[m]}</strong>. Change month above to update.</div>${Object.entries(st).map(([animal,tl])=>'<div class="kb"><h3>'+animal+' — '+sName+'</h3><ul>'+tl.map(t=>'<li>'+t+'</li>').join('')+'</ul></div>').join('')}`;};
 
+
+
+
+
+
+
+
+
+
+
+PAGES.security = function(r,m){return `<div class="ph"><span class="pi">&#128270;</span><h2>Security &amp; Alert Systems</h2><p class="sub">Perimeter warning, deterrents, and situational awareness.</p></div><div class="kb"><h3>&#128270; Primitive Perimeter Systems</h3><ul><li><strong>Tripwire &amp; cans:</strong> Monofilament at ankle height tied to cans with pebbles. Invisible at night.</li><li><strong>Gravel paths:</strong> Loose gravel around sleeping areas — footsteps unmistakable.</li><li><strong>Dogs:</strong> Most effective alarm. Detects threats far earlier than any mechanical system.</li><li><strong>Clear sight lines:</strong> Remove brush within 30-50 feet. Anyone approaching must cross open ground.</li></ul></div><div class="kb"><h3>&#128065; Awareness Principles</h3><ul><li><strong>Watch wildlife:</strong> Deer and birds alarm before humans hear anything.</li><li><strong>Fire management:</strong> Fire visible for miles. Dakota holes (underground fire) for concealed cooking.</li><li><strong>Vary routines:</strong> Predictable behavior is exploitable.</li></ul></div>`;};
+
+PAGES.livestock = function(r,m){return `<div class="ph"><span class="pi">&#128023;</span><h2>Livestock &amp; Homestead Animals</h2><p class="sub">Chickens, rabbits, goats, cattle, pigs — keeping them alive and productive.</p></div><div class="kb"><h3>&#128020; Chickens</h3><ul><li><strong>Best breeds:</strong> Rhode Island Red, Plymouth Rock, Australorp. Lay well and produce good meat.</li><li><strong>Free-range cuts feed costs 30-50%.</strong> Supplement with kitchen scraps and insects.</li><li><strong>Diseases to watch:</strong> Respiratory (rattling breathing), coccidiosis (bloody droppings), mites (pale comb).</li></ul></div><div class="kb"><h3>&#128007; Rabbits</h3><ul><li><strong>Best meat-to-feed ratio</strong> of any animal. Ready at 8-10 weeks. Silent. Small footprint.</li><li><strong>Heat kills:</strong> Die rapidly above 85F. Frozen water bottles and shade in summer.</li></ul></div><div class="kb"><h3>&#128016; Goats</h3><ul><li><strong>Milk breeds:</strong> Nigerian Dwarf, LaMancha, Nubian — 1-3 quarts per day.</li><li><strong>Parasites are the #1 killer.</strong> FAMACHA score monthly. Rotate pastures every 21 days.</li></ul></div>`;};
+
+PAGES.butchering = function(r,m){return `<div class="ph"><span class="pi">&#129482;</span><h2>Hunting, Skinning &amp; Butchering</h2><p class="sub">From the field to the table. Nothing wasted.</p></div><div class="kb"><h3>&#129482; Field Dressing Deer</h3><ol><li>Roll deer on back. Shallow cut sternum to tail — two fingers tent skin away from organs.</li><li>Sever the diaphragm separating chest from abdomen.</li><li>Grip windpipe, pull all organs out in one motion.</li><li>Sever rectum, tie off. Prop cavity open with stick to cool.</li></ol><div class="warn"><strong>Temperature:</strong> Meat must cool below 40F within 4 hours. In warm weather quarter immediately.</div></div><div class="kb"><h3>&#128007; Small Game</h3><ol><li>Pinch skin on back, make 2-inch cut through skin only.</li><li>Pull in opposite directions — skin tears clean both ways.</li><li>Pull skin off like a sock. Remove head and feet at joints.</li></ol></div><div class="kb"><h3>&#127993; Preserving</h3><ul><li><strong>Smoking:</strong> Salt 24 hours, smoke over hardwood 6-12 hours at 150-175F. Lasts months.</li><li><strong>Rendering fat:</strong> Slow-heat with water. Pour off clean tallow for cooking, candles, waterproofing.</li></ul></div>`;};
+
+PAGES.crafts = function(r,m){return `<div class="ph"><span class="pi">&#129534;</span><h2>Homestead Crafts</h2><p class="sub">Soap, butter, candles — making essentials from what you have.</p></div><div class="kb"><h3>&#129534; Soap from Wood Ash Lye</h3><ol><li>Pack hardwood ash in bucket with holes. Pour rainwater through — collect the drip (lye water).</li><li>Test: fresh egg floats at surface = correct strength.</li><li>Melt animal fat. Heat lye to same temperature. Slowly pour lye into fat — never reverse.</li><li>Stir until mixture traces (leaves trail). Pour into molds. Cure 4-6 weeks.</li></ol></div><div class="kb"><h3>&#129370; Butter</h3><ol><li>Skim cream from whole milk after 12-24 hours rest.</li><li>Fill jar half full, seal tight. Shake vigorously 10-20 minutes.</li><li>When butter granules appear, drain buttermilk. Knead in cold water until clear. Salt and store.</li></ol></div>`;};
+
+
+
+PAGES.fishing = function(r,m){
+  var fd = (FISH_DATA[r]||FISH_DATA.midwest);
+  var monthData = fd[m]||[];
+  var rows = monthData.map(function(f){
+    var c = f.active==='high'?'#5a9a5a':f.active==='low'?'#9a7a5a':'#8a8a5a';
+    return '<tr><td><strong>'+(f.sp||f.name||'')+'</strong></td><td style="color:'+c+'">'+(f.active||'—').toUpperCase()+'</td><td>'+(f.method||'—')+'</td><td>'+(f.bait||'—')+'</td><td>'+(f.notes||'—')+'</td></tr>';
+  }).join('');
+  return '<div class="ph"><span class="pi">&#127907;</span><h2>Wilderness Fishing</h2><p class="sub">Water concentrates food. With minimal gear, fishing is your most consistent protein source.</p></div>'
+    +'<div class="rn">&#127758; Showing fish for <strong>'+RN[r]+'</strong> in <strong>'+MN[m]+'</strong>. Change region or month above to update.</div>'
+    +(monthData.length>0
+      ?'<div class="kb"><h3>&#127907; Active Fish — '+MN[m]+', '+RN[r]+'</h3><table class="tbl"><tr><th>Fish</th><th>Activity</th><th>Method</th><th>Bait</th><th>Notes</th></tr>'+rows+'</table></div>'
+      :'<div class="warn">No fishing data for this region/month combination. Try adjusting your region or month.</div>'
+    )
+    +'<div class="kb"><h3>&#129693; Improvised Hooks &amp; Gear</h3><ul>'
+    +'<li><strong>Gorge hook:</strong> Carve hardwood or bone 1-2 inches, sharp both ends, notched center for line. When swallowed and line pulled, it lodges crosswise.</li>'
+    +'<li><strong>Bent metal:</strong> Any stiff wire, safety pin, or thorn works. Fish in still water will take almost any hook when hungry.</li>'
+    +'<li><strong>Trotline:</strong> String with multiple hooks at different depths across a creek. Works passively overnight.</li>'
+    +'<li><strong>Fish weir:</strong> Stack rocks/sticks in a narrowing funnel. Fish follow current in and cannot find the exit.</li>'
+    +'<li><strong>Line:</strong> Paracord inner strand, thread from clothing, or twisted plant fiber all work.</li>'
+    +'</ul></div>'
+    +'<div class="kb"><h3>&#127754; Where to Fish</h3><ul>'
+    +'<li><strong>Structure:</strong> Fish hold near fallen logs, rock edges, depth changes, and river bends.</li>'
+    +'<li><strong>Seams:</strong> Where fast water meets slow water. Baitfish concentrate there, predators follow.</li>'
+    +'<li><strong>Dawn and dusk:</strong> Most fish feed actively when light is low.</li>'
+    +'<li><strong>Deep pools in cold, shallows in heat:</strong> Fish seek comfortable water temperature.</li>'
+    +'</ul></div>';
+};
+
+PAGES.trees = function(r,m){
+  var TD = {
+    pacific:[
+      {n:'Douglas Fir',id:'Soft needles, cones with 3-pronged bracts sticking out',u:'Excellent firewood, resin for fire-starting and wound sealing, bark for shelter',e:'Young spring tips for vitamin C tea, inner bark in emergency'},
+      {n:'Western Red Cedar',id:'Scale-like leaves, stringy fibrous red-brown bark, flattened sprays',u:'Inner bark strips into strong cordage; best natural fire board; shelter material',e:'Inner bark in emergency (bland), berries for birds only'},
+      {n:'Bigleaf Maple',id:'Very large 5-lobed leaves (up to 12 inches), paired winged seeds',u:'Good firewood, sap for syrup in early spring',e:'Sap (Feb-Mar), young flower clusters, seeds'},
+      {n:'Pacific Madrone',id:'Smooth red-orange peeling bark, leathery evergreen oval leaves',u:'Extremely dense firewood (burns very hot), hard wood for tools',e:'Red berries in fall — edible but bland'},
+      {n:'Oregon White Oak',id:'Deeply lobed leaves with rounded tips, acorns with shallow saucer caps',u:'Superior firewood, acorn flour after leaching, bark for tannin',e:'Acorns — lowest tannin of oaks, leach in water, dry and grind to flour'}
+    ],
+    mountain:[
+      {n:'Ponderosa Pine',id:'Long needles in 3s, vanilla-scented bark plates on mature trees',u:'Resin for fire-starting, fatwood burns in any weather, bark strips for shelter',e:'Inner bark in spring, pine nuts (harvest fall), needles for vitamin C tea'},
+      {n:'Quaking Aspen',id:'Round leaves that tremble in slightest breeze, chalky white bark with dark scars',u:'Quick-burning firewood, bark for cordage, straight poles for shelter',e:'Inner bark (bitter emergency food), catkins in spring'},
+      {n:'Engelmann Spruce',id:'Sharp blue-green 4-sided needles, small egg-shaped cones, high elevation',u:'Shelter construction timber, spruce gum seals wounds and waterproofs leather',e:'Young tips in spring (vitamin C), inner bark, gum edible'},
+      {n:'Lodgepole Pine',id:'Needles in 2s, small cones with sharp prickle, often dense uniform stands',u:'Straight poles perfect for shelter, fatwood for fire in wet conditions',e:'Inner bark, small pine nuts, needles for tea'},
+      {n:'Subalpine Fir',id:'Flat needles with rounded tips, erect purple cones that disintegrate on tree',u:'Best bough insulation for ground beds, shelter poles',e:'Inner bark, young needles brewed as tea'}
+    ],
+    southwest:[
+      {n:'Pinyon Pine',id:'Short needles in 2s or 3s, small round cones with large seeds',u:'Dense resinous firewood, resin for adhesive and waterproofing',e:'Pinyon nuts — highest calorie density of any wild food, harvest Sept-Oct. Critical survival food.'},
+      {n:'One-Seed Juniper',id:'Scale-like bluish-green leaves, round blue-gray berries, shreddy bark',u:'Very dense hot firewood, shredded bark as tinder bundle, berries for flavoring',e:'Berries edible (piney, use sparingly), inner bark in emergency'},
+      {n:'Velvet Mesquite',id:'Compound tiny leaflets, long tan seed pods, thorny branches',u:'Extremely hard dense firewood, straight poles, shade in desert',e:'Ripe dried pods ground into sweet nutritious meal — critical survival food in Sonoran desert'},
+      {n:'Desert Willow',id:'Long narrow leaves, orchid-like pink flowers, always near washes and water',u:'Indicator of subsurface water — follow washes to find it, flexible branches for weaving',e:'Flowers edible, young seeds edible, bark tea'},
+      {n:'Cottonwood',id:'Triangular leaves, cottony seeds in late spring, always near water',u:'Best friction fire board (soft dry wood), quick poles',e:'Inner bark in emergency, catkins in spring'}
+    ],
+    midwest:[
+      {n:'White Oak',id:'Rounded leaf lobes (no bristle tips), gray scaly bark, acorns in one season',u:'Superior firewood (highest BTU of eastern hardwoods), acorn flour, bark for tannin',e:'Acorns — lowest tannin oak, leach in multiple water changes, dry and grind'},
+      {n:'Sugar Maple',id:'5-lobed leaves, opposite branching, gray furrowed bark, brilliant fall color',u:'Best firewood of deciduous trees, sap for syrup and sugar (40:1 ratio)',e:'Sap Feb-Mar, inner bark, seeds boiled or roasted'},
+      {n:'American Basswood',id:'Heart-shaped large leaves, extremely fibrous inner bark, fragrant summer flowers',u:'BEST natural cordage — inner bark peels into strong fiber strips for rope',e:'Young leaves edible raw, flowers make pleasant tea, small nutlets'},
+      {n:'Black Walnut',id:'Compound leaves 15-23 leaflets, round green husked fruit, very dark ridged bark',u:'Hardest eastern wood for tools, husks for dye and natural insect repellent',e:'Walnuts — high calorie, harvest after first frost in Oct-Nov'},
+      {n:'Shagbark Hickory',id:'Very shaggy peeling bark strips, compound leaves, round thick-husked nuts',u:'Best firewood after oak (extremely dense), excellent tool handles — flexible and tough',e:'Hickory nuts — rich, calorie-dense, harvest Oct-Nov'}
+    ],
+    southeast:[
+      {n:'Longleaf Pine',id:'Needles 10-18 inches in 3s, very large cones, open parklike stands',u:'Fatwood (resin-saturated heartwood) = best natural fire-starter available. Burns even when wet. Tar for waterproofing.',e:'Inner bark, needles for vitamin C tea, pine nuts'},
+      {n:'Live Oak',id:'Small oval evergreen leaves (does not fully drop), massive spreading crown',u:'Incredibly hard dense wood for tools, weapons, and structural use',e:'Acorns — moderate tannin, leach and grind to nutritious flour'},
+      {n:'Cabbage Palm',id:'Fan-shaped leaves, rough fibrous trunk, state tree of Florida and SC',u:'Leaves for thatch, baskets, and cordage; fronds for shelter',e:'Heart of palm (terminal bud) — edible and nutritious, but harvesting kills the tree'},
+      {n:'Sweetgum',id:'Star-shaped 5-lobed leaves (like a maple star), spiky ball fruits',u:'Dried sap (storax) is an antiseptic wound sealant — one of the best natural ones',e:'Dried resin edible in small amounts, seeds edible'},
+      {n:'Saw Palmetto',id:'Fan-shaped spiny-stemmed leaves, grows in dense thickets, low shrub',u:'Thatch and cordage, berry clusters as landmark for water proximity',e:'Berries edible (strong flavor), heart of palm edible'}
+    ],
+    northeast:[
+      {n:'Paper Birch',id:'Brilliant white peeling papery bark, triangular toothed leaves',u:'Bark fires even when wet (oils resist moisture) — best northeast tinder. Canoe building.',e:'Inner bark nutritious in spring, sap (weaker than maple), catkins'},
+      {n:'Yellow Birch',id:'Yellowish-bronze peeling bark, wintergreen smell when twig scratched',u:'Excellent firewood, bark as tinder, sap in spring',e:'Inner bark, birch twig tea (natural salicin — pain relief), young leaves'},
+      {n:'Sugar Maple',id:'5-lobed leaves, gray furrowed bark, opposite branching',u:'Best firewood of northeast hardwoods, prime sap source',e:'Sap Feb-Mar (40:1 for syrup), inner bark, seeds'},
+      {n:'Eastern Hemlock',id:'Small flat needles with white stripes underneath, tiny cones, drooping top',u:'Bough insulation for ground beds (best northeastern insulating material), bark tannin',e:'Young tips for vitamin C tea — NOT poison hemlock (different plant entirely)'},
+      {n:'White Ash',id:'Compound opposite leaves, diamond-furrowed bark, canoe-paddle seeds',u:'Best wood for tool handles and weapons — tough, flexible, shock-resistant',e:'Inner bark in emergency, seeds edible'}
+    ],
+    midatlantic:[
+      {n:'White Oak',id:'Rounded leaf lobes, gray furrowed bark',u:'Superior firewood, acorn flour (lowest tannin oak), hide tanning',e:'Acorns — leach and grind to flour, important calorie source'},
+      {n:'Pawpaw',id:'Large tropical-looking leaves (12 inches), green kidney-shaped fruit clusters',u:'Bark fiber strips into strong cordage',e:'Fruit — largest native North American fruit, ripe in September, sweet and nutritious'},
+      {n:'Tulip Poplar',id:'Unique tulip-shaped 4-lobed leaves, straight tall trunk, greenish-yellow flowers',u:'Straight lightweight poles for shelter construction',e:'Inner bark, flower nectar, seeds'},
+      {n:'Black Locust',id:'Compound leaves, deeply furrowed dark bark, fragrant white flower clusters',u:'Hardest most rot-resistant eastern wood — fence posts last 50+ years untreated',e:'Flowers edible raw or fried (sweet and fragrant). Seeds and bark toxic — flowers only.'},
+      {n:'Spicebush',id:'Small shrub/tree, spicy aromatic crushed leaves, bright red berries',u:'Berries as allspice substitute, aromatic bark deters insects, easy fire-starter',e:'Dried berries as spice, leaves for tea, young twigs for flavoring meat'}
+    ],
+    texas:[
+      {n:'Mesquite',id:'Compound tiny leaflets, long tan seed pods, thorny, drought-tolerant',u:'Best firewood in arid Texas (very hot and long-burning), shelter poles',e:'Dried pods ground to sweet nutritious meal — historically critical survival food. High protein and sugar.'},
+      {n:'Post Oak',id:'Distinctive cross-shaped 5-lobed leaves, rough gray bark, small acorns',u:'Dense firewood, acorn flour',e:'Acorns — moderate leaching needed, good flour'},
+      {n:'Texas Live Oak',id:'Small oval evergreen leaves, low twisted gnarled form, natural windbreak',u:'Dense firewood, natural shelter from wind and heat in open country',e:'Acorns — moderate tannin, process into flour'},
+      {n:'Pecan',id:'Compound leaves with 9-17 leaflets, distinctive ribbed nuts, tall stately tree',u:'Excellent firewood and smoking wood',e:'Pecans — very high calorie nut, harvest October-November'},
+      {n:'Bald Cypress',id:'Feathery deciduous needles, knobby root knees rising from water, near rivers',u:'Extremely rot-resistant wood for water containers and structures',e:'Inner bark in emergency, seeds edible'}
+    ],
+    alaska:[
+      {n:'White Spruce',id:'Short blue-green needles, small cylindrical cones, common boreal tree',u:'Main shelter tree of boreal Alaska, spruce gum seals and waterproofs, excellent firewood that splits easily when frozen',e:'Young tips very high in vitamin C (prevents scurvy), inner bark, gum edible'},
+      {n:'Paper Birch',id:'White papery peeling bark, triangular toothed leaves, often multi-stemmed',u:'Bark fires in any weather condition (waterproof oils), inner bark for emergency food',e:'Inner bark nutritious in spring (peel thin white layers), sap, catkins'},
+      {n:'Balsam Poplar',id:'Triangular leaves, very fragrant sticky buds in spring, smooth gray bark',u:'Quick-burning firewood for fast heat, straight poles, buds for antiseptic salve',e:'Buds and inner bark in spring, catkins'},
+      {n:'Alder',id:'Oval toothed leaves, small woody cone-like catkins persist on branches, grows near water',u:'Best smoking wood for fish and meat — traditional Alaskan smoke-preservation wood',e:'Inner bark, catkins in spring, nitrogen-fixer (indicates fertile soil for plants)'},
+      {n:'Willow (various)',id:'Long narrow leaves, flexible branches, catkins, always near water',u:'Basket weaving and lashing cordage, natural aspirin from bark',e:'Inner bark nutritious in spring, catkins edible, young leaves, bark tea for pain relief'}
+    ],
+    hawaii:[
+      {n:'Kukui (Candlenut)',id:'Large light-green maple-like leaves, whitish coating underneath, round nuts',u:'Nut oil burned as candles and lamps for centuries, oil for cooking and skin',e:'Roasted nuts edible (raw are strongly laxative), oil for cooking'},
+      {n:'Hala (Pandanus)',id:'Long spiky spiraling leaves, pineapple-like orange fruit, aerial prop roots',u:'Leaves woven into mats, baskets, cordage, and thatch — essential traditional material',e:'Ripe fruit sections edible (scrape flesh from segments), seeds edible roasted'},
+      {n:'Guava',id:'Smooth pinkish peeling bark, oval leaves with prominent veins, yellow-green fruit',u:'Hard wood for tools, abundant fruit in any season',e:'Fruit extremely high in vitamin C — ripe when yellow and fragrant, eat raw or cook'},
+      {n:'Coconut Palm',id:'Classic tall feathered palm, large green-brown nuts, found near coast',u:'Fronds for thatch and weaving, shell for containers, fiber for cordage',e:'Young coconut water for hydration, meat for calories and fat, sprouted nut edible'},
+      {n:'Ohia Lehua',id:'Small leathery oval leaves, brilliant red pompom flowers, lava fields and forest',u:'Hardest Hawaiian wood — tools, weapons, digging sticks',e:'Flowers edible raw, honey from flowers is traditional Hawaiian food'}
+    ]
+  };
+
+  var trees = TD[r]||TD.midwest;
+  var rows = trees.map(function(t){
+    return '<tr><td><strong>'+t.n+'</strong></td><td>'+t.id+'</td><td>'+t.u+'</td><td>'+t.e+'</td></tr>';
+  }).join('');
+
+  return '<div class="ph"><span class="pi">&#127795;</span><h2>Trees by Region</h2>'
+    +'<p class="sub">Identification, survival uses, and edible parts for your region.</p></div>'
+    +'<div class="rn">&#127758; Showing trees for <strong>'+RN[r]+'</strong>. Change region selector above to update.</div>'
+    +'<div class="kb"><h3>&#127795; Key Trees — '+RN[r]+'</h3>'
+    +'<table class="tbl"><tr><th>Tree</th><th>How to Identify</th><th>Survival Uses</th><th>Edible Parts</th></tr>'
+    +rows
+    +'</table></div>'
+    +'<div class="tip"><strong>Safety rule:</strong> Never eat any plant product without 100% ID confirmation using at least 3 separate features. Some edible trees have toxic lookalikes.</div>';
+};
+
+PAGES.naturaltp = function(r,m){return `<div class="ph"><span class="pi">&#127807;</span><h2>Natural Hygiene Plants</h2><p class="sub">Plants that clean, heal, and maintain hygiene without modern products.</p></div><div class="kb"><h3>&#129494; Natural Toothbrushes</h3><ul><li><strong>Willow or birch twig:</strong> Chew end until fibrous. Willow contains natural salicin (antiseptic).</li><li><strong>Charcoal powder:</strong> Grind hardwood charcoal fine. Kills bacteria and removes stains.</li><li><strong>Salt water rinse:</strong> 1 tsp salt in 8oz water kills oral bacteria.</li></ul></div><div class="kb"><h3>&#127798; Natural Soap Alternatives</h3><ul><li><strong>Yucca root:</strong> Crush and add water — rich lather. Found across Southwest and Plains.</li><li><strong>Soapwort:</strong> Crush leaves in water. Gentle lather good for skin and hair.</li><li><strong>Wood ash wash:</strong> Mix with water for lye wash. Cuts grease, kills bacteria.</li></ul></div><div class="kb"><h3>&#127774; Insect Repellents</h3><ul><li><strong>Yarrow:</strong> Crush leaves, rub on skin. Effective against mosquitoes.</li><li><strong>Black walnut husks:</strong> Rub on skin. Repels insects and is antifungal.</li><li><strong>Smoke:</strong> Oldest repellent. Sleep near a low smoky fire in bug season.</li></ul></div>`;};
+
+PAGES.animalhealth = function(r,m){
+  var season=[12,1,2].includes(m)?'winter':[3,4,5].includes(m)?'spring':[6,7,8].includes(m)?'summer':'fall';
+  var sName=season.charAt(0).toUpperCase()+season.slice(1);
+  var tasks={
+    winter:{Chickens:['Check combs for frostbite — apply tallow','Fresh water 3x daily — freezes quickly','Extra protein in cold — sunflower seeds, mealworms','Ventilate coop without drafts — moisture causes disease, not cold'],Rabbits:['Protect from wind and wet — handle cold well if dry','Check water 3x daily — freezes quickly','Increase hay — gut needs fiber to keep moving in cold'],Goats:['Provide 2x summer hay amount in cold','Check hooves — hoof rot in winter mud','Supplement selenium if not on mineral block','Pregnant does: increase grain last 6 weeks before kidding']},
+    spring:{Chickens:['Deep clean coop — all bedding out, scrub, dry','Deworm naturally with pumpkin seeds ground into feed','Parasite eggs hatch in warmth — treat proactively'],Rabbits:['Breeding season — check weight before breeding','Coccidiosis risk rises with warmth and wet','Transition to fresh grass slowly — sudden green grass causes stasis'],Goats:['Hoof trim — growth accelerates','FAMACHA scoring if animals look pale or weak','Kidding season — clean pen, iodine for umbilical cord at birth']},
+    summer:{Chickens:['Heat kills faster than cold — shade and airflow critical','Frozen watermelon treats and cool water help','Reduce scratch grains — they generate body heat'],Rabbits:['Dies above 85F — frozen water bottles in cages essential','Move to shadiest spot available','Suspend breeding — kits cannot handle heat'],Goats:['FAMACHA scoring monthly — peak parasite season','Check milk before every milking — mastitis watch','Isolate any animal with runny eye — pinkeye spreads by flies']},
+    fall:{Chickens:['Molt begins — reduced eggs is normal, increase protein','Pre-winter repairs and weatherproofing','Treat for mites and lice now — easier before cold'],Rabbits:['Breed now for winter meat','Block north and west wind from hutch','Stock extra hay before winter'],Goats:['Breeding season — bucks are aggressive','Does cycle every 21 days','CD&T vaccination booster before breeding']}
+  };
+  var st=tasks[season]||tasks.winter;
+  return `<div class="ph"><span class="pi">&#128197;</span><h2>Livestock Health Calendar</h2><p class="sub">${MN[m]} — ${sName} health protocols for your animals.</p></div><div class="rn">&#127758; <strong>${sName.toUpperCase()}</strong> tasks for <strong>${MN[m]}</strong>. Change month above to update.</div>${Object.entries(st).map(([animal,tl])=>'<div class="kb"><h3>'+animal+' — '+sName+'</h3><ul>'+tl.map(t=>'<li>'+t+'</li>').join('')+'</ul></div>').join('')}`;};
+
+
+
+
+
+
+
+
+
+
+
+
+function doSearch(q){
+  q=q.trim().toLowerCase();
+  if(!q) return;
+  var results=[];
+  var pn={water:'Water',fire:'Fire',shelter:'Shelter',mindset:'Mindset',foraging:'Foraging',trapping:'Trapping',fishing:'Fishing',planting:'Planting',compost:'Compost',stars:'Stars & Sky',mapcompass:'Map & Compass',terrain:'Terrain',tracks:'Animal Tracks',leafid:'Leaf & Tree ID',snakes:'Snakes',predators:'Predators',bugs:'Bugs',sanitation:'Sanitation',medicine:'Natural Medicine',firstaid:'First Aid',urban:'Urban Survival',tools:'Tools & Gear',security:'Security',livestock:'Livestock',animalhealth:'Animal Health',butchering:'Butchering',crafts:'Crafts',naturaltp:'Natural Hygiene',trees:'Trees'};
+  Object.keys(pn).forEach(function(k){
+    try{var c=PAGES[k](R(),M()),plain=c.replace(/<[^>]+>/g,'').toLowerCase();
+    if(plain.indexOf(q)!==-1){var i=plain.indexOf(q),s=plain.substring(Math.max(0,i-50),i+90).replace(/[ \t\n]+/g,' ').trim();results.push({page:k,name:pn[k],snippet:s});}}catch(e){}
+  });
+  var out='<div class="ph"><span class="pi">&#128269;</span><h2>Search Results</h2><p class="sub">'+results.length+' result'+(results.length!==1?'s':'')+' for &ldquo;'+q+'&rdquo;</p></div>';
+  if(!results.length){out+='<div class="warn">No results for &ldquo;'+q+'&rdquo;. Try different keywords.</div>';}
+  else{out+='<div style="display:flex;flex-direction:column;gap:10px">';results.forEach(function(r){out+='<div onclick="go(\''+r.page+'\')" style="background:#1e1710;border:1px solid rgba(184,146,42,.2);border-radius:4px;padding:14px 18px;cursor:pointer" onmouseover="this.style.borderColor=\'rgba(184,146,42,.5)\'" onmouseout="this.style.borderColor=\'rgba(184,146,42,.2)\'">'+'<div style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold);margin-bottom:5px">&#9654; '+r.name+'</div>'+'<div style="font-size:.82rem;color:rgba(242,232,213,.65);line-height:1.6">&hellip;'+r.snippet+'&hellip;</div></div>';});out+='</div>';}
+  _currentPage=null;document.getElementById('navgrid').style.display='none';
+  document.getElementById('content').innerHTML=out;
+  document.getElementById('content').classList.add('show');
+  document.getElementById('backbar').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function printPage(){
+  var c=document.getElementById('content');
+  if(!c||!c.innerHTML.trim()) return;
+  var w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><title>Pioneer Cache</title><style>body{font-family:Georgia,serif;font-size:13px;color:#111;padding:20px;max-width:800px;margin:0 auto}h2,h3{color:#333}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:#eee;padding:7px;text-align:left;border:1px solid #ccc}td{padding:7px;border:1px solid #ddd}ul,ol{padding-left:20px}li{margin-bottom:4px}.warn{background:#fff3f0;padding:8px;border-left:3px solid #c44;margin:10px 0}.tip{background:#fffbe0;padding:8px;border-left:3px solid #884;margin:10px 0}@media print{button{display:none}}</style></head><body><div style="text-align:center;margin-bottom:20px;border-bottom:2px solid #333;padding-bottom:12px"><h1 style="margin:0">THE PIONEER CACHE</h1></div>'+c.innerHTML+'</body></html>');
+  w.document.close();setTimeout(function(){w.print();},400);
+}PAGES.tools = function(r,m){
+var h = '<div class="ph"><span class="pi">&#128295;</span><h2>Tools &amp; Gear &mdash; What to Stockpile Now</h2>'
+  + '<p class="sub">The tools you own before a crisis are the ones you will have during it. This is your priority acquisition list.</p></div>'
+  + '<div class="warn"><strong>The golden rule:</strong> A tool you have and know how to use beats a better tool you do not. Buy quality once, practice with everything, and prioritize hand-powered tools that work without electricity or fuel.</div>';
+
+// Cutting tools
+h += '<div class="kb"><h3>&#128296; Cutting Tools &mdash; Highest Priority</h3><table class="tbl">'
+  + '<tr><th>Tool</th><th>Why You Need It</th><th>What to Look For</th></tr>'
+  + '<tr><td><strong>Fixed-blade knife (4-6 inch)</strong></td><td>Most-used survival tool. Processing food, fire-making, shelter building, first aid. Never rely on a folder alone.</td><td>Full tang, 1095 carbon steel (sharpenable in field), leather or Kydex sheath</td></tr>'
+  + '<tr><td><strong>Hatchet or forest axe</strong></td><td>Splitting firewood, driving stakes, rough carpentry. A 2-3 lb head handles 90% of jobs.</td><td>Hickory or ash handle (replaceable), steel head, avoid fiberglass</td></tr>'
+  + '<tr><td><strong>Folding hand saw</strong></td><td>Cuts branches, lumber, bone. Far more efficient than a knife for anything over 2 inches thick.</td><td>Bahco Laplander style, 7-inch blade, aggressive teeth</td></tr>'
+  + '<tr><td><strong>Machete (18-24 inch)</strong></td><td>Trail clearing, harvesting, splitting green wood. Essential in Southeast and tropical regions.</td><td>1075 steel, simple design, always include a sharpening stone</td></tr>'
+  + '<tr><td><strong>Whetstone set</strong></td><td>A dull blade is useless and dangerous. Every sharp tool needs a way to stay sharp indefinitely.</td><td>Coarse/fine combo stone (400/1000 grit), leather strop, honing oil</td></tr>'
+  + '<tr><td><strong>Wire snips and bolt cutters</strong></td><td>Urban escape, fencing repair, salvaging wire and hardware.</td><td>Hardened steel jaws, 18-inch handles cover most jobs</td></tr>'
+  + '</table></div>';
+
+// Digging
+h += '<div class="kb"><h3>&#127798; Digging &amp; Ground Tools</h3><table class="tbl">'
+  + '<tr><th>Tool</th><th>Why You Need It</th></tr>'
+  + '<tr><td><strong>Full-size spade shovel</strong></td><td>Latrines, root cellars, drainage, fire pits, planting. The single most useful homestead tool after a knife. Get two.</td></tr>'
+  + '<tr><td><strong>Garden fork (digging fork)</strong></td><td>Breaking compacted soil, harvesting root vegetables, turning compost. Cannot be replaced by a shovel.</td></tr>'
+  + '<tr><td><strong>Military e-tool (folding shovel)</strong></td><td>Bug-out bag essential. Digging, chopping, prying in tight spaces.</td></tr>'
+  + '<tr><td><strong>Pick mattock or Pulaski</strong></td><td>Breaking rocky or hard-packed ground, grubbing roots, firebreak cutting. Standard forestry tool.</td></tr>'
+  + '<tr><td><strong>Post-hole digger (manual)</strong></td><td>Fencing for livestock, setting shelter poles, outhouse construction. Clam-shell style, 48-inch handles.</td></tr>'
+  + '</table></div>';
+
+// Building
+h += '<div class="kb"><h3>&#129521; Building &amp; Repair Tools</h3><table class="tbl">'
+  + '<tr><th>Tool</th><th>Why You Need It</th></tr>'
+  + '<tr><td><strong>Claw hammer (20 oz)</strong></td><td>Nails, demolition, prying, splitting. Most versatile striking tool. Get two.</td></tr>'
+  + '<tr><td><strong>Crosscut handsaw (26 inch)</strong></td><td>Cutting lumber when power tools are gone. A sharp handsaw cuts faster than most people expect.</td></tr>'
+  + '<tr><td><strong>Hacksaw with 10 spare blades</strong></td><td>Cutting metal pipe, bolts, rebar, hardware. Blades dull fast, stock spares.</td></tr>'
+  + '<tr><td><strong>Brace and bit set</strong></td><td>Hand-powered drill. Bores holes in wood with zero electricity. Completely silent.</td></tr>'
+  + '<tr><td><strong>Chisels (set of 4)</strong></td><td>Woodworking, mortise joints, carving handles. Last generations if kept sharp.</td></tr>'
+  + '<tr><td><strong>Pry bar or wrecking bar</strong></td><td>Salvaging lumber, opening stuck doors and containers, demolition.</td></tr>'
+  + '<tr><td><strong>Pliers set and channel-locks</strong></td><td>Gripping, turning, bending wire, fence repair. Get multiple sizes.</td></tr>'
+  + '<tr><td><strong>Vise-grips (2-3 pairs)</strong></td><td>Locking pliers that act as a third hand. Pipe repair, bolt extraction, fabrication.</td></tr>'
+  + '<tr><td><strong>Duct tape (20+ rolls)</strong></td><td>Waterproofing, binding, patching almost anything temporarily.</td></tr>'
+  + '<tr><td><strong>Paracord 550 lb (1000 ft)</strong></td><td>Lashing, clothesline, trap line, emergency cordage. Never have enough on a homestead.</td></tr>'
+  + '<tr><td><strong>Assorted nails and screws (10 lb buckets)</strong></td><td>Construction without fasteners is nearly impossible. Prioritize 16d sinkers and 3-inch decking screws.</td></tr>'
+  + '</table></div>';
+
+// Water
+h += '<div class="kb"><h3>&#128167; Water Tools</h3><table class="tbl">'
+  + '<tr><th>Tool</th><th>Why</th><th>Notes</th></tr>'
+  + '<tr><td><strong>Gravity water filter (Berkey or clone)</strong></td><td>Filters 6,000+ gallons per element set. Gravity-fed, no pumping, no electricity.</td><td>Stock extra replacement elements stored dry</td></tr>'
+  + '<tr><td><strong>LifeStraw or Sawyer Squeeze</strong></td><td>Personal portable filter for bug-out bag. Sawyer filters 100,000 gallons.</td><td>Sawyer also filters large batches via squeeze bag</td></tr>'
+  + '<tr><td><strong>Water purification tablets (200+)</strong></td><td>Backup when filters fail or water is too silty to filter cleanly.</td><td>Chlorine dioxide (Aquatabs) most effective, leaves no taste</td></tr>'
+  + '<tr><td><strong>5-gallon food-grade buckets (10+)</strong></td><td>Storage, carrying, fermenting, composting, emergency toilet. Most versatile container made.</td><td>Get lids with gaskets, stack efficiently</td></tr>'
+  + '<tr><td><strong>Manual well pump</strong></td><td>If you have a well, this is critical. Electric pumps fail in grid-down. Simple Pump or Bison works to 200+ feet.</td><td>Install alongside existing electric pump now, before you need it</td></tr>'
+  + '<tr><td><strong>Rain barrel system (2 minimum)</strong></td><td>Passive water collection off any roof. A standard house generates 500+ gallons per inch of rain.</td><td>Food-grade barrels, first-flush diverter, screened top</td></tr>'
+  + '</table></div>';
+
+// Fire
+h += '<div class="kb"><h3>&#128293; Fire Tools</h3><table class="tbl">'
+  + '<tr><th>Tool</th><th>Notes</th></tr>'
+  + '<tr><td><strong>Ferro rods (6+)</strong></td><td>Each throws 12,000+ strikes. Completely waterproof, forever shelf life. Buy in bulk.</td></tr>'
+  + '<tr><td><strong>Lighters (50+)</strong></td><td>Cheapest Bic-style. Faster than ferro in non-emergency conditions. Rotate the stock.</td></tr>'
+  + '<tr><td><strong>Waterproof matches (500+)</strong></td><td>Storm matches as a third backup. Sealed dry, they last indefinitely.</td></tr>'
+  + '<tr><td><strong>Cast iron cookware set</strong></td><td>Dutch oven, skillet, griddle. Works over fire or coals forever. Passes to the next generation.</td></tr>'
+  + '<tr><td><strong>Rocket stove (metal)</strong></td><td>Burns tiny sticks with 90% less wood than open fire for the same cooking heat.</td></tr>'
+  + '</table></div>';
+
+// Comms
+h += '<div class="kb"><h3>&#128247; Communication &amp; Navigation</h3><table class="tbl">'
+  + '<tr><th>Tool</th><th>Why</th></tr>'
+  + '<tr><td><strong>HAM radio (Baofeng UV-5R)</strong></td><td>Two-way communication without any infrastructure. Get licensed now, the Technician test is 35 questions. Local repeaters extend range to 50+ miles.</td></tr>'
+  + '<tr><td><strong>Hand-crank NOAA weather radio</strong></td><td>Receive emergency broadcasts and weather alerts. Crank, solar, or battery. Critical for grid-down situational awareness.</td></tr>'
+  + '<tr><td><strong>Walkie-talkies, FRS/GMRS (set of 4)</strong></td><td>Local group communication. 1-5 mile range. No license needed for FRS channels.</td></tr>'
+  + '<tr><td><strong>Lensatic compass (tritium)</strong></td><td>Cammenga military-grade. Glows in the dark, works forever. Learn to use before you need it.</td></tr>'
+  + '<tr><td><strong>Paper topo maps (laminated)</strong></td><td>Your county and 4 surrounding counties. Cannot be hacked or run out of battery.</td></tr>'
+  + '</table></div>';
+
+// Forgotten items
+h += '<div class="kb"><h3>&#128270; What Most People Forget</h3><ul>'
+  + '<li><strong>Reading glasses (5+ pairs):</strong> If you wear them and cannot see without them, this is critical. Cheap insurance.</li>'
+  + '<li><strong>Sewing kit with heavy needles:</strong> Clothes fail under hard use. Leather needles for repairing boots and gear.</li>'
+  + '<li><strong>Work gloves (10+ pairs):</strong> Hands get destroyed by physical labor. Leather palm, heavy-duty. They wear out faster than you expect.</li>'
+  + '<li><strong>Heirloom seed bank:</strong> Non-hybrid seeds that produce seeds you can save and replant every year. One garden can feed you forever.</li>'
+  + '<li><strong>Hand grain mill:</strong> Country Living or Diamant style. Grinds corn, wheat, and acorns to flour. Hand-powered, lasts generations.</li>'
+  + '<li><strong>Canning supplies (jars, lids, pressure canner):</strong> Preserving meat and vegetables without refrigeration. Learn pressure canning especially.</li>'
+  + '<li><strong>Fermentation crocks (4+):</strong> Sauerkraut, kimchi, pickles, vinegar. Preserves food with zero heat or electricity and adds critical gut bacteria.</li>'
+  + '<li><strong>Bicycle with spare tubes and patch kit:</strong> Transportation that needs no fuel. A cargo bike replaces a truck for many short-haul tasks.</li>'
+  + '<li><strong>Bartering goods:</strong> Salt, coffee, alcohol, tobacco, ammunition become currency. Stock extras of whatever your community will want.</li>'
+  + '<li><strong>Entertainment:</strong> Cards, dice, books, board games. Morale collapses without any distraction during extended high-stress events.</li>'
+  + '</ul></div>'
+  + '<div class="tip"><strong>Priority order:</strong> Water tools first. Cutting tools second. Fire tools third. Medical fourth. Everything else follows. Buy nothing you have not practiced with at least once before storing it.</div>';
+return h;
+};
+
+
+PAGES.security = function(r,m){return `<div class="ph"><span class="pi">&#128270;</span><h2>Security &amp; Alert Systems</h2><p class="sub">Perimeter warning, deterrents, and situational awareness.</p></div><div class="kb"><h3>&#128270; Primitive Perimeter Systems</h3><ul><li><strong>Tripwire &amp; cans:</strong> Monofilament at ankle height tied to cans with pebbles. Invisible at night.</li><li><strong>Gravel paths:</strong> Loose gravel around sleeping areas — footsteps unmistakable.</li><li><strong>Dogs:</strong> Most effective alarm. Detects threats far earlier than any mechanical system.</li><li><strong>Clear sight lines:</strong> Remove brush within 30-50 feet. Anyone approaching must cross open ground.</li></ul></div><div class="kb"><h3>&#128065; Awareness Principles</h3><ul><li><strong>Watch wildlife:</strong> Deer and birds alarm before humans hear anything.</li><li><strong>Fire management:</strong> Fire visible for miles. Dakota holes (underground fire) for concealed cooking.</li><li><strong>Vary routines:</strong> Predictable behavior is exploitable.</li></ul></div>`;};
+
+PAGES.livestock = function(r,m){return `<div class="ph"><span class="pi">&#128023;</span><h2>Livestock &amp; Homestead Animals</h2><p class="sub">Chickens, rabbits, goats, cattle, pigs — keeping them alive and productive.</p></div><div class="kb"><h3>&#128020; Chickens</h3><ul><li><strong>Best breeds:</strong> Rhode Island Red, Plymouth Rock, Australorp. Lay well and produce good meat.</li><li><strong>Free-range cuts feed costs 30-50%.</strong> Supplement with kitchen scraps and insects.</li><li><strong>Diseases to watch:</strong> Respiratory (rattling breathing), coccidiosis (bloody droppings), mites (pale comb).</li></ul></div><div class="kb"><h3>&#128007; Rabbits</h3><ul><li><strong>Best meat-to-feed ratio</strong> of any animal. Ready at 8-10 weeks. Silent. Small footprint.</li><li><strong>Heat kills:</strong> Die rapidly above 85F. Frozen water bottles and shade in summer.</li></ul></div><div class="kb"><h3>&#128016; Goats</h3><ul><li><strong>Milk breeds:</strong> Nigerian Dwarf, LaMancha, Nubian — 1-3 quarts per day.</li><li><strong>Parasites are the #1 killer.</strong> FAMACHA score monthly. Rotate pastures every 21 days.</li></ul></div>`;};
+
+PAGES.butchering = function(r,m){return `<div class="ph"><span class="pi">&#129482;</span><h2>Hunting, Skinning &amp; Butchering</h2><p class="sub">From the field to the table. Nothing wasted.</p></div><div class="kb"><h3>&#129482; Field Dressing Deer</h3><ol><li>Roll deer on back. Shallow cut sternum to tail — two fingers tent skin away from organs.</li><li>Sever the diaphragm separating chest from abdomen.</li><li>Grip windpipe, pull all organs out in one motion.</li><li>Sever rectum, tie off. Prop cavity open with stick to cool.</li></ol><div class="warn"><strong>Temperature:</strong> Meat must cool below 40F within 4 hours. In warm weather quarter immediately.</div></div><div class="kb"><h3>&#128007; Small Game</h3><ol><li>Pinch skin on back, make 2-inch cut through skin only.</li><li>Pull in opposite directions — skin tears clean both ways.</li><li>Pull skin off like a sock. Remove head and feet at joints.</li></ol></div><div class="kb"><h3>&#127993; Preserving</h3><ul><li><strong>Smoking:</strong> Salt 24 hours, smoke over hardwood 6-12 hours at 150-175F. Lasts months.</li><li><strong>Rendering fat:</strong> Slow-heat with water. Pour off clean tallow for cooking, candles, waterproofing.</li></ul></div>`;};
+
+PAGES.crafts = function(r,m){return `<div class="ph"><span class="pi">&#129534;</span><h2>Homestead Crafts</h2><p class="sub">Soap, butter, candles — making essentials from what you have.</p></div><div class="kb"><h3>&#129534; Soap from Wood Ash Lye</h3><ol><li>Pack hardwood ash in bucket with holes. Pour rainwater through — collect the drip (lye water).</li><li>Test: fresh egg floats at surface = correct strength.</li><li>Melt animal fat. Heat lye to same temperature. Slowly pour lye into fat — never reverse.</li><li>Stir until mixture traces (leaves trail). Pour into molds. Cure 4-6 weeks.</li></ol></div><div class="kb"><h3>&#129370; Butter</h3><ol><li>Skim cream from whole milk after 12-24 hours rest.</li><li>Fill jar half full, seal tight. Shake vigorously 10-20 minutes.</li><li>When butter granules appear, drain buttermilk. Knead in cold water until clear. Salt and store.</li></ol></div>`;};
+
+
+
+PAGES.fishing = function(r,m){
+  var fd = (FISH_DATA[r]||FISH_DATA.midwest);
+  var monthData = fd[m]||[];
+  var rows = monthData.map(function(f){
+    var c = f.active==='high'?'#5a9a5a':f.active==='low'?'#9a7a5a':'#8a8a5a';
+    return '<tr><td><strong>'+(f.sp||f.name||'')+'</strong></td><td style="color:'+c+'">'+(f.active||'—').toUpperCase()+'</td><td>'+(f.method||'—')+'</td><td>'+(f.bait||'—')+'</td><td>'+(f.notes||'—')+'</td></tr>';
+  }).join('');
+  return '<div class="ph"><span class="pi">&#127907;</span><h2>Wilderness Fishing</h2><p class="sub">Water concentrates food. With minimal gear, fishing is your most consistent protein source.</p></div>'
+    +'<div class="rn">&#127758; Showing fish for <strong>'+RN[r]+'</strong> in <strong>'+MN[m]+'</strong>. Change region or month above to update.</div>'
+    +(monthData.length>0
+      ?'<div class="kb"><h3>&#127907; Active Fish — '+MN[m]+', '+RN[r]+'</h3><table class="tbl"><tr><th>Fish</th><th>Activity</th><th>Method</th><th>Bait</th><th>Notes</th></tr>'+rows+'</table></div>'
+      :'<div class="warn">No fishing data for this region/month combination. Try adjusting your region or month.</div>'
+    )
+    +'<div class="kb"><h3>&#129693; Improvised Hooks &amp; Gear</h3><ul>'
+    +'<li><strong>Gorge hook:</strong> Carve hardwood or bone 1-2 inches, sharp both ends, notched center for line. When swallowed and line pulled, it lodges crosswise.</li>'
+    +'<li><strong>Bent metal:</strong> Any stiff wire, safety pin, or thorn works. Fish in still water will take almost any hook when hungry.</li>'
+    +'<li><strong>Trotline:</strong> String with multiple hooks at different depths across a creek. Works passively overnight.</li>'
+    +'<li><strong>Fish weir:</strong> Stack rocks/sticks in a narrowing funnel. Fish follow current in and cannot find the exit.</li>'
+    +'<li><strong>Line:</strong> Paracord inner strand, thread from clothing, or twisted plant fiber all work.</li>'
+    +'</ul></div>'
+    +'<div class="kb"><h3>&#127754; Where to Fish</h3><ul>'
+    +'<li><strong>Structure:</strong> Fish hold near fallen logs, rock edges, depth changes, and river bends.</li>'
+    +'<li><strong>Seams:</strong> Where fast water meets slow water. Baitfish concentrate there, predators follow.</li>'
+    +'<li><strong>Dawn and dusk:</strong> Most fish feed actively when light is low.</li>'
+    +'<li><strong>Deep pools in cold, shallows in heat:</strong> Fish seek comfortable water temperature.</li>'
+    +'</ul></div>';
+};
+
+PAGES.trees = function(r,m){
+  var TD = {
+    pacific:[
+      {n:'Douglas Fir',id:'Soft needles, cones with 3-pronged bracts sticking out',u:'Excellent firewood, resin for fire-starting and wound sealing, bark for shelter',e:'Young spring tips for vitamin C tea, inner bark in emergency'},
+      {n:'Western Red Cedar',id:'Scale-like leaves, stringy fibrous red-brown bark, flattened sprays',u:'Inner bark strips into strong cordage; best natural fire board; shelter material',e:'Inner bark in emergency (bland), berries for birds only'},
+      {n:'Bigleaf Maple',id:'Very large 5-lobed leaves (up to 12 inches), paired winged seeds',u:'Good firewood, sap for syrup in early spring',e:'Sap (Feb-Mar), young flower clusters, seeds'},
+      {n:'Pacific Madrone',id:'Smooth red-orange peeling bark, leathery evergreen oval leaves',u:'Extremely dense firewood (burns very hot), hard wood for tools',e:'Red berries in fall — edible but bland'},
+      {n:'Oregon White Oak',id:'Deeply lobed leaves with rounded tips, acorns with shallow saucer caps',u:'Superior firewood, acorn flour after leaching, bark for tannin',e:'Acorns — lowest tannin of oaks, leach in water, dry and grind to flour'}
+    ],
+    mountain:[
+      {n:'Ponderosa Pine',id:'Long needles in 3s, vanilla-scented bark plates on mature trees',u:'Resin for fire-starting, fatwood burns in any weather, bark strips for shelter',e:'Inner bark in spring, pine nuts (harvest fall), needles for vitamin C tea'},
+      {n:'Quaking Aspen',id:'Round leaves that tremble in slightest breeze, chalky white bark with dark scars',u:'Quick-burning firewood, bark for cordage, straight poles for shelter',e:'Inner bark (bitter emergency food), catkins in spring'},
+      {n:'Engelmann Spruce',id:'Sharp blue-green 4-sided needles, small egg-shaped cones, high elevation',u:'Shelter construction timber, spruce gum seals wounds and waterproofs leather',e:'Young tips in spring (vitamin C), inner bark, gum edible'},
+      {n:'Lodgepole Pine',id:'Needles in 2s, small cones with sharp prickle, often dense uniform stands',u:'Straight poles perfect for shelter, fatwood for fire in wet conditions',e:'Inner bark, small pine nuts, needles for tea'},
+      {n:'Subalpine Fir',id:'Flat needles with rounded tips, erect purple cones that disintegrate on tree',u:'Best bough insulation for ground beds, shelter poles',e:'Inner bark, young needles brewed as tea'}
+    ],
+    southwest:[
+      {n:'Pinyon Pine',id:'Short needles in 2s or 3s, small round cones with large seeds',u:'Dense resinous firewood, resin for adhesive and waterproofing',e:'Pinyon nuts — highest calorie density of any wild food, harvest Sept-Oct. Critical survival food.'},
+      {n:'One-Seed Juniper',id:'Scale-like bluish-green leaves, round blue-gray berries, shreddy bark',u:'Very dense hot firewood, shredded bark as tinder bundle, berries for flavoring',e:'Berries edible (piney, use sparingly), inner bark in emergency'},
+      {n:'Velvet Mesquite',id:'Compound tiny leaflets, long tan seed pods, thorny branches',u:'Extremely hard dense firewood, straight poles, shade in desert',e:'Ripe dried pods ground into sweet nutritious meal — critical survival food in Sonoran desert'},
+      {n:'Desert Willow',id:'Long narrow leaves, orchid-like pink flowers, always near washes and water',u:'Indicator of subsurface water — follow washes to find it, flexible branches for weaving',e:'Flowers edible, young seeds edible, bark tea'},
+      {n:'Cottonwood',id:'Triangular leaves, cottony seeds in late spring, always near water',u:'Best friction fire board (soft dry wood), quick poles',e:'Inner bark in emergency, catkins in spring'}
+    ],
+    midwest:[
+      {n:'White Oak',id:'Rounded leaf lobes (no bristle tips), gray scaly bark, acorns in one season',u:'Superior firewood (highest BTU of eastern hardwoods), acorn flour, bark for tannin',e:'Acorns — lowest tannin oak, leach in multiple water changes, dry and grind'},
+      {n:'Sugar Maple',id:'5-lobed leaves, opposite branching, gray furrowed bark, brilliant fall color',u:'Best firewood of deciduous trees, sap for syrup and sugar (40:1 ratio)',e:'Sap Feb-Mar, inner bark, seeds boiled or roasted'},
+      {n:'American Basswood',id:'Heart-shaped large leaves, extremely fibrous inner bark, fragrant summer flowers',u:'BEST natural cordage — inner bark peels into strong fiber strips for rope',e:'Young leaves edible raw, flowers make pleasant tea, small nutlets'},
+      {n:'Black Walnut',id:'Compound leaves 15-23 leaflets, round green husked fruit, very dark ridged bark',u:'Hardest eastern wood for tools, husks for dye and natural insect repellent',e:'Walnuts — high calorie, harvest after first frost in Oct-Nov'},
+      {n:'Shagbark Hickory',id:'Very shaggy peeling bark strips, compound leaves, round thick-husked nuts',u:'Best firewood after oak (extremely dense), excellent tool handles — flexible and tough',e:'Hickory nuts — rich, calorie-dense, harvest Oct-Nov'}
+    ],
+    southeast:[
+      {n:'Longleaf Pine',id:'Needles 10-18 inches in 3s, very large cones, open parklike stands',u:'Fatwood (resin-saturated heartwood) = best natural fire-starter available. Burns even when wet. Tar for waterproofing.',e:'Inner bark, needles for vitamin C tea, pine nuts'},
+      {n:'Live Oak',id:'Small oval evergreen leaves (does not fully drop), massive spreading crown',u:'Incredibly hard dense wood for tools, weapons, and structural use',e:'Acorns — moderate tannin, leach and grind to nutritious flour'},
+      {n:'Cabbage Palm',id:'Fan-shaped leaves, rough fibrous trunk, state tree of Florida and SC',u:'Leaves for thatch, baskets, and cordage; fronds for shelter',e:'Heart of palm (terminal bud) — edible and nutritious, but harvesting kills the tree'},
+      {n:'Sweetgum',id:'Star-shaped 5-lobed leaves (like a maple star), spiky ball fruits',u:'Dried sap (storax) is an antiseptic wound sealant — one of the best natural ones',e:'Dried resin edible in small amounts, seeds edible'},
+      {n:'Saw Palmetto',id:'Fan-shaped spiny-stemmed leaves, grows in dense thickets, low shrub',u:'Thatch and cordage, berry clusters as landmark for water proximity',e:'Berries edible (strong flavor), heart of palm edible'}
+    ],
+    northeast:[
+      {n:'Paper Birch',id:'Brilliant white peeling papery bark, triangular toothed leaves',u:'Bark fires even when wet (oils resist moisture) — best northeast tinder. Canoe building.',e:'Inner bark nutritious in spring, sap (weaker than maple), catkins'},
+      {n:'Yellow Birch',id:'Yellowish-bronze peeling bark, wintergreen smell when twig scratched',u:'Excellent firewood, bark as tinder, sap in spring',e:'Inner bark, birch twig tea (natural salicin — pain relief), young leaves'},
+      {n:'Sugar Maple',id:'5-lobed leaves, gray furrowed bark, opposite branching',u:'Best firewood of northeast hardwoods, prime sap source',e:'Sap Feb-Mar (40:1 for syrup), inner bark, seeds'},
+      {n:'Eastern Hemlock',id:'Small flat needles with white stripes underneath, tiny cones, drooping top',u:'Bough insulation for ground beds (best northeastern insulating material), bark tannin',e:'Young tips for vitamin C tea — NOT poison hemlock (different plant entirely)'},
+      {n:'White Ash',id:'Compound opposite leaves, diamond-furrowed bark, canoe-paddle seeds',u:'Best wood for tool handles and weapons — tough, flexible, shock-resistant',e:'Inner bark in emergency, seeds edible'}
+    ],
+    midatlantic:[
+      {n:'White Oak',id:'Rounded leaf lobes, gray furrowed bark',u:'Superior firewood, acorn flour (lowest tannin oak), hide tanning',e:'Acorns — leach and grind to flour, important calorie source'},
+      {n:'Pawpaw',id:'Large tropical-looking leaves (12 inches), green kidney-shaped fruit clusters',u:'Bark fiber strips into strong cordage',e:'Fruit — largest native North American fruit, ripe in September, sweet and nutritious'},
+      {n:'Tulip Poplar',id:'Unique tulip-shaped 4-lobed leaves, straight tall trunk, greenish-yellow flowers',u:'Straight lightweight poles for shelter construction',e:'Inner bark, flower nectar, seeds'},
+      {n:'Black Locust',id:'Compound leaves, deeply furrowed dark bark, fragrant white flower clusters',u:'Hardest most rot-resistant eastern wood — fence posts last 50+ years untreated',e:'Flowers edible raw or fried (sweet and fragrant). Seeds and bark toxic — flowers only.'},
+      {n:'Spicebush',id:'Small shrub/tree, spicy aromatic crushed leaves, bright red berries',u:'Berries as allspice substitute, aromatic bark deters insects, easy fire-starter',e:'Dried berries as spice, leaves for tea, young twigs for flavoring meat'}
+    ],
+    texas:[
+      {n:'Mesquite',id:'Compound tiny leaflets, long tan seed pods, thorny, drought-tolerant',u:'Best firewood in arid Texas (very hot and long-burning), shelter poles',e:'Dried pods ground to sweet nutritious meal — historically critical survival food. High protein and sugar.'},
+      {n:'Post Oak',id:'Distinctive cross-shaped 5-lobed leaves, rough gray bark, small acorns',u:'Dense firewood, acorn flour',e:'Acorns — moderate leaching needed, good flour'},
+      {n:'Texas Live Oak',id:'Small oval evergreen leaves, low twisted gnarled form, natural windbreak',u:'Dense firewood, natural shelter from wind and heat in open country',e:'Acorns — moderate tannin, process into flour'},
+      {n:'Pecan',id:'Compound leaves with 9-17 leaflets, distinctive ribbed nuts, tall stately tree',u:'Excellent firewood and smoking wood',e:'Pecans — very high calorie nut, harvest October-November'},
+      {n:'Bald Cypress',id:'Feathery deciduous needles, knobby root knees rising from water, near rivers',u:'Extremely rot-resistant wood for water containers and structures',e:'Inner bark in emergency, seeds edible'}
+    ],
+    alaska:[
+      {n:'White Spruce',id:'Short blue-green needles, small cylindrical cones, common boreal tree',u:'Main shelter tree of boreal Alaska, spruce gum seals and waterproofs, excellent firewood that splits easily when frozen',e:'Young tips very high in vitamin C (prevents scurvy), inner bark, gum edible'},
+      {n:'Paper Birch',id:'White papery peeling bark, triangular toothed leaves, often multi-stemmed',u:'Bark fires in any weather condition (waterproof oils), inner bark for emergency food',e:'Inner bark nutritious in spring (peel thin white layers), sap, catkins'},
+      {n:'Balsam Poplar',id:'Triangular leaves, very fragrant sticky buds in spring, smooth gray bark',u:'Quick-burning firewood for fast heat, straight poles, buds for antiseptic salve',e:'Buds and inner bark in spring, catkins'},
+      {n:'Alder',id:'Oval toothed leaves, small woody cone-like catkins persist on branches, grows near water',u:'Best smoking wood for fish and meat — traditional Alaskan smoke-preservation wood',e:'Inner bark, catkins in spring, nitrogen-fixer (indicates fertile soil for plants)'},
+      {n:'Willow (various)',id:'Long narrow leaves, flexible branches, catkins, always near water',u:'Basket weaving and lashing cordage, natural aspirin from bark',e:'Inner bark nutritious in spring, catkins edible, young leaves, bark tea for pain relief'}
+    ],
+    hawaii:[
+      {n:'Kukui (Candlenut)',id:'Large light-green maple-like leaves, whitish coating underneath, round nuts',u:'Nut oil burned as candles and lamps for centuries, oil for cooking and skin',e:'Roasted nuts edible (raw are strongly laxative), oil for cooking'},
+      {n:'Hala (Pandanus)',id:'Long spiky spiraling leaves, pineapple-like orange fruit, aerial prop roots',u:'Leaves woven into mats, baskets, cordage, and thatch — essential traditional material',e:'Ripe fruit sections edible (scrape flesh from segments), seeds edible roasted'},
+      {n:'Guava',id:'Smooth pinkish peeling bark, oval leaves with prominent veins, yellow-green fruit',u:'Hard wood for tools, abundant fruit in any season',e:'Fruit extremely high in vitamin C — ripe when yellow and fragrant, eat raw or cook'},
+      {n:'Coconut Palm',id:'Classic tall feathered palm, large green-brown nuts, found near coast',u:'Fronds for thatch and weaving, shell for containers, fiber for cordage',e:'Young coconut water for hydration, meat for calories and fat, sprouted nut edible'},
+      {n:'Ohia Lehua',id:'Small leathery oval leaves, brilliant red pompom flowers, lava fields and forest',u:'Hardest Hawaiian wood — tools, weapons, digging sticks',e:'Flowers edible raw, honey from flowers is traditional Hawaiian food'}
+    ]
+  };
+
+  var trees = TD[r]||TD.midwest;
+  var rows = trees.map(function(t){
+    return '<tr><td><strong>'+t.n+'</strong></td><td>'+t.id+'</td><td>'+t.u+'</td><td>'+t.e+'</td></tr>';
+  }).join('');
+
+  return '<div class="ph"><span class="pi">&#127795;</span><h2>Trees by Region</h2>'
+    +'<p class="sub">Identification, survival uses, and edible parts for your region.</p></div>'
+    +'<div class="rn">&#127758; Showing trees for <strong>'+RN[r]+'</strong>. Change region selector above to update.</div>'
+    +'<div class="kb"><h3>&#127795; Key Trees — '+RN[r]+'</h3>'
+    +'<table class="tbl"><tr><th>Tree</th><th>How to Identify</th><th>Survival Uses</th><th>Edible Parts</th></tr>'
+    +rows
+    +'</table></div>'
+    +'<div class="tip"><strong>Safety rule:</strong> Never eat any plant product without 100% ID confirmation using at least 3 separate features. Some edible trees have toxic lookalikes.</div>';
+};
+
+PAGES.naturaltp = function(r,m){return `<div class="ph"><span class="pi">&#127807;</span><h2>Natural Hygiene Plants</h2><p class="sub">Plants that clean, heal, and maintain hygiene without modern products.</p></div><div class="kb"><h3>&#129494; Natural Toothbrushes</h3><ul><li><strong>Willow or birch twig:</strong> Chew end until fibrous. Willow contains natural salicin (antiseptic).</li><li><strong>Charcoal powder:</strong> Grind hardwood charcoal fine. Kills bacteria and removes stains.</li><li><strong>Salt water rinse:</strong> 1 tsp salt in 8oz water kills oral bacteria.</li></ul></div><div class="kb"><h3>&#127798; Natural Soap Alternatives</h3><ul><li><strong>Yucca root:</strong> Crush and add water — rich lather. Found across Southwest and Plains.</li><li><strong>Soapwort:</strong> Crush leaves in water. Gentle lather good for skin and hair.</li><li><strong>Wood ash wash:</strong> Mix with water for lye wash. Cuts grease, kills bacteria.</li></ul></div><div class="kb"><h3>&#127774; Insect Repellents</h3><ul><li><strong>Yarrow:</strong> Crush leaves, rub on skin. Effective against mosquitoes.</li><li><strong>Black walnut husks:</strong> Rub on skin. Repels insects and is antifungal.</li><li><strong>Smoke:</strong> Oldest repellent. Sleep near a low smoky fire in bug season.</li></ul></div>`;};
+
+PAGES.animalhealth = function(r,m){
+  var season=[12,1,2].includes(m)?'winter':[3,4,5].includes(m)?'spring':[6,7,8].includes(m)?'summer':'fall';
+  var sName=season.charAt(0).toUpperCase()+season.slice(1);
+  var tasks={
+    winter:{Chickens:['Check combs for frostbite — apply tallow','Fresh water 3x daily — freezes quickly','Extra protein in cold — sunflower seeds, mealworms','Ventilate coop without drafts — moisture causes disease, not cold'],Rabbits:['Protect from wind and wet — handle cold well if dry','Check water 3x daily — freezes quickly','Increase hay — gut needs fiber to keep moving in cold'],Goats:['Provide 2x summer hay amount in cold','Check hooves — hoof rot in winter mud','Supplement selenium if not on mineral block','Pregnant does: increase grain last 6 weeks before kidding']},
+    spring:{Chickens:['Deep clean coop — all bedding out, scrub, dry','Deworm naturally with pumpkin seeds ground into feed','Parasite eggs hatch in warmth — treat proactively'],Rabbits:['Breeding season — check weight before breeding','Coccidiosis risk rises with warmth and wet','Transition to fresh grass slowly — sudden green grass causes stasis'],Goats:['Hoof trim — growth accelerates','FAMACHA scoring if animals look pale or weak','Kidding season — clean pen, iodine for umbilical cord at birth']},
+    summer:{Chickens:['Heat kills faster than cold — shade and airflow critical','Frozen watermelon treats and cool water help','Reduce scratch grains — they generate body heat'],Rabbits:['Dies above 85F — frozen water bottles in cages essential','Move to shadiest spot available','Suspend breeding — kits cannot handle heat'],Goats:['FAMACHA scoring monthly — peak parasite season','Check milk before every milking — mastitis watch','Isolate any animal with runny eye — pinkeye spreads by flies']},
+    fall:{Chickens:['Molt begins — reduced eggs is normal, increase protein','Pre-winter repairs and weatherproofing','Treat for mites and lice now — easier before cold'],Rabbits:['Breed now for winter meat','Block north and west wind from hutch','Stock extra hay before winter'],Goats:['Breeding season — bucks are aggressive','Does cycle every 21 days','CD&T vaccination booster before breeding']}
+  };
+  var st=tasks[season]||tasks.winter;
+  return `<div class="ph"><span class="pi">&#128197;</span><h2>Livestock Health Calendar</h2><p class="sub">${MN[m]} — ${sName} health protocols for your animals.</p></div><div class="rn">&#127758; <strong>${sName.toUpperCase()}</strong> tasks for <strong>${MN[m]}</strong>. Change month above to update.</div>${Object.entries(st).map(([animal,tl])=>'<div class="kb"><h3>'+animal+' — '+sName+'</h3><ul>'+tl.map(t=>'<li>'+t+'</li>').join('')+'</ul></div>').join('')}`;};
+
+
+
+
+
+
+
+
+
+
+
+
+function doSearch(q){
+  q=q.trim().toLowerCase();
+  if(!q) return;
+  var results=[];
+  var pn={water:'Water',fire:'Fire',shelter:'Shelter',mindset:'Mindset',foraging:'Foraging',trapping:'Trapping',fishing:'Fishing',planting:'Planting',compost:'Compost',stars:'Stars & Sky',mapcompass:'Map & Compass',terrain:'Terrain',tracks:'Animal Tracks',leafid:'Leaf & Tree ID',snakes:'Snakes',predators:'Predators',bugs:'Bugs',sanitation:'Sanitation',medicine:'Natural Medicine',firstaid:'First Aid',urban:'Urban Survival',tools:'Tools & Gear',security:'Security',livestock:'Livestock',animalhealth:'Animal Health',butchering:'Butchering',crafts:'Crafts',naturaltp:'Natural Hygiene',trees:'Trees'};
+  Object.keys(pn).forEach(function(k){
+    try{var c=PAGES[k](R(),M()),plain=c.replace(/<[^>]+>/g,'').toLowerCase();
+    if(plain.indexOf(q)!==-1){var i=plain.indexOf(q),s=plain.substring(Math.max(0,i-50),i+90).replace(/[ \t\n]+/g,' ').trim();results.push({page:k,name:pn[k],snippet:s});}}catch(e){}
+  });
+  var out='<div class="ph"><span class="pi">&#128269;</span><h2>Search Results</h2><p class="sub">'+results.length+' result'+(results.length!==1?'s':'')+' for &ldquo;'+q+'&rdquo;</p></div>';
+  if(!results.length){out+='<div class="warn">No results for &ldquo;'+q+'&rdquo;. Try different keywords.</div>';}
+  else{out+='<div style="display:flex;flex-direction:column;gap:10px">';results.forEach(function(r){out+='<div onclick="go(\''+r.page+'\')" style="background:#1e1710;border:1px solid rgba(184,146,42,.2);border-radius:4px;padding:14px 18px;cursor:pointer" onmouseover="this.style.borderColor=\'rgba(184,146,42,.5)\'" onmouseout="this.style.borderColor=\'rgba(184,146,42,.2)\'">'+'<div style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold);margin-bottom:5px">&#9654; '+r.name+'</div>'+'<div style="font-size:.82rem;color:rgba(242,232,213,.65);line-height:1.6">&hellip;'+r.snippet+'&hellip;</div></div>';});out+='</div>';}
+  _currentPage=null;document.getElementById('navgrid').style.display='none';
+  document.getElementById('content').innerHTML=out;
+  document.getElementById('content').classList.add('show');
+  document.getElementById('backbar').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function printPage(){
+  var c=document.getElementById('content');
+  if(!c||!c.innerHTML.trim()) return;
+  var w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><title>Pioneer Cache</title><style>body{font-family:Georgia,serif;font-size:13px;color:#111;padding:20px;max-width:800px;margin:0 auto}h2,h3{color:#333}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:#eee;padding:7px;text-align:left;border:1px solid #ccc}td{padding:7px;border:1px solid #ddd}ul,ol{padding-left:20px}li{margin-bottom:4px}.warn{background:#fff3f0;padding:8px;border-left:3px solid #c44;margin:10px 0}.tip{background:#fffbe0;padding:8px;border-left:3px solid #884;margin:10px 0}@media print{button{display:none}}</style></head><body><div style="text-align:center;margin-bottom:20px;border-bottom:2px solid #333;padding-bottom:12px"><h1 style="margin:0">THE PIONEER CACHE</h1></div>'+c.innerHTML+'</body></html>');
+  w.document.close();setTimeout(function(){w.print();},400);
+}
 
 </script>
 </body>
