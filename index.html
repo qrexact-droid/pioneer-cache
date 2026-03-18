@@ -234,6 +234,8 @@ select:focus{border-color:var(--gold)}
 
 
 
+
+
 const MN=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const RN={pacific:'Pacific Coast',southwest:'Southwest Desert',mountain:'Mountain West',midwest:'Midwest/Plains',southeast:'Southeast',northeast:'Northeast',midatlantic:'Mid-Atlantic',texas:'Texas/Gulf',alaska:'Alaska',hawaii:'Hawaii'};
 
@@ -2058,6 +2060,122 @@ function showHome(){
 
 
 // Map state functions — defined at top level so always available
+
+// ================================================================
+// MAP SETUP SYSTEM — First-run download screen + progress tracking
+// ================================================================
+
+// Track which states have been cached
+window.MAP_CACHE_STATUS = {};
+
+// Check localStorage for previously cached states
+(function(){
+  try {
+    var stored = localStorage.getItem('pioneer_map_cache');
+    if(stored) window.MAP_CACHE_STATUS = JSON.parse(stored);
+  } catch(e) {}
+})();
+
+function saveMapCacheStatus(){
+  try {
+    localStorage.setItem('pioneer_map_cache', JSON.stringify(window.MAP_CACHE_STATUS));
+  } catch(e){}
+}
+
+function getCachedCount(){
+  return Object.values(window.MAP_CACHE_STATUS).filter(function(v){ return v; }).length;
+}
+
+// State center data for map positioning
+var MAP_CENTERS = {
+  AL:{lat:32.8,lng:-86.8,z:7},AK:{lat:64.2,lng:-153.0,z:4},AZ:{lat:34.3,lng:-111.1,z:7},
+  AR:{lat:34.8,lng:-92.2,z:7},CA:{lat:36.8,lng:-119.4,z:6},CO:{lat:39.0,lng:-105.5,z:7},
+  CT:{lat:41.6,lng:-72.7,z:9},DE:{lat:39.0,lng:-75.5,z:9},FL:{lat:28.5,lng:-82.0,z:7},
+  GA:{lat:32.7,lng:-83.4,z:7},HI:{lat:20.5,lng:-157.0,z:7},ID:{lat:44.3,lng:-114.5,z:6},
+  IL:{lat:40.0,lng:-89.2,z:7},IN:{lat:39.9,lng:-86.3,z:7},IA:{lat:42.1,lng:-93.5,z:7},
+  KS:{lat:38.5,lng:-98.4,z:7},KY:{lat:37.5,lng:-85.3,z:7},LA:{lat:31.0,lng:-91.8,z:7},
+  ME:{lat:45.4,lng:-69.2,z:7},MD:{lat:39.0,lng:-76.8,z:8},MA:{lat:42.3,lng:-71.8,z:8},
+  MI:{lat:44.5,lng:-85.0,z:7},MN:{lat:46.4,lng:-94.0,z:7},MS:{lat:32.7,lng:-89.7,z:7},
+  MO:{lat:38.5,lng:-92.5,z:7},MT:{lat:47.0,lng:-109.5,z:6},NE:{lat:41.5,lng:-99.8,z:7},
+  NV:{lat:39.5,lng:-116.5,z:7},NH:{lat:43.7,lng:-71.6,z:8},NJ:{lat:40.1,lng:-74.5,z:8},
+  NM:{lat:34.5,lng:-106.0,z:7},NY:{lat:43.0,lng:-75.0,z:7},NC:{lat:35.6,lng:-79.4,z:7},
+  ND:{lat:47.5,lng:-100.5,z:7},OH:{lat:40.4,lng:-82.8,z:7},OK:{lat:35.5,lng:-97.5,z:7},
+  OR:{lat:44.0,lng:-120.5,z:7},PA:{lat:41.0,lng:-77.5,z:7},RI:{lat:41.7,lng:-71.5,z:10},
+  SC:{lat:33.8,lng:-80.9,z:8},SD:{lat:44.0,lng:-100.2,z:7},TN:{lat:35.9,lng:-86.4,z:7},
+  TX:{lat:31.5,lng:-99.3,z:6},UT:{lat:39.5,lng:-111.1,z:7},VT:{lat:44.1,lng:-72.7,z:8},
+  VA:{lat:37.5,lng:-79.0,z:7},WA:{lat:47.4,lng:-120.5,z:7},WV:{lat:38.7,lng:-80.6,z:8},
+  WI:{lat:44.5,lng:-89.5,z:7},WY:{lat:43.0,lng:-107.5,z:7},DC:{lat:38.9,lng:-77.0,z:12}
+};
+
+// ── LEAFLET MAP INIT ──
+window._leafletMap = null;
+
+window.initLeafletMap = function(){
+  var container = document.getElementById('leaflet-map');
+  if(!container) return;
+  var msg = document.getElementById('map-offline-msg');
+
+  if(typeof L === 'undefined'){
+    if(msg){ msg.style.display='flex'; }
+    return;
+  }
+
+  if(window._leafletMap){
+    try{ window._leafletMap.remove(); }catch(e){}
+    window._leafletMap = null;
+  }
+
+  var sel = window._selectedState;
+  var sm = MAP_CENTERS[sel] || {lat:39.5,lng:-98.3,z:5};
+  var view = window._mapView || 'map';
+
+  var tileUrl, attr;
+  if(view === 'terrain'){
+    tileUrl = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
+    attr = 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap';
+  } else if(view === 'satellite'){
+    tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+    attr = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP';
+  } else {
+    tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  }
+
+  try {
+    var map = L.map(container, { zoomControl:true, scrollWheelZoom:true })
+      .setView([sm.lat, sm.lng], sm.z);
+
+    var layer = L.tileLayer(tileUrl, { maxZoom:18, attribution:attr });
+
+    var tileErrors = 0;
+    layer.on('tileerror', function(){
+      tileErrors++;
+      if(tileErrors > 5 && msg) msg.style.display = 'flex';
+    });
+    layer.on('tileload', function(){
+      tileErrors = 0;
+      if(msg) msg.style.display = 'none';
+      // Mark this state as cached
+      if(sel && !window.MAP_CACHE_STATUS[sel]){
+        window.MAP_CACHE_STATUS[sel] = true;
+        saveMapCacheStatus();
+        // Update any cache counter on screen
+        var counter = document.getElementById('cache-count');
+        if(counter) counter.textContent = getCachedCount() + '/50';
+      }
+    });
+
+    layer.addTo(map);
+    window._leafletMap = map;
+    setTimeout(function(){ map.invalidateSize(); }, 150);
+
+  } catch(e){
+    console.error('Leaflet init error:', e);
+    if(msg) msg.style.display = 'flex';
+  }
+};
+
+// ── MAPVIEW PAGE ──
 window.mapSelectState = function(code){
   window._selectedState = code || null;
   window._mapView = code ? 'map' : 'grid';
@@ -2066,7 +2184,7 @@ window.mapSelectState = function(code){
   if(PAGES.mapview){
     document.getElementById('content').innerHTML = PAGES.mapview(R(), M());
     window.scrollTo({top:0, behavior:'smooth'});
-    if(code) setTimeout(initLeafletMap, 150);
+    if(code) setTimeout(window.initLeafletMap, 200);
   }
 };
 
@@ -2075,1136 +2193,33 @@ window.setMapView = function(v){
   if(PAGES.mapview){
     document.getElementById('content').innerHTML = PAGES.mapview(R(), M());
     window.scrollTo({top:0, behavior:'smooth'});
-    if(window._selectedState && v !== 'grid' && v !== 'geo') setTimeout(initLeafletMap, 150);
+    if(window._selectedState && v!=='grid' && v!=='geo' && v!=='setup'){
+      setTimeout(window.initLeafletMap, 200);
+    }
   }
 };
-
-window.selectState = function(code){
-  window.mapSelectState(code);
-};
-
-
-// Initialize Leaflet map after mapview renders
-function initLeafletMap(){
-  var container = document.getElementById('leaflet-map');
-  if(!container) return;
-  
-  // Destroy existing map instance
-  if(window._leafletMap){
-    try{ window._leafletMap.remove(); } catch(e){}
-    window._leafletMap = null;
-  }
-
-  var sm = (function(){
-    var sel = window._selectedState;
-    var STATE_MAP = {
-      AL:{lat:32.8,lng:-86.8,z:7}, AK:{lat:64.2,lng:-153.0,z:4}, AZ:{lat:34.3,lng:-111.1,z:7},
-      AR:{lat:34.8,lng:-92.2,z:7}, CA:{lat:36.8,lng:-119.4,z:6}, CO:{lat:39.0,lng:-105.5,z:7},
-      CT:{lat:41.6,lng:-72.7,z:9}, DE:{lat:39.0,lng:-75.5,z:9}, FL:{lat:28.5,lng:-82.0,z:7},
-      GA:{lat:32.7,lng:-83.4,z:7}, HI:{lat:20.5,lng:-157.0,z:7}, ID:{lat:44.3,lng:-114.5,z:6},
-      IL:{lat:40.0,lng:-89.2,z:7}, IN:{lat:39.9,lng:-86.3,z:7}, IA:{lat:42.1,lng:-93.5,z:7},
-      KS:{lat:38.5,lng:-98.4,z:7}, KY:{lat:37.5,lng:-85.3,z:7}, LA:{lat:31.0,lng:-91.8,z:7},
-      ME:{lat:45.4,lng:-69.2,z:7}, MD:{lat:39.0,lng:-76.8,z:8}, MA:{lat:42.3,lng:-71.8,z:8},
-      MI:{lat:44.5,lng:-85.0,z:7}, MN:{lat:46.4,lng:-94.0,z:7}, MS:{lat:32.7,lng:-89.7,z:7},
-      MO:{lat:38.5,lng:-92.5,z:7}, MT:{lat:47.0,lng:-109.5,z:6}, NE:{lat:41.5,lng:-99.8,z:7},
-      NV:{lat:39.5,lng:-116.5,z:7}, NH:{lat:43.7,lng:-71.6,z:8}, NJ:{lat:40.1,lng:-74.5,z:8},
-      NM:{lat:34.5,lng:-106.0,z:7}, NY:{lat:43.0,lng:-75.0,z:7}, NC:{lat:35.6,lng:-79.4,z:7},
-      ND:{lat:47.5,lng:-100.5,z:7}, OH:{lat:40.4,lng:-82.8,z:7}, OK:{lat:35.5,lng:-97.5,z:7},
-      OR:{lat:44.0,lng:-120.5,z:7}, PA:{lat:41.0,lng:-77.5,z:7}, RI:{lat:41.7,lng:-71.5,z:10},
-      SC:{lat:33.8,lng:-80.9,z:8}, SD:{lat:44.0,lng:-100.2,z:7}, TN:{lat:35.9,lng:-86.4,z:7},
-      TX:{lat:31.5,lng:-99.3,z:6}, UT:{lat:39.5,lng:-111.1,z:7}, VT:{lat:44.1,lng:-72.7,z:8},
-      VA:{lat:37.5,lng:-79.0,z:7}, WA:{lat:47.4,lng:-120.5,z:7}, WV:{lat:38.7,lng:-80.6,z:8},
-      WI:{lat:44.5,lng:-89.5,z:7}, WY:{lat:43.0,lng:-107.5,z:7}, DC:{lat:38.9,lng:-77.0,z:12}
-    };
-    return STATE_MAP[sel] || {lat:39.5,lng:-98.3,z:5};
-  })();
-
-  var view = window._mapView || 'map';
-  var tileUrl = view === 'terrain'
-    ? 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
-    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-  if(typeof L === 'undefined'){
-    var offlineMsg = document.getElementById('map-offline-msg');
-    if(offlineMsg) offlineMsg.style.display = 'flex';
-    return;
-  }
-
-  try{
-    var map = L.map('leaflet-map', {
-      zoomControl: true,
-      scrollWheelZoom: true,
-      attributionControl: true
-    }).setView([sm.lat, sm.lng], sm.z);
-
-    L.tileLayer(tileUrl, {
-      maxZoom: 18,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // On tile error, show offline message
-    map.on('tileerror', function(){
-      var offlineMsg = document.getElementById('map-offline-msg');
-      if(offlineMsg) offlineMsg.style.display = 'flex';
-    });
-
-    window._leafletMap = map;
-    
-    // Invalidate size after container fully renders
-    setTimeout(function(){ map.invalidateSize(); }, 100);
-  } catch(e){
-    console.error('Leaflet init error:', e);
-    var offlineMsg = document.getElementById('map-offline-msg');
-    if(offlineMsg) offlineMsg.style.display = 'flex';
-  }
-}
-
-function initMapControls(){
-  var dragging=false, lastX=0, lastY=0, scale=1, tx=0, ty=0;
-  var svg = document.getElementById('usmap');
-  var statesG = document.getElementById('states');
-
-  function applyTransform(){
-    if(statesG) statesG.setAttribute('transform','translate('+tx+','+ty+') scale('+scale+')');
-  }
-
-  window.mapZoom = function(factor){
-    scale = Math.min(12, Math.max(0.3, scale*factor));
-    applyTransform();
-  };
-  window.mapReset = function(){
-    scale=1; tx=0; ty=0; applyTransform();
-  };
-  window.mapDragStart = function(e){
-    dragging=true; lastX=e.clientX; lastY=e.clientY;
-    if(svg) svg.style.cursor='grabbing';
-  };
-  window.mapDragMove = function(e){
-    if(!dragging) return;
-    tx += (e.clientX-lastX)/scale;
-    ty += (e.clientY-lastY)/scale;
-    lastX=e.clientX; lastY=e.clientY;
-    applyTransform();
-  };
-  window.mapDragEnd = function(){
-    dragging=false;
-    if(svg) svg.style.cursor='grab';
-  };
-
-  // Event delegation — handle clicks on state paths via data-state attribute
-  if(svg){
-    svg.addEventListener('click', function(e){
-      var t = e.target;
-      // Walk up to find data-state
-      while(t && t !== svg){
-        if(t.getAttribute && t.getAttribute('data-state')){
-          window.mapSelectState(t.getAttribute('data-state'));
-          return;
-        }
-        t = t.parentNode;
-      }
-    });
-    // Hover effects via delegation
-    svg.addEventListener('mouseover', function(e){
-      var t = e.target;
-      if(t && t.classList && t.classList.contains('sp')){
-        t.style.filter='brightness(1.6)';
-        t.style.opacity='1';
-      }
-    });
-    svg.addEventListener('mouseout', function(e){
-      var t = e.target;
-      if(t && t.classList && t.classList.contains('sp')){
-        t.style.filter='';
-        // Restore opacity based on whether it\'s selected
-        var sel = window._selectedState;
-        var code = t.getAttribute('data-state');
-        t.style.opacity = (code===sel) ? '1' : (sel ? '0.35' : '0.9');
-      }
-    });
-  }
-}
-
-
-function getLandmarks(r){
-  var lm = {
-    pacific:[[37.8651,-119.5383,"Yosemite"],[36.4864,-118.5658,"Mt Whitney"],[44.4280,-110.5885,"Yellowstone"],[48.7596,-121.8090,"North Cascades"],[37.9061,-122.5455,"Mt Tamalpais"],[41.2132,-122.3117,"Mt Shasta"],[46.8523,-121.7603,"Mt Rainier"],[44.0521,-121.3153,"Bend OR"],[40.3400,-124.0023,"King Range CA"]],
-    southwest:[[36.1069,-112.1129,"Grand Canyon"],[33.4734,-112.0400,"Phoenix"],[32.2217,-110.9265,"Tucson"],[35.6870,-105.9378,"Santa Fe"],[36.8858,-111.5116,"Lake Powell"],[37.2982,-113.0263,"Zion Canyon"],[38.6830,-109.5441,"Canyonlands"],[36.4472,-116.8659,"Death Valley"],[35.0174,-111.0228,"Winslow AZ"]],
-    mountain:[[44.4280,-110.5885,"Yellowstone"],[43.7904,-110.6818,"Grand Teton"],[39.7392,-104.9903,"Denver"],[37.2753,-107.8801,"Mesa Verde"],[39.1911,-106.8175,"Aspen CO"],[47.9253,-113.9972,"Glacier NP"],[46.8652,-113.9857,"Missoula MT"],[44.0682,-114.7420,"Sawtooth ID"],[38.8339,-105.0424,"Pikes Peak"]],
-    midwest:[[47.9500,-90.9200,"Boundary Waters"],[43.9800,-89.9500,"Wisconsin Dells"],[46.7867,-90.8251,"Apostle Islands"],[41.8781,-87.6298,"Chicago"],[44.9778,-93.2650,"Minneapolis"],[38.6270,-90.1994,"St Louis"],[41.4993,-81.6944,"Cleveland"],[46.4753,-84.3553,"Sault Ste Marie"]],
-    southeast:[[35.6117,-83.4895,"Great Smoky Mtns"],[25.2867,-80.9812,"Everglades"],[30.3322,-81.6557,"Jacksonville"],[32.0809,-81.0912,"Savannah"],[29.9511,-90.0715,"New Orleans"],[30.4213,-87.2169,"Pensacola"],[27.9506,-82.4572,"Tampa"],[34.2257,-77.9447,"Wilmington NC"]],
-    northeast:[[45.9044,-68.9213,"Katahdin ME"],[44.2706,-71.3033,"Mt Washington NH"],[43.0481,-76.1474,"Syracuse NY"],[44.4759,-73.2121,"Burlington VT"],[42.3601,-71.0589,"Boston"],[41.7658,-72.6851,"Hartford CT"],[43.6591,-70.2568,"Portland ME"],[44.5588,-72.5778,"Montpelier VT"]],
-    midatlantic:[[38.8951,-77.0364,"Washington DC"],[39.2904,-76.6122,"Baltimore"],[38.5382,-78.0136,"Shenandoah NP"],[37.0000,-80.0000,"New River Gorge"],[37.2296,-80.4139,"Roanoke VA"],[39.9526,-75.1652,"Philadelphia"],[40.7128,-74.0060,"New York City"],[38.9530,-78.1928,"Front Royal VA"]],
-    texas:[[29.1869,-103.2419,"Big Bend"],[29.4241,-98.4936,"San Antonio"],[31.7619,-106.4850,"El Paso"],[30.2672,-97.7431,"Austin"],[32.7767,-96.7970,"Dallas"],[31.5500,-97.1467,"Waco"],[31.3200,-100.4100,"San Angelo"],[25.9000,-97.4500,"Brownsville"]],
-    alaska:[[63.0695,-151.0074,"Denali"],[64.2008,-165.4063,"Nome"],[58.3005,-134.4197,"Juneau"],[61.2176,-149.8997,"Anchorage"],[64.8378,-147.7164,"Fairbanks"],[59.6425,-151.5483,"Kenai Peninsula"],[56.4575,-132.3831,"Ketchikan"],[60.5500,-145.7500,"Cordova"]],
-    hawaii:[[20.7984,-156.3319,"Haleakala"],[19.4194,-155.2885,"Kilauea"],[20.0198,-155.6788,"Waimea HI"],[21.3069,-157.8583,"Honolulu"],[22.2170,-159.5261,"Waimea Canyon Kauai"],[21.0942,-156.6001,"Molokai"],[20.8783,-156.6825,"Maui"],[22.0783,-160.1332,"Na Pali Coast"]]
-  };
-  return lm[r]||lm.midwest;
-}
-
-
-// ================================================================
-// EXPANDED LIVESTOCK — Full disease treatment + seasonal health calendars
-// ================================================================
-function getLandmarks(r){
-  var lm = {
-    pacific:[[37.8651,-119.5383,"Yosemite"],[36.4864,-118.5658,"Mt Whitney"],[44.4280,-110.5885,"Yellowstone"],[48.7596,-121.8090,"North Cascades"],[37.9061,-122.5455,"Mt Tamalpais"],[41.2132,-122.3117,"Mt Shasta"],[46.8523,-121.7603,"Mt Rainier"],[44.0521,-121.3153,"Bend OR"],[40.3400,-124.0023,"King Range CA"]],
-    southwest:[[36.1069,-112.1129,"Grand Canyon"],[33.4734,-112.0400,"Phoenix"],[32.2217,-110.9265,"Tucson"],[35.6870,-105.9378,"Santa Fe"],[36.8858,-111.5116,"Lake Powell"],[37.2982,-113.0263,"Zion Canyon"],[38.6830,-109.5441,"Canyonlands"],[36.4472,-116.8659,"Death Valley"],[35.0174,-111.0228,"Winslow AZ"]],
-    mountain:[[44.4280,-110.5885,"Yellowstone"],[43.7904,-110.6818,"Grand Teton"],[39.7392,-104.9903,"Denver"],[37.2753,-107.8801,"Mesa Verde"],[39.1911,-106.8175,"Aspen CO"],[47.9253,-113.9972,"Glacier NP"],[46.8652,-113.9857,"Missoula MT"],[44.0682,-114.7420,"Sawtooth ID"],[38.8339,-105.0424,"Pikes Peak"]],
-    midwest:[[47.9500,-90.9200,"Boundary Waters"],[43.9800,-89.9500,"Wisconsin Dells"],[46.7867,-90.8251,"Apostle Islands"],[41.8781,-87.6298,"Chicago"],[44.9778,-93.2650,"Minneapolis"],[38.6270,-90.1994,"St Louis"],[41.4993,-81.6944,"Cleveland"],[46.4753,-84.3553,"Sault Ste Marie"]],
-    southeast:[[35.6117,-83.4895,"Great Smoky Mtns"],[25.2867,-80.9812,"Everglades"],[30.3322,-81.6557,"Jacksonville"],[32.0809,-81.0912,"Savannah"],[29.9511,-90.0715,"New Orleans"],[30.4213,-87.2169,"Pensacola"],[27.9506,-82.4572,"Tampa"],[34.2257,-77.9447,"Wilmington NC"]],
-    northeast:[[45.9044,-68.9213,"Katahdin ME"],[44.2706,-71.3033,"Mt Washington NH"],[43.0481,-76.1474,"Syracuse NY"],[44.4759,-73.2121,"Burlington VT"],[42.3601,-71.0589,"Boston"],[41.7658,-72.6851,"Hartford CT"],[43.6591,-70.2568,"Portland ME"],[44.5588,-72.5778,"Montpelier VT"]],
-    midatlantic:[[38.8951,-77.0364,"Washington DC"],[39.2904,-76.6122,"Baltimore"],[38.5382,-78.0136,"Shenandoah NP"],[37.0000,-80.0000,"New River Gorge"],[37.2296,-80.4139,"Roanoke VA"],[39.9526,-75.1652,"Philadelphia"],[40.7128,-74.0060,"New York City"],[38.9530,-78.1928,"Front Royal VA"]],
-    texas:[[29.1869,-103.2419,"Big Bend"],[29.4241,-98.4936,"San Antonio"],[31.7619,-106.4850,"El Paso"],[30.2672,-97.7431,"Austin"],[32.7767,-96.7970,"Dallas"],[31.5500,-97.1467,"Waco"],[31.3200,-100.4100,"San Angelo"],[25.9000,-97.4500,"Brownsville"]],
-    alaska:[[63.0695,-151.0074,"Denali"],[64.2008,-165.4063,"Nome"],[58.3005,-134.4197,"Juneau"],[61.2176,-149.8997,"Anchorage"],[64.8378,-147.7164,"Fairbanks"],[59.6425,-151.5483,"Kenai Peninsula"],[56.4575,-132.3831,"Ketchikan"],[60.5500,-145.7500,"Cordova"]],
-    hawaii:[[20.7984,-156.3319,"Haleakala"],[19.4194,-155.2885,"Kilauea"],[20.0198,-155.6788,"Waimea HI"],[21.3069,-157.8583,"Honolulu"],[22.2170,-159.5261,"Waimea Canyon Kauai"],[21.0942,-156.6001,"Molokai"],[20.8783,-156.6825,"Maui"],[22.0783,-160.1332,"Na Pali Coast"]]
-  };
-  return lm[r]||lm.midwest;
-}
-
-
-// ================================================================
-// EXPANDED LIVESTOCK — Full disease treatment + seasonal health calendars
-// ================================================================
-// Top-level map functions — always available, no dependency on initMapControls
-window.mapSelectState = function(code){
-  window._selectedState = code || null;
-  window._mapView = 'map';
-  var sel = document.getElementById('stateSelect');
-  if(sel) sel.value = code || '';
-  if(PAGES.mapview){
-    document.getElementById('content').innerHTML = PAGES.mapview(R(),M());
-    setTimeout(initMapControls, 60);
-  }
-};
-
-window.setMapView = function(v){
-  window._mapView = v;
-  if(PAGES.mapview){
-    document.getElementById('content').innerHTML = PAGES.mapview(R(),M());
-    if(v !== 'geo') setTimeout(initMapControls, 60);
-    else window.scrollTo({top:0,behavior:'smooth'});
-  }
-};
-
-function initMapControls(){
-  var dragging=false, lastX=0, lastY=0, scale=1, tx=0, ty=0;
-  var svg = document.getElementById('usmap');
-  var statesG = document.getElementById('states');
-
-  function applyTransform(){
-    if(statesG) statesG.setAttribute('transform','translate('+tx+','+ty+') scale('+scale+')');
-  }
-
-  window.mapZoom = function(factor){
-    scale = Math.min(12, Math.max(0.3, scale*factor));
-    applyTransform();
-  };
-  window.mapReset = function(){
-    scale=1; tx=0; ty=0; applyTransform();
-  };
-  window.mapDragStart = function(e){
-    dragging=true; lastX=e.clientX; lastY=e.clientY;
-    if(svg) svg.style.cursor='grabbing';
-  };
-  window.mapDragMove = function(e){
-    if(!dragging) return;
-    tx += (e.clientX-lastX)/scale;
-    ty += (e.clientY-lastY)/scale;
-    lastX=e.clientX; lastY=e.clientY;
-    applyTransform();
-  };
-  window.mapDragEnd = function(){
-    dragging=false;
-    if(svg) svg.style.cursor='grab';
-  };
-
-  // Click delegation on SVG — handles state path clicks via data-state
-  if(svg){
-    // Remove old listener by cloning
-    var newSvg = svg.cloneNode(true);
-    svg.parentNode.replaceChild(newSvg, svg);
-    svg = newSvg;
-    statesG = document.getElementById('states');
-
-    svg.addEventListener('mousedown', function(e){ window.mapDragStart(e); });
-    svg.addEventListener('mousemove', function(e){ window.mapDragMove(e); });
-    svg.addEventListener('mouseup', function(e){ window.mapDragEnd(); });
-    svg.addEventListener('mouseleave', function(e){ window.mapDragEnd(); });
-
-    svg.addEventListener('click', function(e){
-      if(Math.abs(tx-(window._mapLastTx||0)) > 5 || Math.abs(ty-(window._mapLastTy||0)) > 5) return;
-      var t = e.target;
-      while(t && t !== svg){
-        var code = t.getAttribute && t.getAttribute('data-state');
-        if(code){
-          window.mapSelectState(code);
-          return;
-        }
-        t = t.parentNode;
-      }
-    });
-
-    svg.addEventListener('mouseover', function(e){
-      var t = e.target;
-      if(t && t.classList && t.classList.contains('sp')){
-        t.style.filter='brightness(1.8)';
-        t.style.opacity='1';
-      }
-    });
-    svg.addEventListener('mouseout', function(e){
-      var t = e.target;
-      if(t && t.classList && t.classList.contains('sp')){
-        t.style.filter='';
-        var code = t.getAttribute('data-state');
-        var selCode = window._selectedState;
-        t.style.opacity = (code===selCode) ? '1' : (selCode ? '0.3' : '0.9');
-      }
-    });
-  }
-}
-PAGES.livestock = function(r,m){
-
-const HEALTH_CALENDAR = {
-  chickens: {
-    1:"Respiratory illness risk peaks in cold. Check for rattling breathing daily. Add ACV to water. Increase ventilation without drafts. Supplement vitamin D (lack of sun). Watch for frostbite on combs — rub petroleum jelly or lard.",
-    2:"Continue respiratory monitoring. Begin planning spring chick order. Worm with pumpkin seeds in feed. Check for lice/mites under feathers — harder to see in winter but still present.",
-    3:"Days lengthening — egg production returning. Transition to higher protein feed (20%) to support laying. Deworm with garlic water. Clean and disinfect coop before spring breeding season.",
-    4:"Coccidiosis risk rises with spring rains (wet ground). Keep bedding dry. Watch for bloody droppings. Start chicks this month for June laying. Introduce new birds slowly — quarantine 30 days.",
-    5:"Peak breeding season — watch roosters for over-mating stress on hens. Parasites increasing. Begin DE dusting in nest boxes. Check for scaly leg mites (raised crusty scales on legs).",
-    6:"Heat stress begins. Ensure abundant shade and cool water. Reduce scratch grains (generates body heat). Freeze treats (watermelon, berries). Watch for pale combs in heat — can indicate internal issues.",
-    7:"Peak heat stress month. Provide frozen treats and electrolytes (pinch of salt + sugar in water). Hens may slow or stop laying in extreme heat — this is normal. Watch for bumblefoot from hot dry ground.",
-    8:"Molt beginning for some birds. Normal — don\'t panic about feather loss. Increase protein during molt (18-20%). Eggs decline during molt — hens redirect nutrition to feather production.",
-    9:"Fall molt in full swing for most birds. Supplement protein heavily. Prepare coop for winter — seal drafts, add extra bedding. Begin supplemental lighting if you want winter eggs.",
-    10:"Prepare winter housing. Add deep litter method (never clean all bedding — layers generate heat). Worm before winter with pumpkin seeds. Stock up on ACV and garlic.",
-    11:"Winter prep. Begin supplemental lighting (14 hrs total light). Stock up on oyster shell calcium. Watch for respiratory illness as birds spend more time indoors. Deep litter should be 6-12 inches.",
-    12:"Cold stress monitoring. Check water 3x daily to prevent freezing. Watch for frostbite — Vaseline/lard on combs and wattles. Egg production low — normal. Feed extra scratch in evening for warmth."
-  },
-  goats: {
-    1:"Kidding season for fall-bred does. Have kidding kit ready: iodine for navels, colostrum backup, thermometer. Normal kid temp 103°F. Cold stress — kid coats or heat lamp in extreme cold. Watch for hypoglycemia in kids (weak, cold, not nursing).",
-    2:"Late kidding for some. Body condition scoring on all animals — add extra hay for thin does. Selenium deficiency common in winter — supplement or White Muscle Disease appears in kids. Worm check — FAMACHA score eyes (pale = anemia from barber pole worm).",
-    3:"Breeding season ends. Milk production peaks in spring. Begin rotational grazing as pasture greens. Hoof trimming — hooves grow faster in spring wet conditions. Watch for hoof rot (foul smell, limping).",
-    4:"Pasture management critical. Don\'t graze below 4 inches — allows parasite larvae to be ingested. FAMACHA worm monitoring begins in earnest. Kids weaning. CAE testing if not done.",
-    5:"Peak parasite season starts. Barber pole worm most dangerous — kills quickly via anemia. FAMACHA every 2 weeks on all animals. Only treat animals showing pale inner eyelids (score 3-5). Copper bolus if not given spring.",
-    6:"Parasite pressure at maximum. Rotate pastures aggressively. Dry off does for next breeding if needed. Watch for mastitis in milk does (hot, hard udder, off milk, sick doe). Trim hooves monthly.",
-    7:"Heat stress. Provide shade and fresh cool water at all times. Milk production drops in heat — normal. Continue FAMACHA monitoring. Watch for pinkeye (Moraxella) — isolate affected animals, treat with dilute honey eyewash or clean and flush.",
-    8:"Prepare for breeding season (Oct-Nov). Evaluate which does and does to breed. Body condition score — does should be BCS 2.5-3 at breeding. Put bucks in separate area 30 days before breeding.",
-    9:"Flushing does: increase feed 2-3 weeks before breeding to improve conception rate and litter size. FAMACHA still active — parasites present until hard frost. CD&T booster vaccinations.",
-    10:"Breeding season. Introduce buck to does. Mark breeding dates — gestation is 150 days. Decrease milking frequency to dry off does 60 days before kidding. Winter housing prep.",
-    11:"Does entering mid-gestation. Increase nutrition in late pregnancy (last 6 weeks most critical). Begin supplementing selenium and vitamin E. Check and treat for internal parasites before winter.",
-    12:"Late gestation — does need 1.5x normal nutrition. Check udder development — beginners should feel for colostrum 2-3 weeks before due date. Prepare kidding area. Worm high-risk animals before kidding."
-  },
-  cattle: {
-    1:"Feed 25-30 lbs quality hay per cow per day. Check water twice daily — cattle need 20-30 gallons even in winter. Watch for signs of hardware disease (swallowed wire — magnetic bolus prevention). Respiratory illness risk high.",
-    2:"Calving season for fall-bred cows. Have colostrum replacer on hand. Calf should be up and nursing within 2 hours — intervene if not. Scours (diarrhea) is #1 calf killer: oral electrolytes immediately.",
-    3:"Mud management critical — mud stress is real, increases caloric needs 25%. Move cattle to drier ground. Watch for pinkeye as UV increases. Vaccinations: IBR, BVD, Blackleg boosters.",
-    4:"Turn out on pasture when grass reaches 6-8 inches. Continue hay until pasture established — avoid overgrazing early growth. Treat for internal parasites (Ivermectin from drugstore or herbal deworm). Branding and dehorning calves.",
-    5:"Parasite season begins. Rotate pastures every 2-3 weeks. Watch for grass tetany (staggers, muscle tremors) — magnesium deficiency from lush spring grass. Supplement with magnesium blocks.",
-    6:"Fly control critical. Heel flies, face flies, horn flies reduce weight gain significantly. Cattle oilers, fly tags, or pour-on treatments. Watch for pinkeye epidemics — spread by face flies.",
-    7:"Heat stress. Shade and fresh water essential. Cattle need 35-45 gallons water per day in heat. Stop working cattle midday. Watch for heat stroke (standing in pond, excessive panting, staggering).",
-    8:"Body condition scoring on all cattle — cows should be BCS 5-6 before winter. Flush thin animals with extra nutrition. Begin weaning calves. Foot rot more common in hot wet conditions.",
-    9:"Fall breeding season for spring calves. Bull fertility check. Pregnancy check all cows via palpation or ultrasound 60-90 days after bulls removed. Vaccinate calves before weaning.",
-    10:"Wean calves. Ship stockers or backgrounders. Begin transitioning to hay as pasture quality declines. Watch for respiratory disease at weaning — most stressful time in cattle\'s life.",
-    11:"Build hay reserves. Calculate winter feed needs: 1.5 tons per cow for 5-month winter. Test hay quality if possible. Treat any open cows or cull. Pre-calving vaccinations.",
-    12:"Monitor body condition — maintain BCS 5+ through winter. Feed quality hay. Supplement protein if hay is low-quality (protein tub or distillers grains). Check heifer development for first calving."
-  },
-  rabbits: {
-    1:"GI stasis risk in cold — keep fresh hay available 24/7. This is the most common rabbit killer. Water bottles freeze — switch to crocks or check 3x daily. Nestboxes for any kits. Reduce breeding pace.",
-    2:"Breeding resumes. Does kindle after 31 days. Provide warm nestboxes with extra hay. Check kits daily — any outside the nest in cold will die quickly; return and add more nesting material.",
-    3:"Spring breeding at full pace. Condition all breeding stock — thin animals produce small litters. Begin growing fresh greens to supplement: clover, plantain, dandelion, kale.",
-    4:"Fresh forage season begins. Introduce slowly — sudden diet changes cause GI upset. Limit fresh greens to 10% of diet at first, increase over 2 weeks. Ear mite treatment if any head shaking seen.",
-    5:"Peak breeding and production season. Does can raise 4-5 litters/year. Butcher weight kits (5 lbs) at 8-12 weeks. Rotate grow-out tractors on fresh grass daily for supplemental grazing.",
-    6:"Heat stress danger — rabbits die at 85°F+. Provide frozen water bottles in cages to lie against. Shade all hutches 100%. Reduce breeding in peak heat — conception rates drop and does reabsorb litters.",
-    7:"Hottest month — minimal breeding. Keep alive and comfortable. Frozen treats help. Watch for heat stroke (rapid panting, wet nose, sprawled out). Drench with cool water immediately if heat stroke.",
-    8:"Begin rebuilding breeding pace as temps moderate. Wean kits at 6-8 weeks to protect doe\'s condition. Grow and dry summer grass into hay for winter — cut, spread thin, dry 3-5 days.",
-    9:"Excellent breeding weather. Push production now before winter. Stock up on dried hay for winter. Process any overstock bucks for meat before winter to reduce feed costs.",
-    10:"Reduce litter sizes heading into winter — cold increases kit mortality. Make winter nestboxes deeper with more insulation. Snuffles (runny nose, sneezing) often flares in fall transition.",
-    11:"Winter transition. Increase hay availability. Insulate hutches from wind. Continue monitoring for GI stasis — cold weather reduces movement. Worm with pumpkin seeds in feed.",
-    12:"Minimal breeding or stop completely in cold climates. Focus on keeping animals healthy through winter. Fresh hay and clean water are the most important inputs this month."
-  }
-};
-
-const chickenDiseases = [
-  {name:"Respiratory Infection (Mycoplasma, CRD)",symptoms:"Rattling or gurgling breathing, watery/foamy eyes, nasal discharge, lethargy, swollen face",natural:"Oregano oil 1-2 drops per gallon water (natural antibiotic). Apple cider vinegar 1 tbsp per gallon water ongoing. Garlic 1 crushed clove per gallon water. Isolate immediately — highly contagious.",prevention:"Maintain good ventilation. Avoid overcrowding. Quarantine new birds 30 days. Keep humidity low in winter coop."},
-  {name:"Coccidiosis",symptoms:"Bloody or rusty droppings, lethargy, hunched posture, pale comb, off feed",natural:"Apple cider vinegar 2 tbsp per gallon water. Thyme and oregano added to feed. Vitamin A supplementation. KEEP BEDDING DRY — wet conditions breed coccidia.",prevention:"Keep ground dry. Rotate outdoor areas. Never use moldy bedding."},
-  {name:"Egg Binding",symptoms:"Straining, tail pumping, lethargy, sitting in nest box for hours without laying",natural:"Warm bath soak 20 minutes — relaxes muscles. Olive oil or coconut oil applied to vent. Calcium supplementation. EMERGENCY if bird cannot pass egg within 24-48 hours.",prevention:"Always provide oyster shell calcium. Prevent obesity. Ensure adequate exercise space."},
-  {name:"Lice and Mites",symptoms:"Feather loss (especially vent area), pale comb, excessive preening, poor production, weight loss",natural:"Diatomaceous earth dusted thoroughly in bedding, nest boxes, and on birds under feathers. Wood ash bathing area. Neem oil diluted 1:10 in water sprayed on birds.",prevention:"Regular DE dusting. Clean coop monthly. Dust bathing area always available."},
-  {name:"Sour Crop / Impacted Crop",symptoms:"Swollen crop that does not empty overnight, sour smell from beak, lethargy",natural:"Massage crop downward gently 2 minutes per hour. Isolate and withhold feed 12-24 hours. Offer water with ACV only. Olive oil 1 tsp orally to lubricate. If impacted (hard, firm) — massage more aggressively.",prevention:"Always provide grit. Avoid long-fibered dry grasses. Ensure birds don\'t gorge."},
-  {name:"Bumblefoot",symptoms:"Swollen black scab on foot pad, limping, reluctance to walk",natural:"Soak in warm Epsom salt water 15 min daily. Remove black scab carefully with sterile blade. Pack wound with raw honey (antibacterial). Wrap with clean bandage. Change daily.",prevention:"Smooth perches (no splinters). Clean dry bedding. Avoid sharp ground cover."},
-  {name:"Internal Worms",symptoms:"Weight loss despite good appetite, pale yolks, poor production, lethargy",natural:"Pumpkin seeds ground and mixed in feed 1 cup per 6 birds weekly — cucurbitacin paralyzes roundworms. Garlic in water weekly. Black walnut hull tea as occasional drench.",prevention:"Rotate outdoor areas. Don\'t allow birds on wet muddy ground continuously."},
-  {name:"Marek\'s Disease (viral)",symptoms:"Paralysis of legs/wings, grey eye, weight loss, tumors",natural:"No cure. Supportive care — isolate, vitamins, comfortable conditions. Prevent via vaccination at hatch only.",prevention:"Vaccinate all chicks at hatch. Marek\'s is everywhere — vaccination is non-negotiable."}
-];
-
-const goatDiseases = [
-  {name:"Barber Pole Worm (Haemonchus contortus)",symptoms:"Pale inner eyelids (bottle jaw), anemia, weakness, sudden death — most common fatal disease",natural:"FAMACHA scoring every 2 weeks — only treat pale animals (score 3,4,5). Wormwood herb in feed. Copper sulfate drench. Papaya leaves. Pumpkin seeds. Prevention: rotate pastures constantly.",prevention:"Never graze below 4 inches. Rotate every 21 days minimum. Select for FAMACHA resistance — cull animals that always need treatment."},
-  {name:"Enterotoxemia / Overeating Disease",symptoms:"Sudden death of healthy-looking animals, especially kids. Convulsions, bloat, diarrhea.",natural:"Penicillin if available. Oral Vitamin B complex. Probiotic drench. Slow feed changes prevent it.",prevention:"CD&T vaccination twice yearly (most critical goat vaccine). Never make sudden feed changes. Don\'t allow gorging on grain."},
-  {name:"Mastitis",symptoms:"Hot, hard, or lumpy udder. Off-colored milk (watery, bloody, chunky). Sick doe.",natural:"Frequent milking to clear infection. Peppermint oil diluted on udder (cooling, antimicrobial). Garlic oil massage into teat canal. Teat dip with dilute ACV after milking.",prevention:"Clean hands and equipment before milking. Teat dip after every milking. Cull chronic cases."},
-  {name:"Hoof Rot (Footrot)",symptoms:"Severe limping, foul smell from hoof, soft black tissue between toes",natural:"Trim aggressively — remove all diseased tissue. Zinc sulfate footbath (2 lbs per gallon water, stand 15 min). Pack with copper sulfate paste. Keep on dry ground.",prevention:"Dry footing. Trim hooves every 6-8 weeks. Zinc mineral supplementation."},
-  {name:"Copper Deficiency",symptoms:"Faded coat color, 'fish tail' (sparse tail hair), rough coat, poor production, anemia, neurological signs in kids",natural:"Copper bolus capsule orally every 6 months — most reliable method. Copper sulfate in mineral mix. Kelp meal supplement.",prevention:"Don\'t feed cattle mineral to goats — it\'s low in copper. Provide goat-specific loose mineral with copper always available."},
-  {name:"White Muscle Disease (Selenium deficiency)",symptoms:"Weak kids unable to stand, stiff gait, sudden death in kids, white streaks in muscle tissue",natural:"Bo-Se (selenium + vitamin E) injection from vet supply OR oral selenium supplement. Vitamin E oil orally.",prevention:"Supplement pregnant does with selenium-vitamin E 4 weeks before kidding. Many regions are selenium-deficient — supplement all animals."},
-  {name:"Pinkeye (Conjunctivitis)",symptoms:"Watery eye, squinting, red/pink conjunctiva, white cloudy eye in advanced cases",natural:"Flush eye with clean saline. Apply dilute raw honey eyedrops (antibacterial). Tea tree oil 1 drop diluted in 1 tbsp water as eye flush. Isolate immediately.",prevention:"Control face flies. Isolate new animals. Prevent close nose-to-nose contact when disease is active."}
-];
-
-const horseDiseases = [
-  {name:"Colic (abdominal pain)",symptoms:"Pawing, looking at flank, rolling repeatedly, refusing to eat, elevated heart rate",natural:"Walk continuously — most important intervention. Provide fresh water. Dilute peppermint or ginger oil in water for cramping. Call vet for severe or persistent cases — can be fatal.",prevention:"Regular deworming. Consistent feeding schedule. Always provide fresh water. Don\'t change feed suddenly."},
-  {name:"Thrush (hoof infection)",symptoms:"Black foul-smelling discharge in hoof clefts, soft rubbery frog tissue, horse may or may not be lame",natural:"Clean hoof thoroughly daily. Pack with pine tar (traditional remedy — antifungal, antiseptic). Dilute tea tree oil applied to clefts. Oregano oil diluted 1:10.",prevention:"Clean hooves daily. Dry footing. Trim regularly. Don\'t leave in mud."},
-  {name:"Rain Rot (Dermatophilosis)",symptoms:"Crusty scabs along back and rump that pull off with tufts of hair, raised bumpy coat",natural:"Remove all scabs while wet (they soften in rain or water). Apple cider vinegar spray directly on skin. Coconut oil after scabs removed. Keep dry.",prevention:"Provide shelter from prolonged rain. Dry blankets. Selenium/vitamin E supplementation strengthens skin resistance."},
-  {name:"Heaves (COPD / RAO)",symptoms:"Chronic cough, flared nostrils, 'heave line' visible (secondary abdominal muscle development), exercise intolerance",natural:"Completely eliminate round bale hay — too much mold/dust. Wet all hay before feeding. Move to pasture grazing. Reduce dust in barn. Elderflower tea has mild bronchodilator effect.",prevention:"Never feed dusty or moldy hay. Use low-dust bedding (paper or rubber mats). Good barn ventilation."},
-  {name:"Laminitis / Founder",symptoms:"Hot hooves, reluctance to move, 'sawhorse stance', lying down more than normal",natural:"Remove from pasture immediately — grass is the trigger. Apply cold water or ice to hooves. Deep sand or soft bedding for standing on. Long-term: diet management is everything.",prevention:"Limit access to rich spring pasture. Never allow grazing on frost-killed grass (releases sugars). No grain for easy-keepers."}
-];
-
-const currentHealth = HEALTH_CALENDAR.chickens[m]||"";
-const goatHealth = HEALTH_CALENDAR.goats[m]||"";
-const cattleHealth = HEALTH_CALENDAR.cattle[m]||"";
-const rabbitHealth = HEALTH_CALENDAR.rabbits[m]||"";
-
-const diseaseTable = (diseases) => `
-<table class="tbl">
-<tr><th>Disease</th><th>Symptoms</th><th>Natural Treatment</th><th>Prevention</th></tr>
-${diseases.map(d=>`<tr>
-  <td><strong>${d.name}</strong></td>
-  <td style="font-size:.78rem">${d.symptoms}</td>
-  <td style="font-size:.78rem;color:#a8d48a">${d.natural}</td>
-  <td style="font-size:.78rem;color:rgba(242,232,213,.65)">${d.prevention}</td>
-</tr>`).join('')}
-</table>`;
-
-return `
-<div class="ph"><span class="pi">🐓</span><h2>Raising Livestock</h2>
-<p class="sub">Chickens, rabbits, goats, cattle, horses, pigs, ducks — raising, feeding, and healing from your land.</p></div>
-
-<!-- SEASONAL HEALTH CALENDAR -->
-<div class="kb"><h3>📅 Seasonal Health Calendar — ${MN[m]}</h3>
-<div class="cg">
-  <div class="card" style="border-color:rgba(184,146,42,.4)"><div class="ct">🐓 Chickens — ${MN[m]}</div><p style="font-size:.83rem">${currentHealth}</p></div>
-  <div class="card" style="border-color:rgba(184,146,42,.4)"><div class="ct">🐐 Goats — ${MN[m]}</div><p style="font-size:.83rem">${goatHealth}</p></div>
-  <div class="card" style="border-color:rgba(184,146,42,.4)"><div class="ct">🐄 Cattle — ${MN[m]}</div><p style="font-size:.83rem">${cattleHealth}</p></div>
-  <div class="card" style="border-color:rgba(184,146,42,.4)"><div class="ct">🐇 Rabbits — ${MN[m]}</div><p style="font-size:.83rem">${rabbitHealth}</p></div>
-</div></div>
-
-<!-- CHICKENS -->
-<div class="kb"><h3>🐓 Chickens — Raising &amp; Feeding</h3>
-<ul>
-<li><strong>Best dual-purpose breeds:</strong> Rhode Island Red, Plymouth Rock, Sussex, Wyandotte — eggs AND meat from the same bird</li>
-<li><strong>Space:</strong> 4 sq ft/bird inside coop, 10 sq ft/bird in run. Hardware cloth (not chicken wire) on all openings — weasels fit through chicken wire.</li>
-<li><strong>Homegrown feed recipe:</strong> Cracked corn 40% + wheat/barley 30% + sunflower seeds 15% + dried black soldier fly larvae 10% + oyster shell/eggshell calcium 5%</li>
-<li><strong>Free-range supplement:</strong> Free chickens supplement 30-50% of their diet from insects, worms, grass, and seeds. Let sunflowers stand and dry in garden — chickens harvest seeds themselves.</li>
-<li><strong>Fermented feed:</strong> Soak grain 3 days until slightly sour. Increases nutrition 20%, reduces feed needs, improves gut health. Chickens prefer it.</li>
-<li><strong>Black soldier fly larvae (BSFL):</strong> Set up a compost bin — BSFL grow in it naturally in warm weather. 50%+ protein. Chickens go wild for them. Essentially free high-protein feed.</li>
-</ul>
-<h4 style="font-family:Cinzel,serif;font-size:.78rem;color:var(--gold);margin:14px 0 8px;letter-spacing:.1em">CHICKEN DISEASE REFERENCE</h4>
-${diseaseTable(chickenDiseases)}</div>
-
-<!-- RABBITS -->
-<div class="kb"><h3>🐇 Meat Rabbits — Raising &amp; Feeding</h3>
-<ul>
-<li><strong>Best meat breeds:</strong> New Zealand White, Californian, Rex — reach 5 lbs butcher weight in 8-10 weeks</li>
-<li><strong>Feed from your land:</strong> Clover (plant throughout property), comfrey (the "rabbit herb" — high protein, they love it), kale, dandelion, plantain, chicory, dried summer grass hay</li>
-<li><strong>Making rabbit hay:</strong> Cut grass and clover before it seeds. Spread thin in rows. Turn daily for 3-5 days until completely dry and crackly throughout. Store in dry covered area. Never feed damp hay — mold causes GI stasis and death.</li>
-<li><strong>Breeding:</strong> Bring doe to buck\'s cage always. Kindle (birth) 28-31 days after breeding. Provide nest box with deep hay at day 28.</li>
-<li><strong>Butcher weight:</strong> 4-5 lbs live at 8-12 weeks. Most efficient meat-to-feed ratio of any homestead animal.</li>
-</ul>
-<table class="tbl"><tr><th>Disease</th><th>Symptoms</th><th>Natural Treatment</th><th>Prevention</th></tr>
-<tr><td><strong>GI Stasis</strong></td><td>No droppings, hunched, not eating, gurgling gut</td><td style="color:#a8d48a">EMERGENCY. Massage abdomen. Fresh hay immediately. Remove pellets. Force movement. Critical within hours.</td><td>Fresh hay available 24/7. No sudden diet changes.</td></tr>
-<tr><td><strong>Ear Mites</strong></td><td>Head shaking, dark crusty buildup in ears</td><td style="color:#a8d48a">Mineral oil dropped into ear, massage gently. Repeat weekly 3 weeks.</td><td>Quarantine new animals. Regular ear checks.</td></tr>
-<tr><td><strong>Snuffles (Pasteurella)</strong></td><td>Runny nose, sneezing, wet matted front paws</td><td style="color:#a8d48a">Improve ventilation first. Oregano oil in water. Echinacea tincture. Isolate — very contagious.</td><td>Reduce stress. Good ventilation. Avoid temperature swings.</td></tr>
-<tr><td><strong>Coccidiosis</strong></td><td>Diarrhea, weight loss, pot-bellied young rabbits</td><td style="color:#a8d48a">ACV 1 tsp per gallon water. Dry clean bedding. Oregano.</td><td>Keep hutch scrupulously dry. Remove young from infected doe.</td></tr>
-</table></div>
-
-<!-- GOATS -->
-<div class="kb"><h3>🐐 Goats — Raising, Milking &amp; Feeding</h3>
-<ul>
-<li><strong>Dairy breeds:</strong> Nubian (richest milk, large), Nigerian Dwarf (small, efficient, 1-2 qts/day), Alpine, LaMancha</li>
-<li><strong>Fencing:</strong> Goats test every fence. 4-strand high-tensile electric or 4-inch no-climb woven wire. They will find and exploit any weakness.</li>
-<li><strong>Feed from your land:</strong> Goats are browsers — they prefer brush, weeds, tree leaves, bark over grass. Plant elderberry, willow, blackberry, and multiflora rose along fence lines as living feed. Supplement with 1.5-2 lbs hay per 100 lbs body weight daily.</li>
-<li><strong>Copper is non-negotiable:</strong> Goats have high copper requirements. Cattle mineral is low in copper. Always use goat-specific loose mineral. Without copper: faded coat, fish tail, poor health, neurological issues in kids.</li>
-<li><strong>Milking protocol:</strong> Twice daily 12 hours apart. Clean udder with warm water. First 3 squirts into separate container (mastitis check). Chill milk immediately after milking.</li>
-<li><strong>Making butter from goat milk:</strong> Let milk sit 24 hours. Skim cream. Shake in sealed jar 15-20 minutes until butter and buttermilk separate. Knead butter in cold water until water runs clear. Salt lightly.</li>
-</ul>
-<h4 style="font-family:Cinzel,serif;font-size:.78rem;color:var(--gold);margin:14px 0 8px;letter-spacing:.1em">GOAT DISEASE REFERENCE</h4>
-${diseaseTable(goatDiseases)}</div>
-
-<!-- CATTLE -->
-<div class="kb"><h3>🐄 Cattle — Raising &amp; Feeding</h3>
-<ul>
-<li><strong>Best homestead breeds:</strong> Dexter (small, dual-purpose, efficient), Jersey (best milk), Angus/Hereford (meat), Scottish Highland (cold-hardy, rough forage)</li>
-<li><strong>Land requirement:</strong> 1-2 acres per cow depending on pasture quality. Rotate — never graze below 4 inches.</li>
-<li><strong>Hay planning:</strong> 1,000 lb cow needs 25-30 lbs hay per day. A 5-month winter = 1.5-2 tons per cow. Grow orchardgrass, timothy, brome, or alfalfa. Cut alfalfa at 10% bloom for best protein.</li>
-<li><strong>Homestead feed supplements:</strong> Corn silage (whole plants chopped, fermented in pit). Turnips and beets fed whole in winter. Kelp meal for minerals. Pumpkins and squash as treats and natural deworming.</li>
-<li><strong>Natural deworming rotation:</strong> Rotate pastures every 21 days (larvae die without host after 21 days). Pumpkin seeds and black walnut hull tea supplement. AVOID overusing chemical dewormers — resistance is rampant.</li>
-</ul>
-<table class="tbl"><tr><th>Condition</th><th>Symptoms</th><th>Natural Response</th><th>Prevention</th></tr>
-<tr><td><strong>Bloat</strong></td><td>Left side balloon distension, restless, respiratory distress</td><td style="color:#a8d48a">Walk immediately. Drench with 1 cup vegetable oil to break foam. Stomach tube if severe. Never let cow lie down.</td><td>Never turn onto lush wet legume (clover/alfalfa) pasture hungry. Feed hay first.</td></tr>
-<tr><td><strong>Pinkeye</strong></td><td>Watery eye, squinting, white cloudy eye, bright light avoidance</td><td style="color:#a8d48a">Isolate. Flush with clean saline. Dilute honey eyewash. Keep in shade.</td><td>Control face flies (primary vector). Good nutrition — vitamin A deficiency increases susceptibility.</td></tr>
-<tr><td><strong>Foot Rot</strong></td><td>Sudden severe lameness, foul smell between toes, swelling</td><td style="color:#a8d48a">Trim and clean between toes. Zinc sulfate footbath. Pack with copper sulfate. Dry ground essential.</td><td>Dry footing. Zinc mineral supplement. Regular hoof trimming.</td></tr>
-<tr><td><strong>Grass Tetany</strong></td><td>Staggering, muscle tremors, hypersensitivity, sudden death</td><td style="color:#a8d48a">Magnesium sulfate drench (Epsom salts). Magnesium oxide in feed.</td><td>Magnesium block access always. Never turn onto lush spring grass hungry.</td></tr>
-<tr><td><strong>Scours (calf diarrhea)</strong></td><td>Watery/bloody diarrhea in calves, weakness, dehydration</td><td style="color:#a8d48a">#1 calf killer. Oral electrolytes immediately. Ensure colostrum was received in first 2 hours of life. Probiotic paste.</td><td>Clean calving area. Ensure colostrum in first 2 hours. Good cow nutrition pre-calving.</td></tr>
-</table></div>
-
-<!-- HORSES -->
-<div class="kb"><h3>🐴 Horses &amp; Donkeys</h3>
-<ul>
-<li><strong>Work breeds:</strong> Percheron, Belgian, Clydesdale for draft/plowing. Quarter Horse, Morgan for riding and lighter work.</li>
-<li><strong>Donkeys:</strong> Natural livestock guardian — will actively chase and kill coyotes and foxes. Lower feed requirements than horses. Must have company.</li>
-<li><strong>Daily hay needs:</strong> 1.5-2% of body weight in forage. 1,000 lb horse = 15-20 lbs hay/day.</li>
-<li><strong>Growing horse hay:</strong> Orchardgrass, timothy, brome, or fescue. Cut at early head (before seeds form) for highest nutrition. Dry 3-5 days in field — horses are very susceptible to mold-caused heaves.</li>
-<li><strong>Hoof care:</strong> Clean daily. Trim every 6-8 weeks. Learn basic hoof trimming — farrier dependency is a vulnerability in grid-down.</li>
-</ul>
-<h4 style="font-family:Cinzel,serif;font-size:.78rem;color:var(--gold);margin:14px 0 8px;letter-spacing:.1em">HORSE DISEASE REFERENCE</h4>
-${diseaseTable(horseDiseases)}</div>
-
-<!-- PIGS -->
-<div class="kb"><h3>🐷 Pigs</h3>
-<ul>
-<li><strong>Best homestead breeds:</strong> Berkshire, Tamworth, Duroc — heritage breeds that thrive on foraging and mixed diets</li>
-<li><strong>Always raise two together:</strong> Pigs suffer alone. Minimum pair.</li>
-<li><strong>Feed from homestead:</strong> Kitchen scraps, garden waste, whey from cheese-making, acorns (they harvest themselves in forest), spent garden plants, fermented grain, roots</li>
-<li><strong>Fermented feed:</strong> Soak grain 3-5 days until sour. Increases digestibility 40%, reduces feed cost significantly. Pigs actively prefer it.</li>
-<li><strong>Butcher weight:</strong> 250-300 lbs live at 5-6 months on good mixed diet. Don\'t wait longer — feed efficiency drops dramatically after 300 lbs.</li>
-<li><strong>Wallow:</strong> Essential — pigs cannot sweat. Mud wallow prevents heat stroke and provides parasite protection. Minimum 8x8 ft wet wallow in summer.</li>
-</ul></div>
-
-<!-- DUCKS -->
-<div class="kb"><h3>🦆 Ducks &amp; Geese</h3>
-<ul>
-<li><strong>Best duck breeds:</strong> Khaki Campbell (300+ eggs/yr), Pekin (meat), Welsh Harlequin (dual purpose), Muscovy (foraging king, no quack, excellent meat)</li>
-<li><strong>Advantages over chickens:</strong> More disease-resistant, excellent foragers, superb slug/snail/mosquito larva control, cold-hardy, produce larger eggs</li>
-<li><strong>Geese:</strong> Excellent alarm animals (loud and aggressive with strangers — better than dogs for intruder alerts). Weeder geese — put in garden rows to eat weeds not vegetables. Need grass as primary diet.</li>
-<li><strong>Water:</strong> Ducks need water deep enough to submerge their heads. A small kiddie pool works. Change frequently.</li>
-</ul></div>`;
-};
-
-
-
-
-
-
-
-
-
-
-
-PAGES.foraging = function(r,m){
-  const plants = (FORAGE_DATA[r]||FORAGE_DATA.midwest)[m]||[];
-  const safe = plants.filter(p=>p.s==='safe');
-  const caution = plants.filter(p=>p.s==='caution'||p.s==='medicinal');
-  const deadly = plants.filter(p=>p.s==='DEADLY'||p.s==='TOXIC');
-
-  const row = p => `<tr>
-    <td><strong>${p.n}</strong></td>
-    <td><span style="color:${p.s==='safe'?'#a8d48a':p.s==='DEADLY'||p.s==='TOXIC'?'var(--ember)':'var(--gold)'};font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.08em">${p.s.toUpperCase()}</span></td>
-    <td>${p.notes}</td>
-  </tr>`;
-
-  return `
-<div class="ph"><span class="pi">&#127807;</span><h2>Foraging &amp; Edible Plants</h2>
-<p class="sub">${RN[r]} &mdash; ${MN[m]}: What\'s available, what\'s edible, what will kill you.</p></div>
-<div class="warn"><strong>Golden Rule:</strong> Never eat any plant unless you can identify it using at least 3 separate features. One mistake can be fatal. When in doubt — leave it out.</div>
-<div class="rn">&#127758; Showing plants available in <strong>${RN[r]}</strong> during <strong>${MN[m]}</strong>. Change region or month above to update this list.</div>
-
-${safe.length ? `<div class="kb"><h3 style="color:#a8d48a">&#9989; Safe to Eat — ${MN[m]}, ${RN[r]}</h3>
-<table class="tbl"><tr><th>Plant</th><th>Status</th><th>Notes &amp; How to Use</th></tr>
-${safe.map(row).join('')}</table></div>` : ''}
-
-${caution.length ? `<div class="kb"><h3 style="color:var(--gold)">&#9888;&#65039; Use With Caution</h3>
-<table class="tbl"><tr><th>Plant</th><th>Status</th><th>Notes</th></tr>
-${caution.map(row).join('')}</table></div>` : ''}
-
-${deadly.length ? `<div class="kb"><h3 style="color:var(--ember)">&#9762;&#65039; DEADLY — Know These Plants</h3>
-<table class="tbl"><tr><th>Plant</th><th>Status</th><th>Why It\'s Dangerous</th></tr>
-${deadly.map(row).join('')}</table></div>` : ''}
-
-<div class="kb"><h3>&#128218; Year-Round Reliable Edibles — Any Region</h3>
-<div class="cg">
-  <div class="card"><div class="ct">&#127804; Dandelion</div><p>Every part edible. Young leaves raw, roots roasted as coffee, flowers raw or fried. Found everywhere year-round.</p></div>
-  <div class="card"><div class="ct">&#127793; Cattail</div><p>Near water everywhere. Shoots, pollen, and roots all edible at different seasons. Learn this one plant above all others.</p></div>
-  <div class="card"><div class="ct">&#129845; Wild Onion/Garlic</div><p>If it smells like onion — it\'s safe. The only reliable smell test in foraging. Entire plant edible.</p></div>
-  <div class="card"><div class="ct">&#127807; Plantain (lawn weed)</div><p>Oval parallel-veined leaves in disturbed soil everywhere. Eat raw or cooked. Also excellent on insect stings.</p></div>
-</div></div>`;
-};
-
-
-PAGES.fishing = function(r,m){
-  const fish = (FISH_DATA[r]||FISH_DATA.midwest)[m]||[];
-
-  const row = f => `<tr>
-    <td><strong>${f.sp}</strong></td>
-    <td><span style="color:${f.status==='peak'?'#a8d48a':f.status==='good'?'var(--gold)':'var(--ash)'};font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.06em">${f.status.toUpperCase()}</span></td>
-    <td>${f.method}</td>
-    <td style="color:var(--gold)">${f.bait}</td>
-    <td>${f.notes}</td>
-  </tr>`;
-
-  return `
-<div class="ph"><span class="pi">&#127907;</span><h2>Fishing</h2>
-<p class="sub">${RN[r]} &mdash; ${MN[m]}: What\'s biting, where to find them, what bait to use.</p></div>
-<div class="rn">&#127758; Showing fish species for <strong>${RN[r]}</strong> in <strong>${MN[m]}</strong>. Change region or month above to update.</div>
-
-<div class="kb"><h3>&#127907; What to Target This Month</h3>
-<table class="tbl">
-  <tr><th>Species</th><th>Activity</th><th>Method</th><th>Best Bait</th><th>Notes</th></tr>
-  ${fish.map(row).join('')}
-</table></div>
-
-<div class="kb"><h3>&#128269; Where Fish Hold — Universal Rules</h3>
-<ul>
-<li><strong>Current seams:</strong> Where fast water meets slow — fish station here waiting for food to wash by</li>
-<li><strong>Cover and shade:</strong> Under cut banks, fallen logs, bridge pilings, overhanging brush</li>
-<li><strong>Temperature breaks:</strong> Fish seek comfort zone — deep in summer heat, shallow in cold months when sun warms shallows</li>
-<li><strong>Inlets/outlets:</strong> Where water enters or exits a lake — food concentrates here</li>
-<li><strong>Dawn and dusk:</strong> Most species feed most aggressively in low light — your highest-yield windows</li>
-</ul></div>
-
-<div class="kb"><h3>&#129693; Improvised Gear</h3>
-<ul>
-<li><strong>Gorge hook:</strong> Carve hardwood or bone stick 1–2 inches, sharp both ends, notched center. Fish swallows it, pulling line causes it to lodge crosswise.</li>
-<li><strong>Line:</strong> Paracord inner strand, thread from clothing, twisted plant fiber</li>
-<li><strong>Trotline (passive):</strong> String a line across a creek with multiple hooks at different depths. Bait all hooks. Check every few hours — works overnight while you sleep.</li>
-<li><strong>Fish weir:</strong> Build a funnel of sticks and rocks narrowing to a dead-end pen. Fish follow current in and can\'t find the exit.</li>
-</ul></div>`;
-};
-
-
-PAGES.trapping = function(r,m){
-  const td = TRAP_DATA[r]||TRAP_DATA.midwest;
-  const monthNote = td.byMonth[m]||"Check local game activity and set snares on active runs.";
-  const isPeak = td.peak.includes(m);
-
-  return `
-<div class="ph"><span class="pi">&#129332;</span><h2>Trapping &amp; Hunting</h2>
-<p class="sub">${RN[r]} &mdash; ${MN[m]}: What\'s active, where to set, what to target.</p></div>
-<div class="rn" style="${isPeak?'border-left-color:var(--gold);color:var(--gold)':''}">
-  &#127758; <strong>${RN[r]} — ${MN[m]}:</strong> ${isPeak?'&#11088; PEAK TRAPPING MONTH — ':''} ${monthNote}
-</div>
-
-<div class="kb"><h3>&#128269; Reading Animal Sign</h3>
-<ul>
-<li><strong>Runs vs trails:</strong> A run is single-species — narrow, direct, connecting water to bedding to feeding. Trails are multi-species and wider. Set traps on runs.</li>
-<li><strong>Fresh scat:</strong> Moist throughout = recent activity. Dry = hours or days old.</li>
-<li><strong>Dew tracking:</strong> Early morning — anything walking through dew-covered grass creates dull patches in low-angle light. Track even through grass.</li>
-<li><strong>Rubs, scrapes, fur on branches:</strong> All confirm presence and direction of travel.</li>
-</ul></div>
-
-<div class="kb"><h3>&#128279; Simple Snare Setup</h3>
-<ol>
-<li>Wire (best), paracord inner strand, or twisted plant fiber</li>
-<li>Loop size: 4 in for rabbits, 2.5 in for squirrels, 8–10 in for larger game</li>
-<li>Height: 4 inches off ground for rabbits; center of loop where head will pass through</li>
-<li>Anchor firmly to root or deep stake — animal must not be able to drag it</li>
-<li>Channelize with natural sticks to guide animals through the loop</li>
-<li>Rub snare with dirt or charred wood to mask your scent. Wear gloves.</li>
-</ol></div>
-
-<div class="kb"><h3>&#9878;&#65039; Figure-4 Deadfall</h3>
-<p>Three notched sticks support a heavy rock or log (3× target animal\'s weight). Bait placed on the toggle releases the weight when disturbed. Practice this at home — the balance requires hands-on feel.</p></div>
-
-<div class="kb"><h3>&#129385; Processing Game</h3>
-<ul>
-<li>Work fast in warm weather — meat spoils quickly</li>
-<li>Hang cleaned meat 10 ft up, 4 ft from trunk, away from camp</li>
-<li>Eat liver and heart first — most nutritious, spoil fastest</li>
-<li>Boil bones for broth. Render all fat — highest calorie source available.</li>
-<li>Smoke thin strips over low hardwood fire 6–12 hours for jerky that lasts weeks</li>
-</ul></div>`;
-};
-
-
-PAGES.snakes = function(r,m){
-  const sd = SNAKE_DATA[r]||SNAKE_DATA.midwest;
-  const isCold = [11,12,1,2,3].includes(m);
-  const isWarm = [5,6,7,8,9].includes(m);
-
-  return `
-<div class="ph"><span class="pi">&#128013;</span><h2>Snakes — Venomous vs Safe</h2>
-<p class="sub">${RN[r]}: Know exactly which venomous species live where you are.</p></div>
-
-<div class="rn" style="${isWarm?'border-left-color:var(--ember);color:#e8b090':''}">
-  &#127758; <strong>${RN[r]} — ${MN[m]}:</strong>
-  ${isCold?'&#10052;&#65039; Cold weather — snakes mostly inactive or dormant. Risk is low but not zero in warm spells.':''}
-  ${isWarm?'&#9888;&#65039; PEAK SNAKE SEASON — highest activity and bite risk. Watch every step.':''}
-  ${!isCold&&!isWarm?'Moderate snake activity. Warming/cooling days bring snakes to surface.':''}
-  <br><strong>Active season:</strong> ${sd.active} &nbsp;|&nbsp; <strong>Hotspots:</strong> ${sd.hotspots}
-</div>
-
-<div class="kb"><h3>&#128013; Venomous Species in ${RN[r]}</h3>
-<ul>${sd.species.map(s=>`<li>${s}</li>`).join('')}</ul></div>
-
-<div class="kb"><h3>&#128272; The Four Universal ID Features</h3>
-<table class="tbl">
-<tr><th>Feature</th><th>Venomous</th><th>Non-Venomous</th><th>Exceptions</th></tr>
-<tr><td>Head shape</td><td>Triangular/arrowhead, wider than neck</td><td>Oval/rounded, same width as neck</td><td>Coral snake has round head. Some harmless snakes flatten defensively.</td></tr>
-<tr><td>Heat pit</td><td>Pit between eye and nostril (looks like 3rd nostril)</td><td>No pit</td><td>Definitive for pit vipers. Coral snake has no pit.</td></tr>
-<tr><td>Pupils</td><td>Vertical slit — cat eye</td><td>Round</td><td>Coral snake has round pupils despite being venomous. Don\'t get close enough to check.</td></tr>
-<tr><td>Tail rattle</td><td>Rattlesnakes only — unique segmented rattle</td><td>No rattle</td><td>Some harmless snakes vibrate tails in leaves. Only rattlesnakes have actual segments.</td></tr>
-</table></div>
-
-<div class="kb"><h3 style="color:var(--gold)">&#128260; Coral Snake Rule (US Only)</h3>
-<p style="font-size:1.1rem;font-family:Cinzel,serif;text-align:center;padding:12px;background:rgba(184,146,42,.08);border-radius:3px;color:var(--gold)">
-"Red touches yellow — kill a fellow.<br>Red touches black — friend of Jack."
-</p>
-<p>This rhyme applies ONLY in the United States and Canada. Do not apply it in Central or South America where coral snake patterns vary.</p></div>
-
-<div class="kb"><h3>&#129306; Snakebite Response</h3>
-<ul>
-<li>Stay calm — elevated heart rate spreads venom faster</li>
-<li>Immobilize the bitten limb at or below heart level</li>
-<li>Remove rings and tight clothing near bite before swelling begins</li>
-<li>Get to medical care as fast as possible — antivenom is the only treatment</li>
-<li><strong>DO NOT:</strong> Cut and suck, apply tourniquet, use ice, apply electrical shock, or give alcohol</li>
-</ul>
-<div class="warn"><strong>Grid-down:</strong> Rest completely. Immobilize the limb. Keep hydrated and calm. Most healthy adults survive rattlesnake bites — panic and movement accelerate the damage.</div></div>`;
-};
-
-
-PAGES.bugs = function(r,m){
-  const bugNote = (BUG_DATA[r]||BUG_DATA.midwest)[m]||"Moderate insect activity. Standard precautions apply.";
-  const isPeak = bugNote.includes('PEAK') || bugNote.includes('peak');
-
-  return `
-<div class="ph"><span class="pi">🦟</span><h2>Bugs &amp; Insects</h2>
-<p class="sub">${RN[r]} &mdash; ${MN[m]}: What\'s biting, what diseases are active, how to protect yourself.</p></div>
-
-<div class="rn" style="${isPeak?'border-left-color:var(--ember);color:#e8b090':''}">
-  &#127758; <strong>${RN[r]} — ${MN[m]}:</strong> ${bugNote}
-</div>
-
-<div class="kb"><h3>🦟 Mosquito Protection</h3>
-<ul>
-<li><strong>Physical barrier first:</strong> Long sleeves, pants tucked into socks, head net. Most reliable defense — always available.</li>
-<li><strong>Smoke:</strong> One of the oldest effective repellents. Stay in campfire smoke. Smudge shelter with punk wood or dry cattail before sleeping.</li>
-<li><strong>Natural repellents:</strong> Crushed catnip leaves, pineapple weed, wax myrtle. Reapply every 1–2 hours.</li>
-<li><strong>Eliminate breeding sites:</strong> Any still water in containers breeds mosquitoes in 3–7 days. Dump every container near camp.</li>
-<li><strong>Timing:</strong> Stay near smoke or indoors at dawn and dusk — peak feeding times.</li>
-</ul></div>
-
-<div class="kb"><h3>&#129361; Tick Protocol</h3>
-<ul>
-<li><strong>Prevention:</strong> Tuck pants into socks. Light-colored clothing. Walk trail centers not brush edges.</li>
-<li><strong>Daily full-body check:</strong> Head/hairline, behind ears, armpits, groin, behind knees, between toes. Every single day.</li>
-<li><strong>Removal:</strong> Fine-tipped tweezers, grasp as close to skin as possible. Pull straight up — steady pressure, no twisting. Clean area with soap and water.</li>
-<li><strong>Do NOT use:</strong> Petroleum jelly, heat, nail polish, or matches — these cause the tick to regurgitate into the wound.</li>
-<li><strong>Watch for:</strong> Bullseye rash (3–30 days after bite) = Lyme disease. Seek treatment early — it becomes much harder to treat if missed.</li>
-</ul></div>
-
-<div class="kb"><h3>&#128029; Other Hazards for ${RN[r]}</h3>
-<table class="tbl">
-<tr><th>Insect</th><th>Risk</th><th>Prevention &amp; Response</th></tr>
-${(r==='southwest'||r==='texas')?`
-<tr><td>Bark Scorpion (most dangerous)</td><td>Sting very painful. Potentially dangerous for children/elderly.</td><td>Shake out boots and shoes every morning. Check sleeping gear. Keep area clear of debris.</td></tr>
-<tr><td>Kissing Bug (Triatomine)</td><td>Chagas disease vector. Active at night near rodent habitats.</td><td>Seal cracks in sleeping area. Check bedding. Avoid sleeping near wood rat nests.</td></tr>`:''}
-${(r==='southeast'||r==='texas'||r==='midatlantic')?`
-<tr><td>Fire Ants</td><td>Swarm and sting without warning. Allergic reaction possible.</td><td>Never stand still near a mound. Move immediately if stepped on. Antihistamine for reaction.</td></tr>
-<tr><td>Chiggers</td><td>Intensely itchy welts lasting weeks. Scratching invites infection.</td><td>Tuck clothing. Sulfur powder around boots repels. Cool bath helps.</td></tr>`:''}
-${(r==='alaska')?`
-<tr><td>Blackflies</td><td>Extremely aggressive biting. Swarms can be disabling in interior Alaska.</td><td>Head net is non-negotiable June–August. DEET helps. Smoke deterrent.</td></tr>
-<tr><td>No-see-ums (Midges)</td><td>Tiny — penetrate standard mesh. Painful bite, potential reaction.</td><td>Fine-mesh head net only. DEET. Most active at dawn/dusk near water.</td></tr>`:''}
-<tr><td>Yellowjackets/Wasps</td><td>Ground nests in late summer — stepped on without warning. Swarm attack.</td><td>Watch footing in August–September. If attacked: run straight, cover face, seek shelter.</td></tr>
-<tr><td>Deer/Horse Flies</td><td>Painful bite near water in warm months.</td><td>Light clothing. Keep moving — they target stationary subjects.</td></tr>
-</table></div>`;
-};
-
-
-PAGES.predators = function(r,m){
-  const isWinter = [12,1,2,3].includes(m);
-  return `
-<div class="ph"><span class="pi">&#128059;</span><h2>Predators &amp; Dangerous Wildlife</h2>
-<p class="sub">${RN[r]}: Know which animals are present and how to respond.</p></div>
-
-<div class="rn">&#127758; <strong>${RN[r]} — ${MN[m]}:</strong>
-${r==='alaska'?'GRIZZLY and BLACK BEARS present. Moose extremely dangerous year-round. Wolves possible.':''}
-${r==='pacific'?'Mountain lion, black bear, rattlesnake primary threats. Coyote common near camps.':''}
-${r==='southwest'?'Rattlesnake primary threat. Mountain lion in canyon country. Javelina defensive when cornered.':''}
-${r==='mountain'?'Grizzly bear (northern Rockies/Yellowstone), black bear, mountain lion, rattlesnake. Moose in northern areas.':''}
-${r==='midwest'?'Black bear (forests), coyote, feral hog expanding. Rattlesnake in rocky outcrops.':''}
-${r==='southeast'?'Black bear, cottonmouth/eastern diamondback, alligator (FL/coastal SE), wild hog, eastern coral snake.':''}
-${r==='northeast'?'Black bear, timber rattlesnake (rocky ledges), copperhead. Coyote common.':''}
-${r==='midatlantic'?'Black bear (mountains), timber rattlesnake, copperhead, cottonmouth (SE VA/NC). Wild hog spreading.':''}
-${r==='texas'?'Western diamondback rattlesnake, feral hog, mountain lion (west TX), cottonmouth (east/gulf), alligator (coastal).':''}
-${r==='hawaii'?'No large land predators. Feral pigs. Aggressive roosters. Box jellyfish and Portuguese Man o War coastal.':''}
-${isWinter?'Winter reduces predator activity in most regions — bears hibernating, snakes dormant, less wildlife movement overall.':''}
-</div>
-
-${(r==='alaska'||r==='mountain'||r==='pacific')?`
-<div class="kb"><h3>&#128059; Grizzly vs Black Bear — Know the Difference</h3>
-<table class="tbl">
-<tr><th>Feature</th><th>Grizzly / Brown Bear</th><th>Black Bear</th></tr>
-<tr><td>Shoulder</td><td>Prominent muscle hump</td><td>No hump — rump is highest point</td></tr>
-<tr><td>Face profile</td><td>Dished / concave</td><td>Straight or Roman-nosed</td></tr>
-<tr><td>Front claws</td><td>Long (2–4 in), light colored</td><td>Short, dark, curved</td></tr>
-<tr><td>Size</td><td>Much larger — 400–800+ lbs</td><td>150–400 lbs</td></tr>
-<tr><td>Attack response</td><td>Defensive attack: PLAY DEAD face down. Predatory: FIGHT BACK.</td><td>ALWAYS fight back — target nose and eyes</td></tr>
-</table>
-<div class="tip"><strong>Bear spray works.</strong> More effective than firearms for stopping charges. Carry on belt, not in pack. Use at 30–60 ft range.</div>
-</div>`:''}
-
-<div class="kb"><h3>&#128059; Bear Safety — Universal Rules</h3>
-<ul>
-<li>Store food 10 ft high, 4 ft from any trunk, away from sleeping area</li>
-<li>Never cook or eat in or near your sleeping area</li>
-<li>If you encounter a bear: speak calmly, appear large, back away slowly — never run</li>
-<li>Running triggers the chase instinct in all bears</li>
-</ul></div>
-
-${(r==='pacific'||r==='mountain'||r==='southwest'||r==='alaska')?`
-<div class="kb"><h3>&#129409; Mountain Lion</h3>
-<ul>
-<li>Secretive — if you see one watching you, it\'s been watching much longer</li>
-<li>Do NOT run. Make yourself large. Maintain eye contact. Pick up children.</li>
-<li>If attacked: fight back aggressively. Target eyes and nose. They expect passive prey.</li>
-</ul></div>`:''}
-
-${(r==='southeast'||r==='texas'||r==='midatlantic')?`
-<div class="kb"><h3>&#128250; Alligator &amp; Wild Hog</h3>
-<ul>
-<li><strong>Alligator:</strong> Never approach, never feed. Fast on land for 20 ft. If attacked: fight back, target eyes and snout — jaw-open muscles are weak.</li>
-<li><strong>Wild hog:</strong> Tusks, aggressive when cornered. Climb anything above ground immediately. Never corner a hog.</li>
-</ul></div>`:''}
-
-<div class="kb"><h3>&#128038; Other Hazardous Wildlife</h3>
-<table class="tbl">
-<tr><th>Animal</th><th>Risk</th><th>Response</th></tr>
-<tr><td>Moose (north)</td><td>Most dangerous animal in North America by attacks per year. Charges without warning.</td><td>Run and put large trees between you and the moose. They won\'t chase around obstacles.</td></tr>
-<tr><td>Coyote</td><td>Very rarely attacks adults. Risk to small children and pets.</td><td>Haze aggressively — yell, clap, throw objects. Never run.</td></tr>
-<tr><td>Black Widow Spider</td><td>Red hourglass underside. Neurotoxic. Dark undisturbed spaces.</td><td>Gloves when reaching into dark spaces. Seek medical care for bite.</td></tr>
-<tr><td>Brown Recluse</td><td>Violin mark on body. Tissue-destroying bite. Central/SE US.</td><td>Shake clothing before wearing. Gloves in storage/wood piles.</td></tr>
-</table></div>`;
-};
-
-
-
-// ================================================================
-// NEW PAGES — Livestock, Butchering, Crafts, Hunting, Security, Trees
-// ================================================================
-
-
-PAGES.butchering = function(r,m){
-return `
-<div class="ph"><span class="pi">🔪</span><h2>Hunting, Skinning &amp; Butchering</h2>
-<p class="sub">Big game and small game — from the field to the table. Done right, nothing is wasted.</p></div>
-
-<div class="kb"><h3>🦌 Big Game Hunting — Pre-Hunt Preparation</h3>
-<ul>
-<li><strong>Scouting:</strong> Find feeding areas (oak flats, farm fields, browse lines), bedding areas (dense brush, thermal cover), and travel corridors connecting them. The best stand location is on the trail between bed and food.</li>
-<li><strong>Sign to look for:</strong> Rubs (shredded bark on trees 2–4 ft up = buck), scrapes (bare oval dirt patch with overhanging licking branch = breeding sign), tracks, beds, scat, trails worn into soil.</li>
-<li><strong>Wind:</strong> The single most important factor. Deer and elk smell you from 500+ yards. Always approach and hunt with wind in your face (blowing from animal toward you, not reverse). Check wind constantly with a small puff bottle or milkweed fluff.</li>
-<li><strong>Elk calling:</strong> Bull elk bugle September–October. Cow calls (mew, estrus cow call) draw bulls in rut. Start with cow calls — less likely to spook than challenging a dominant bull.</li>
-<li><strong>Deer calling:</strong> Grunt calls and rattling antlers effective during rut (November in most US regions). Doe bleat calls work pre-rut and post-rut.</li>
-<li><strong>Shot placement — ethical and effective:</strong> Broadside: aim directly behind the front leg, one-third up the body (heart/lung zone). This is a double-lung shot — fastest, most reliable kill. Avoid head shots, spine shots, and gut shots. A well-placed double-lung shot drops most deer within 100 yards.</li>
-</ul></div>
-
-<div class="kb"><h3>🦌 Field Dressing Big Game — Do This Immediately</h3>
-<p>Field dressing removes the organs (gut pile) to cool the carcass and prevent meat spoilage. Do this within 30 minutes of the kill in warm weather.</p>
-<ol>
-<li>Roll deer onto its back, hindquarters slightly lower than shoulders on a slope</li>
-<li>Using a sharp knife, carefully make a shallow cut through the skin only from sternum to base of tail — insert two fingers ahead of the blade to tent the skin away from organs and avoid puncturing the stomach or intestines</li>
-<li>Roll the animal to one side and reach in to cut the windpipe and esophagus as high up in the chest cavity as possible</li>
-<li>Sever the diaphragm (the membrane separating chest from abdominal cavity)</li>
-<li>Reach forward, grip the windpipe, and pull all organs down and out in one motion</li>
-<li>Sever the rectum: circle with knife around anus, tie off with cord to prevent contamination, pull through from inside</li>
-<li>Prop the cavity open with a stick — air circulation begins cooling immediately</li>
-<li>Wipe cavity with grass or clean cloth — do NOT wash with water (promotes bacterial growth)</li>
-</ol>
-<div class="warn"><strong>Temperature kills meat:</strong> Meat must cool below 40°F within 4 hours or begin spoiling. In warm weather, get the hide off and the carcass quartered quickly. Hang in shade with air circulation.</div></div>
-
-<div class="kb"><h3>🔪 Skinning &amp; Quartering Deer/Elk</h3>
-<ol>
-<li><strong>Hang the animal:</strong> Hoist by rear legs from a strong branch or gambrel at least 8 feet up. Hanging makes skinning and quartering far easier and keeps meat cleaner.</li>
-<li><strong>Skin the legs first:</strong> Cut around each leg above the knee, then slit down the inside of each leg to the centerline. Peel skin away from the leg, using fist pressure between skin and membrane (fist skinning) — separates cleanly with minimal knife work.</li>
-<li><strong>Peel the hide:</strong> Work downward pulling with your fist. Use the knife only where the hide sticks. The hide should peel like a jacket being pulled off.</li>
-<li><strong>Remove the head</strong> at the base of the skull.</li>
-<li><strong>Quartering:</strong> Remove front shoulders (no joints — they pull away from the body), then hindquarters (cut through the ball joint of the hip), then backstraps (the prime muscle running along either side of the spine — slice close to bone from neck to hindquarters), then tenderloins (inside the body cavity along the spine — the most tender cut).</li>
-<li><strong>Neck meat, rib meat:</strong> All edible — bone out and use for burger or stew meat</li>
-</ol></div>
-
-<div class="kb"><h3>🐇 Small Game Skinning (Rabbit, Squirrel)</h3>
-<ol>
-<li>Pinch the skin on the back in the middle of the animal</li>
-<li>Make a 2-inch cut through the skin only</li>
-<li>Insert two fingers into the cut and pull in opposite directions — the skin tears clean in both directions</li>
-<li>Pull the skin down over the hindquarters and legs (like pulling off a sock), then forward over the head — it comes off in one piece</li>
-<li>Remove head and feet by cutting at joints</li>
-<li>Field dress the same as big game — small incision, remove all organs</li>
-</ol></div>
-
-<div class="kb"><h3>🎯 Preserving the Harvest</h3>
-<ul>
-<li><strong>Smoking:</strong> Cure meat in salt first 24–48 hours (1 tbsp salt per lb). Then smoke over hardwood (hickory, apple, cherry, mesquite) at 150–175°F for 6–12 hours until internal temp reaches 160°F. Smoked venison jerky lasts months without refrigeration.</li>
-<li><strong>Rendering fat:</strong> All animal fat is valuable. Render by slow heating in a pot with water. Fat melts, water evaporates, impurities sink. Pour off clean lard/tallow. Use for cooking, candles, soap, and waterproofing.</li>
-<li><strong>Bone broth:</strong> Crack all bones, simmer with any vegetables 12–24 hours. Extremely nutritious. Reduce further to a gelatin for long-term storage.</li>
-<li><strong>Organ priority:</strong> Liver (within 4 hours of kill), heart, kidneys first — most nutritious parts and first to spoil.</li>
-</ul></div>
-
-<div class="kb"><h3>🏹 Tanning a Hide — Basic Brain Tan Method</h3>
-<ol>
-<li><strong>Flesh the hide:</strong> Stretch hide on a frame or over a log. Scrape all fat and membrane from the flesh side with a dull blade working away from you. Thorough fleshing is essential.</li>
-<li><strong>Remove the hair:</strong> Soak hide 3–5 days in a bucket of water with wood ash (creates lye solution). Hair slips off easily. Scrape completely clean.</li>
-<li><strong>Brain tan:</strong> Every animal has enough brain to tan its own hide — this is literally true. Mash the brain (or use from another animal) with enough warm water to make a thick paste. Work into the hide thoroughly, squeezing and stretching for 1–2 hours. Let soak overnight.</li>
-<li><strong>Soften:</strong> Work the hide continuously as it dries — pull over a rope, pull through a hole in wood, stretch over your knee. The hide goes from stiff to soft as you work it while drying. This takes 2–4 hours of continuous work. If it dries stiff, re-wet and work again.</li>
-<li><strong>Smoke:</strong> Sew into a bag shape and smoke over a smoldering fire (punky wood, rotten wood) for 1–2 hours per side until golden-brown. Smoking sets the brain tan and allows the hide to be wet and dried repeatedly without going stiff. Unsmoked brain-tanned hide becomes rawhide when wet.</li>
-</ol></div>`;
-};
-PAGES.crafts = function(r,m){
-return `
-<div class="ph"><span class="pi">🧼</span><h2>Homestead Crafts</h2>
-<p class="sub">Soap, butter, candles, toothpaste, clothing — making everything you need from what you have.</p></div>
-
-<div class="kb"><h3>🧼 Making Soap</h3>
-<p>Soap is made from fat (any animal or plant fat) and lye (sodium hydroxide). On the homestead, lye is made from wood ash. This process has been used for thousands of years.</p>
-<h4 style="color:var(--gold);margin:10px 0 6px;font-family:Cinzel,serif;font-size:.8rem;letter-spacing:.1em">STEP 1 — MAKE LYE FROM WOOD ASH</h4>
-<ol>
-<li>Fill a wooden barrel or bucket that has holes in the bottom with clean hardwood ash (oak, hickory, fruitwood ash is strongest)</li>
-<li>Pour clean rainwater slowly over the ash and collect the liquid that drips through — this is lye water (potassium hydroxide solution)</li>
-<li>Test strength: drop a fresh egg in the lye water — it should float just at the surface with a dime-sized area showing. If it sinks, boil the solution to concentrate it.</li>
-</ol>
-<h4 style="color:var(--gold);margin:10px 0 6px;font-family:Cinzel,serif;font-size:.8rem;letter-spacing:.1em">STEP 2 — RENDER YOUR FAT</h4>
-<p>Melt any animal fat (lard, tallow from beef/deer, bear fat) with water in a large pot. Bring to a boil, then let cool. The clean fat solidifies on top. Scrape off. Repeat 2–3 times (called "trying" the fat) until pure white.</p>
-<h4 style="color:var(--gold);margin:10px 0 6px;font-family:Cinzel,serif;font-size:.8rem;letter-spacing:.1em">STEP 3 — COMBINE</h4>
-<ol>
-<li>Heat fat until melted (not boiling). Heat lye solution to roughly same temperature.</li>
-<li>Slowly pour lye into fat while stirring constantly — never reverse this order</li>
-<li>Stir until mixture traces (leaves a trail on surface when drizzled back in — like pudding)</li>
-<li>Add: dried herbs (lavender, rosemary, pine needles), rendered tallow for hardness, or honey for moisturizing</li>
-<li>Pour into wooden molds. Cover and insulate for 24 hours (saponification continues generating heat).</li>
-<li>Unmold and cut into bars. Cure in open air for 4–6 weeks. Fresh soap is harsh — curing completes saponification and makes it gentle.</li>
-</ol>
-<div class="warn"><strong>Lye is caustic:</strong> Burns skin and eyes. Wear gloves and eye protection when handling. Always add lye to fat, never fat to lye (violent reaction). Keep vinegar nearby to neutralize spills.</div></div>
-
-<div class="kb"><h3>🧈 Making Butter</h3>
-<p>The simplest dairy product — requires only fresh cream.</p>
-<ol>
-<li>Collect cream — let whole raw milk sit 12–24 hours, the cream rises to the top. Skim it off.</li>
-<li>Let cream come to room temperature (65–70°F). Cold cream takes much longer to churn.</li>
-<li>Pour into a jar with a tight lid (half-full). Shake vigorously and continuously for 10–20 minutes, or use a manual butter churn, or beat with a stick in a bucket.</li>
-<li>You will go through stages: heavy cream → whipped cream → the mixture will suddenly break and separate into butter granules floating in buttermilk</li>
-<li>Pour off buttermilk (save — excellent for baking and drinking)</li>
-<li>Place butter in a bowl of very cold water and knead repeatedly, changing water until it runs clear. This removes all buttermilk — any remaining causes rancidity within days.</li>
-<li>Add salt to taste (also extends shelf life). Press into a mold or wrap in cloth. Store in a cool place or submerged in salted brine.</li>
-</ol>
-<div class="tip"><strong>Clarified butter (ghee):</strong> Melt butter slowly and simmer until white milk solids sink and brown. Pour off clear golden fat. Ghee stores at room temperature for months without refrigeration — important survival food.</div></div>
-
-<div class="kb"><h3>🦷 Homemade Toothpaste</h3>
-<p>Multiple effective options from homestead and foraged materials:</p>
-<ul>
-<li><strong>Baking soda paste:</strong> Baking soda + small amount of water + few drops peppermint oil. Mildly abrasive, antibacterial. Effective basic toothpaste.</li>
-<li><strong>Coconut oil pulling + powder:</strong> Swish 1 tbsp coconut oil in mouth 10–20 minutes. Kills bacteria, reduces plaque. Follow with baking soda.</li>
-<li><strong>Charcoal powder:</strong> Grind hardwood charcoal very fine. Apply to wet toothbrush. Removes stains and kills bacteria. Rinse thoroughly (stains grout).</li>
-<li><strong>Herbal paste:</strong> Mix: baking soda 3 parts + bentonite clay 1 part + coconut oil 2 parts + dried sage powder + dried mint. Forms a paste. Sage is a traditional tooth cleaner used for centuries.</li>
-<li><strong>Twig brush:</strong> Chew the end of a fresh willow, birch, or neem twig until fibrous. Use the frayed end as a brush — willow contains antiseptic salicin. Effective and used across human history.</li>
-<li><strong>Salt water rinse:</strong> 1 tsp salt in 8 oz water. Rinse and gargle. Kills oral bacteria, reduces inflammation.</li>
-</ul></div>
-
-<div class="kb"><h3>🕯️ Making Candles &amp; Fat Lamps</h3>
-<ul>
-<li><strong>Tallow candles:</strong> Melt rendered beef or deer fat (tallow). Cut cotton cord or twisted plant fiber to length. Dip wick in hot tallow, remove, let harden — repeat 20+ times to build up the candle. Or pour into a cylindrical mold around a suspended wick. Tallow candles are smokier than modern paraffin but very effective.</li>
-<li><strong>Beeswax candles:</strong> If bees are kept. Melt wax, pour into molds. Burns clean and bright. Most valuable candle material available on a homestead.</li>
-<li><strong>Fat lamp:</strong> Any container (clay pot, shell, metal cup) + rendered fat + any fiber wick. Burns for hours. A pinch of salt in the fat reduces smoke. This technology has lit human dwellings for 40,000 years.</li>
-</ul></div>
-
-<div class="kb"><h3>🧵 Clothing from Animal Hide</h3>
-<p>See Butchering section for complete tanning process (brain tan method). Once you have soft, smoked buckskin:</p>
-<ul>
-<li><strong>Tools needed:</strong> Bone awl (sharpen a deer leg bone to a point) or metal awl, sinew (tendons from the back of any deer/elk — split into fine threads), sharp knife</li>
-<li><strong>Sinew:</strong> Pull tendons from the backstrap area, dry completely, then split into threads along natural grain. Sinew is stronger than most thread and expands when wet (self-sealing seams in moccasins).</li>
-<li><strong>Basic moccasin pattern:</strong> Trace around foot, add 1.5 inches all around. Cut two pieces (top and sole). Sew together flesh-side out with running stitch, then turn right-side out. Single-piece plains moccasin is even simpler — one piece wrapped and stitched.</li>
-<li><strong>Shirt/poncho:</strong> Two large hides seamed at shoulders with arm holes. Add fringe at seams — fringe drains water from the hide and dries quickly.</li>
-<li><strong>Rawhide uses:</strong> Un-tanned hide dried stiff = rawhide. Excellent for: knife sheaths, containers, lashing (tightens as it dries), drum heads, snowshoe webbing.</li>
-</ul></div>`;
-};
-PAGES.security = function(r,m){
-return `
-<div class="ph"><span class="pi">🔔</span><h2>Security &amp; Alert Systems</h2>
-<p class="sub">Perimeter warning systems, natural deterrents, and awareness — built from what you have.</p></div>
-
-<div class="kb"><h3>🔔 Primitive Perimeter Alert Systems</h3>
-<ul>
-<li><strong>Tripwire and cans:</strong> Run monofilament fishing line or dark thread at ankle height across likely approach paths. Tie to any noisy items — cans with pebbles, bells, aluminum tabs on cord. Nearly invisible at night. Use multiple lines at 6-inch intervals to catch anyone crossing carefully.</li>
-<li><strong>Gravel paths:</strong> Loose gravel around sleeping areas and entry points — footsteps on gravel are unmistakable. Japanese castles used "nightingale floors" on this same principle.</li>
-<li><strong>Noise perimeter:</strong> Hang dry branches, leaves in bundles on string between trees at multiple heights. Wind moves them constantly (false positives) but anything large hitting them produces a distinct sound.</li>
-<li><strong>Dogs:</strong> The most effective and oldest alarm system. A well-trained livestock guardian dog (LGD) or alert dog cannot be duplicated by any technology. They detect threats far earlier than any mechanical system. Large white LGDs (Great Pyrenees, Anatolian Shepherd) also physically deter predators from livestock.</li>
-<li><strong>Elevated sleeping platform:</strong> A raised sleeping area provides both early warning from height (you hear more) and a defensive advantage.</li>
-<li><strong>Clear sight lines:</strong> Remove brush and low vegetation within 30–50 feet of camp perimeter. Anyone approaching must cross open ground. Also eliminates snake and insect habitat near your living area.</li>
-</ul></div>
-
-<div class="kb"><h3>👁️ Awareness &amp; Observation Principles</h3>
-<ul>
-<li><strong>Watch wildlife behavior:</strong> Deer and birds alarm-call well before humans hear anything. A deer staring hard in one direction, flagging its tail, or "blowing" (loud snort) indicates something approaching from that direction. Crows and jays are especially reliable alarm callers.</li>
-<li><strong>Establish patterns and notice breaks:</strong> Know what your normal looks like — sounds, smells, animal behavior. Anything that deviates from normal warrants attention.</li>
-<li><strong>Fire visibility management:</strong> Fire visible for miles at night. Use Dakota holes (underground fire — see Fire section) for concealed cooking. Shield fire from view with tarps or terrain. In uncertain situations, cold camps are safer than warm, visible ones.</li>
-<li><strong>Smell management:</strong> Cook smells carry far. Cook early in the day when wind disperses smell upward. Don\'t cook food with strong smells near your sleeping area.</li>
-</ul></div>
-
-<div class="kb"><h3>🌿 Natural Barrier Plants</h3>
-<ul>
-<li><strong>Osage orange (Hedge Apple):</strong> Traditional living fence used across the Midwest. Dense, thorny, impenetrable when planted tight. Was used by pioneers before barbed wire.</li>
-<li><strong>Hawthorn:</strong> Native thorny tree/shrub. Dense hedgerow of hawthorn is nearly impossible to push through. Edible berries.</li>
-<li><strong>Rose (multiflora or native):</strong> Dense thorny canes that create impenetrable hedges within 3–4 years. Also provides rosehips (food) and nesting habitat for alarm-calling birds.</li>
-<li><strong>Cactus (Southwest):</strong> Cholla and prickly pear barriers in arid regions. Slow to establish but impossible to breach once mature.</li>
-<li><strong>Bamboo (Southeast/warm regions):</strong> Creates dense visual screen and sound-producing barrier in wind. Fast-growing. Use running bamboo in contained raised beds or it will spread aggressively.</li>
-</ul></div>`;
-};
-PAGES.trees = function(r,m){
-return `
-<div class="ph"><span class="pi">🌲</span><h2>Trees — Regional Guide</h2>
-<p class="sub">Trees provide food, medicine, building material, fire, tools, and medicine. Know your trees by region.</p></div>
-<div class="rn">&#127758; Showing key trees for <strong>${RN[r]}</strong>. Change region above to update.</div>
-
-${r==='pacific'?`
-<div class="kb"><h3>&#127795; Pacific Coast Key Trees</h3>
-<table class="tbl">
-<tr><th>Tree</th><th>ID</th><th>Food</th><th>Medicine/Other Uses</th></tr>
-<tr><td><strong>Coast Redwood</strong></td><td>Massive, red fibrous bark, flat needles in two rows</td><td>Inner bark edible (emergency)</td><td>Bark for basket fiber, rot-resistant lumber, tannin-rich bark for preserving hides</td></tr>
-<tr><td><strong>Douglas Fir</strong></td><td>Distinctive 3-pronged bracts sticking out of cones like mouse tails</td><td>Young tips as vitamin C tea</td><td>Best construction timber in the world. Resin as wound sealant. Strong straight poles.</td></tr>
-<tr><td><strong>Tanoak</strong></td><td>Evergreen, holly-like leaves, acorns with spiny burr-cap</td><td>Acorns — leach tannins (7+ days), grind into high-calorie flour</td><td>Bark tea as astringent wound wash. Tannin for hide preservation.</td></tr>
-<tr><td><strong>California Bay Laurel</strong></td><td>Strong spicy smell when leaves crushed, yellow flowers</td><td>Dried leaves as extremely potent seasoning (1/4 of a bay leaf suffices). Roasted nuts edible.</td><td>Leaf infusion for headache. Natural insect repellent — scatter leaves in stored grain.</td></tr>
-<tr><td><strong>Pacific Madrone</strong></td><td>Red peeling papery bark, large oval leaves, orange-red berries</td><td>Berries edible raw or dried (mealy, mild)</td><td>Bark tea for colds and sore throat. Very hard wood for tool handles.</td></tr>
-<tr><td><strong>Red Alder</strong></td><td>Light gray-white bark, oval leaves with rolled edges</td><td>Inner bark (cambium) — emergency food</td><td>Bark tea for skin conditions. Natural antibiotic properties. Wood for smoking salmon — traditional.</td></tr>
-<tr><td><strong>Bigleaf Maple</strong></td><td>Huge maple leaves 6–12 in wide, helicopter seeds</td><td>Spring sap into syrup. Seeds edible boiled. Young leaves edible.</td><td>Inner bark as emergency food. Excellent firewood.</td></tr>
-</table></div>` :
-
-r==='southwest'?`
-<div class="kb"><h3>&#127795; Southwest Desert Key Trees</h3>
-<table class="tbl">
-<tr><th>Tree</th><th>ID</th><th>Food</th><th>Medicine/Other Uses</th></tr>
-<tr><td><strong>Mesquite</strong></td><td>Thorny, small leaflets in compound leaves, tan seed pods</td><td>Pods ground into sweet flour (mezquitamal). Seeds edible. Flowers edible. Staple food of the desert.</td><td>Gum (sap) as eye wash and for sore throat. Wood for smoking meat. Excellent fuel — burns very hot.</td></tr>
-<tr><td><strong>Palo Verde</strong></td><td>Green trunk and branches, sparse small leaflets</td><td>Green seeds edible raw in spring. Dried seeds ground into flour.</td><td>Provides critical shade. Nitrogen fixer — improves desert soil.</td></tr>
-<tr><td><strong>Saguaro Cactus (giant)</strong></td><td>Iconic columnar cactus — AZ/Sonora only</td><td>Bright red fruit at top — traditional Tohono O\'odham harvest food. Very sweet, high calorie. Fermented into traditional wine.</td><td>Ribs used for construction poles. Boots (holes in trunk) provide shelter from heat.</td></tr>
-<tr><td><strong>Pinyon Pine</strong></td><td>Short 2-needle bundles, round fat cones</td><td>Pine nuts — highest calorie wild food available. Harvest Sept–Oct.</td><td>Resin as wound sealant, fire starter, waterproofing. Needles for vitamin C tea.</td></tr>
-<tr><td><strong>One-seed Juniper</strong></td><td>Scale-like leaves, blue-gray berries, shredding bark</td><td>Berries edible — use as seasoning, dry for storage</td><td>Bark for tinder (excellent), basket fiber, cordage. Berries: kidney/urinary tonic. Natural insect repellent.</td></tr>
-<tr><td><strong>Cottonwood</strong></td><td>Heart-shaped leaves that tremble, cottony seed fluff in spring</td><td>Inner bark as emergency food (spring)</td><td>Indicates water nearby — always. Spring buds (balm of Gilead) steeped in oil = natural pain-relieving salve.</td></tr>
-</table></div>` :
-
-r==='alaska'?`
-<div class="kb"><h3>&#127795; Alaska Key Trees</h3>
-<table class="tbl">
-<tr><th>Tree</th><th>ID</th><th>Food</th><th>Medicine/Other Uses</th></tr>
-<tr><td><strong>White Spruce</strong></td><td>Blue-green needles, square (roll between fingers), small cones hang down</td><td>Young tips: vitamin C tea — critical for scurvy prevention. Inner bark emergency food.</td><td>Roots split for basket lashing. Pitch for canoe sealing and wound dressing. Excellent construction wood.</td></tr>
-<tr><td><strong>Paper Birch</strong></td><td>White peeling papery bark with horizontal lines</td><td>Spring sap sweet drink. Inner bark edible (grind into flour). Bark tea mildly nutritious.</td><td>Bark waterproofs shelters, makes containers, and starts fire even wet — birch bark resin is very flammable. Excellent shelter material.</td></tr>
-<tr><td><strong>Quaking Aspen</strong></td><td>Round leaves that tremble in slightest breeze, white-green smooth bark with black marks</td><td>Inner bark (cambium) edible in spring — scrape and eat or dry into flour strips</td><td>Bark contains salicin (aspirin). Boil bark for fever/pain relief. Soft wood for friction fire spindle.</td></tr>
-<tr><td><strong>Balsam Poplar</strong></td><td>Large heart-shaped sticky buds with strong balsam smell, heart-shaped leaves</td><td>Inner bark edible spring</td><td>Sticky buds ("Balm of Gilead") infused in oil = excellent natural salve for chapped skin, wounds, and joint pain. One of the most useful boreal medicines.</td></tr>
-<tr><td><strong>Sitka Spruce (coastal)</strong></td><td>Very sharp needles, largest spruce species</td><td>Young tips, inner bark, pitch</td><td>Roots extremely pliable — used for basket weaving and lashing. Strongest construction wood in Alaska.</td></tr>
-<tr><td><strong>Alder</strong></td><td>Dark bark, oval leaves, small woody "cones"</td><td>Inner bark emergency food</td><td>Bark tea: antibiotic, used for skin infections. Wood for smoking salmon — traditional alder smoke flavor. Nitrogen fixer in soil.</td></tr>
-</table></div>` :
-
-r==='southeast'?`
-<div class="kb"><h3>&#127795; Southeast Key Trees</h3>
-<table class="tbl">
-<tr><th>Tree</th><th>ID</th><th>Food</th><th>Medicine/Other Uses</th></tr>
-<tr><td><strong>Longleaf Pine</strong></td><td>Very long needles (10–18 in) in bundles of 3, large cones</td><td>Pine needle tea (vitamin C). Inner bark edible. Pollen edible in spring.</td><td>Pitch/tar for waterproofing. Fatwood (resin-soaked heartwood) lights fire in any conditions. Turpentine from sap as antiseptic.</td></tr>
-<tr><td><strong>Live Oak</strong></td><td>Evergreen, small oval leaves, small narrow acorns</td><td>Acorns — leach 5-7 days, grind into flour. High calorie, sustainable annual harvest.</td><td>Tannin-rich bark for hide tanning. Extremely hard wood for tools and construction.</td></tr>
-<tr><td><strong>Sassafras</strong></td><td>Three distinct leaf shapes on SAME tree: oval, mitten, 3-lobed. Spicy root smell.</td><td>Root bark tea (root beer flavor). Leaves dried and powdered = filé (thickener for gumbo). Traditional spring tonic.</td><td>Root bark tea: traditional blood purifier, antimicrobial. Branches used as spice sticks in cooking.</td></tr>
-<tr><td><strong>Tulip Poplar</strong></td><td>Tulip-shaped leaves with flat base, distinctive tulip flowers, straight tall trunk</td><td>Flower nectar. Inner bark tea.</td><td>Bark tea: antifungal, antiparasitic. Soft straight wood for dugout canoes and carving. Used medicinally for fever.</td></tr>
-<tr><td><strong>Sweetgum</strong></td><td>Star-shaped 5-pointed leaves, spiky round seed balls on ground</td><td>Young leaves edible. Gum/resin edible (sweet, used as chewing gum).</td><td>Resin ("storax") is a natural antiseptic used on wounds. Bark tea for skin conditions.</td></tr>
-<tr><td><strong>Pawpaw</strong></td><td>Large tropical-looking drooping leaves, no branching pattern, banana-like fruits</td><td>Fruits August–October — largest native fruit, custard flavor, very high calorie</td><td>Bark and seeds contain natural pesticide compounds. Bark fiber for cordage.</td></tr>
-</table></div>` :
-
-r==='mountain'?`
-<div class="kb"><h3>&#127795; Mountain West Key Trees</h3>
-<table class="tbl">
-<tr><th>Tree</th><th>ID</th><th>Food</th><th>Medicine/Other Uses</th></tr>
-<tr><td><strong>Ponderosa Pine</strong></td><td>Long 2-3 needle bundles, vanilla/butterscotch smell on warm bark, large plates on trunk</td><td>Inner bark edible spring. Needles for vitamin C tea. Pollen edible in spring.</td><td>Pitch for wound dressing and waterproofing. Excellent construction lumber. Bark plates harvest for fire building.</td></tr>
-<tr><td><strong>Quaking Aspen</strong></td><td>Fluttering round leaves, smooth pale gray-green bark, clonal groves</td><td>Inner bark edible spring — sweet and starchy</td><td>Bark contains salicin. Boil bark for aspirin-equivalent. Excellent friction fire spindle. Soft wood for carving.</td></tr>
-<tr><td><strong>Lodgepole Pine</strong></td><td>Straight, 2-needle bundles, serotinous cones (sealed with resin, open in fire)</td><td>Inner bark edible spring. Pine nut in cones.</td><td>Straight poles used for tipi frames and cabin construction. Bark for emergency shelter covering.</td></tr>
-<tr><td><strong>Engelmann Spruce</strong></td><td>Sharp square needles, purple cones, high elevation</td><td>Young tips as vitamin C tea</td><td>Roots for lashing. Excellent building wood for mountain construction.</td></tr>
-<tr><td><strong>Rocky Mountain Juniper</strong></td><td>Scale-like leaves, blue berries, shredding bark, aromatic</td><td>Berries as seasoning. Tea from berries.</td><td>Bark for tinder — strips and shreds into fine fibers. Natural insect repellent. Berries for kidney support.</td></tr>
-<tr><td><strong>Limber Pine</strong></td><td>5-needle bundles (like white pine), very flexible branches</td><td>Large calorie-dense pine nuts</td><td>Resin as wound sealant. Needles for vitamin C. Flexible branches for basket framework.</td></tr>
-</table></div>` :
-
-`<div class="kb"><h3>&#127795; Key Trees for ${RN[r]}</h3>
-<div class="cg">
-  <div class="card"><div class="ct">&#127795; Oak (multiple species)</div><p><strong>ID:</strong> Lobed leaves, acorns. Dozens of species across eastern and western US. <strong>Food:</strong> Acorns — leach tannins in water 3-7 days, dry and grind into high-calorie flour. Annual harvest. <strong>Uses:</strong> Tannin-rich bark for hide tanning. Hardest available wood for tool handles, wedges, and construction.</p></div>
-  <div class="card"><div class="ct">&#127795; Eastern White Pine</div><p><strong>ID:</strong> Exactly 5 needles per bundle. Tall straight trunk. <strong>Food:</strong> Pine needle tea — highest vitamin C of any common tree. Inner bark edible. <strong>Uses:</strong> Resin seals wounds and waterproofs. Excellent construction lumber. Fatwood lights fires in wet conditions.</p></div>
-  <div class="card"><div class="ct">&#127795; Black Walnut</div><p><strong>ID:</strong> Pinnately compound leaves, round green-husked nuts, strong smell. <strong>Food:</strong> Very calorie-dense nuts — harvest Oct-Nov with gloves (husks stain). <strong>Uses:</strong> Hull extract as natural black dye. Wood extremely hard for tool handles. Hulls as natural dewormer.</p></div>
-  <div class="card"><div class="ct">&#127795; Willow (multiple species)</div><p><strong>ID:</strong> Always near water. Long narrow lance-shaped leaves. Flexible branches. <strong>Food:</strong> Inner bark chewed for pain/fever (contains salicin = natural aspirin). <strong>Uses:</strong> Flexible branches for basket weaving, fish traps, snare construction. Indicates water within 50 feet always.</p></div>
-  <div class="card"><div class="ct">&#127795; Birch</div><p><strong>ID:</strong> White peeling bark in northeast. <strong>Food:</strong> Spring sap sweet drink. Inner bark edible — grind into flour. <strong>Uses:</strong> Bark waterproofs shelters and starts fire even when wet. Bark for containers. Birch tar for adhesive and preservative.</p></div>
-  <div class="card"><div class="ct">&#127795; Hickory</div><p><strong>ID:</strong> Compound leaves, shaggy or plated bark depending on species, hard-shelled nuts. <strong>Food:</strong> Most calorie-dense nut in eastern North America — taste like pecans. Harvest Oct-Nov. <strong>Uses:</strong> The strongest, most shock-resistant wood available. Essential for tool handles, axe handles, bow staves.</p></div>
-</div></div>`}
-
-<div class="kb"><h3>&#127795; How to Read a Tree for Survival Value</h3>
-<table class="tbl">
-<tr><th>What You Need</th><th>What to Look For</th></tr>
-<tr><td>Food (immediate)</td><td>Fruit/berry trees in season, nut trees in fall, inner bark (cambium) of most trees in spring</td></tr>
-<tr><td>Fire starting</td><td>Dry dead standing wood, birch bark, pine resin/fatwood, dry cedar inner bark for tinder</td></tr>
-<tr><td>Construction</td><td>Straight-grained conifers (pine, spruce, fir, cedar) for poles and logs — resist rot</td></tr>
-<tr><td>Tool handles</td><td>Hickory, ash, oak — hardest shock-resistant woods. Green wood carved and dried slowly.</td></tr>
-<tr><td>Medicine</td><td>Willow bark (pain/fever), cottonwood buds (wound salve), alder bark (antibiotic), pine pitch (wound sealant)</td></tr>
-<tr><td>Water location</td><td>Willow, cottonwood, alder, sycamore — always within 50 ft of water</td></tr>
-<tr><td>Cordage/fiber</td><td>Inner bark of basswood, willow, cedar, stinging nettle — strip and twist into cordage</td></tr>
-</table></div>`;
-};
-PAGES.naturaltp = function(r,m){
-return `
-<div class="ph"><span class="pi">🌿</span><h2>Natural Hygiene Plants</h2>
-<p class="sub">What to use when modern supplies run out — for every hygiene need.</p></div>
-<div class="rn">&#127758; Region: <strong>${RN[r]}</strong>. Plants listed are those commonly found in your region.</div>
-
-<div class="kb"><h3>🌿 Natural Toilet Paper — Safe Plants by Region</h3>
-<div class="warn"><strong>Rules:</strong> Only use plants you can positively identify. Avoid any plant with milky white sap (usually toxic/irritating), fuzzy or hairy leaves that could cause skin reaction, or any plant in the parsley/carrot family (risk of toxics). Always use the smooth underside of a leaf against skin.</div>
-<table class="tbl">
-<tr><th>Plant</th><th>Where Found</th><th>How to Identify</th><th>Notes</th></tr>
-<tr><td><strong>Large Mullein</strong> (best choice)</td><td>Roadsides, disturbed soil — nearly all US regions</td><td>Very large, thick, velvety-soft leaves in a ground rosette first year. Tall flower stalk second year. Unmistakable softness.</td><td>The "cowboy toilet paper." Thick and soft. Year-round availability of dried stalks holding leaves.</td></tr>
-<tr><td><strong>Common Mullein (same)</strong></td><td>Most of North America</td><td>Soft woolly leaves, large rosette, tall yellow flower spike</td><td>Most comfortable natural TP available anywhere in North America.</td></tr>
-<tr><td><strong>Large Dock / Burdock leaves</strong></td><td>Disturbed ground, roadsides, stream banks — all US</td><td>Very large heart-shaped to oval leaves. Dock has smooth underside, burdock has fine hairs.</td><td>Smooth underside of dock leaf works well. Burdock — use smooth side only.</td></tr>
-<tr><td><strong>Smooth Stones</strong></td><td>Streams everywhere</td><td>Rounded, smooth, 2–3 inch river stones</td><td>Traditional in many cultures. Rinse after use. Carry a small pouch of clean smooth stones — reusable indefinitely.</td></tr>
-<tr><td><strong>Corn Husks / Dry Grass</strong></td><td>Fields, homestead</td><td>Any dry non-scratchy grass, flattened</td><td>Bunch together and fold. Works well when dry.</td></tr>
-<tr><td><strong>Snow</strong></td><td>Winter, all northern regions</td><td>N/A</td><td>Excellent natural wipe — cold but hygienic. Traditional in northern indigenous cultures.</td></tr>
-<tr><td><strong>Water (hand wash)</strong></td><td>Any water source</td><td>N/A</td><td>Safest and most hygienic method used by majority of world\'s population. Requires thorough hand washing after.</td></tr>
-</table>
-<div class="warn"><strong>NEVER USE:</strong> Poison Ivy, Poison Oak, Poison Sumac (three-leafed or white-berried), Stinging Nettle (unless boiled first), any plant with milky sap, nettles, wild parsnip, wild parsley, or any plant you cannot positively identify.</div></div>
-
-<div class="kb"><h3>🧼 Hygiene Without Modern Supplies</h3>
-<ul>
-<li><strong>Soap substitute:</strong> Soapwort plant (Saponaria) — boil leaves and stems, creates soapy lather. Also: yucca root lather (Southwest). Soaproot (California).</li>
-<li><strong>Deodorant:</strong> Baking soda applied dry. Dilute apple cider vinegar wiped on. Activated charcoal powder. Rubbing with dry smooth river clay absorbs odor.</li>
-<li><strong>Menstrual supplies:</strong> Dried and softened sphagnum moss (used historically — naturally antibacterial). Clean strips of cotton or soft animal hide (buckskin). Wash and dry in sun after use — UV light is an effective disinfectant.</li>
-<li><strong>Hair cleaning:</strong> Dry clay or fine dry soil rubbed through hair, then brushed out — absorbs oil. Apple cider vinegar rinse after any water washing.</li>
-<li><strong>Wound cleaning:</strong> Boiled water only. Strong enough — and most important. Pine resin as a follow-up antiseptic sealant.</li>
-</ul></div>`;
-};
-
-
-
-// ================================================================
-// OFFLINE MAP PAGE — SVG US Map with state detail + geo landmarks
-// No internet required. All data embedded.
-// ================================================================
-
 
 PAGES.mapview = function(r,m){
   var sel = window._selectedState || null;
   var view = window._mapView || 'grid';
   var sd = sel ? STATE_DATA[sel] : null;
+  var cached = getCachedCount();
 
   var SR = {WA:'pacific',OR:'pacific',CA:'pacific',MT:'mountain',ID:'mountain',WY:'mountain',CO:'mountain',UT:'mountain',NV:'mountain',ND:'midwest',SD:'midwest',NE:'midwest',KS:'midwest',MN:'midwest',IA:'midwest',MO:'midwest',WI:'midwest',IL:'midwest',IN:'midwest',OH:'midwest',MI:'midwest',AZ:'southwest',NM:'southwest',TX:'texas',OK:'texas',AR:'southeast',LA:'southeast',TN:'southeast',MS:'southeast',AL:'southeast',GA:'southeast',FL:'southeast',SC:'southeast',NC:'midatlantic',VA:'midatlantic',WV:'midatlantic',KY:'southeast',MD:'midatlantic',DE:'midatlantic',PA:'midatlantic',NJ:'midatlantic',NY:'northeast',CT:'northeast',RI:'northeast',MA:'northeast',VT:'northeast',NH:'northeast',ME:'northeast',AK:'alaska',HI:'hawaii',DC:'midatlantic'};
   var RC = {pacific:'#1a4a2a',southwest:'#4a2a0a',mountain:'#0a2a4a',midwest:'#1a3a0a',southeast:'#3a1a0a',northeast:'#0a1a3a',midatlantic:'#2a1a3a',texas:'#3a1a1a',alaska:'#0a3a4a',hawaii:'#2a0a3a'};
 
-  // State center coordinates and zoom levels for Leaflet
-  var STATE_MAP = {
-    AL:{lat:32.8,lng:-86.8,z:7}, AK:{lat:64.2,lng:-153.0,z:4}, AZ:{lat:34.3,lng:-111.1,z:7},
-    AR:{lat:34.8,lng:-92.2,z:7}, CA:{lat:36.8,lng:-119.4,z:6}, CO:{lat:39.0,lng:-105.5,z:7},
-    CT:{lat:41.6,lng:-72.7,z:9}, DE:{lat:39.0,lng:-75.5,z:9}, FL:{lat:28.5,lng:-82.0,z:7},
-    GA:{lat:32.7,lng:-83.4,z:7}, HI:{lat:20.5,lng:-157.0,z:7}, ID:{lat:44.3,lng:-114.5,z:6},
-    IL:{lat:40.0,lng:-89.2,z:7}, IN:{lat:39.9,lng:-86.3,z:7}, IA:{lat:42.1,lng:-93.5,z:7},
-    KS:{lat:38.5,lng:-98.4,z:7}, KY:{lat:37.5,lng:-85.3,z:7}, LA:{lat:31.0,lng:-91.8,z:7},
-    ME:{lat:45.4,lng:-69.2,z:7}, MD:{lat:39.0,lng:-76.8,z:8}, MA:{lat:42.3,lng:-71.8,z:8},
-    MI:{lat:44.5,lng:-85.0,z:7}, MN:{lat:46.4,lng:-94.0,z:7}, MS:{lat:32.7,lng:-89.7,z:7},
-    MO:{lat:38.5,lng:-92.5,z:7}, MT:{lat:47.0,lng:-109.5,z:6}, NE:{lat:41.5,lng:-99.8,z:7},
-    NV:{lat:39.5,lng:-116.5,z:7}, NH:{lat:43.7,lng:-71.6,z:8}, NJ:{lat:40.1,lng:-74.5,z:8},
-    NM:{lat:34.5,lng:-106.0,z:7}, NY:{lat:43.0,lng:-75.0,z:7}, NC:{lat:35.6,lng:-79.4,z:7},
-    ND:{lat:47.5,lng:-100.5,z:7}, OH:{lat:40.4,lng:-82.8,z:7}, OK:{lat:35.5,lng:-97.5,z:7},
-    OR:{lat:44.0,lng:-120.5,z:7}, PA:{lat:41.0,lng:-77.5,z:7}, RI:{lat:41.7,lng:-71.5,z:10},
-    SC:{lat:33.8,lng:-80.9,z:8}, SD:{lat:44.0,lng:-100.2,z:7}, TN:{lat:35.9,lng:-86.4,z:7},
-    TX:{lat:31.5,lng:-99.3,z:6}, UT:{lat:39.5,lng:-111.1,z:7}, VT:{lat:44.1,lng:-72.7,z:8},
-    VA:{lat:37.5,lng:-79.0,z:7}, WA:{lat:47.4,lng:-120.5,z:7}, WV:{lat:38.7,lng:-80.6,z:8},
-    WI:{lat:44.5,lng:-89.5,z:7}, WY:{lat:43.0,lng:-107.5,z:7}, DC:{lat:38.9,lng:-77.0,z:12}
-  };
-
   function makeTile(code){
     if(!code) return '<div style="width:52px;height:44px"></div>';
-    var isSel=code===sel, nm=(STATE_DATA[code]||{}).name||code;
+    var isSel=code===sel;
+    var isCached=!!window.MAP_CACHE_STATUS[code];
+    var nm=(STATE_DATA[code]||{}).name||code;
     var bg=isSel?'#b8922a':(sel?'rgba(15,25,15,.5)':RC[SR[code]]||'#1a2a1a');
-    var bd=isSel?'2px solid #ffd700':'1px solid rgba(150,200,255,.2)';
+    var bd=isSel?'2px solid #ffd700':(isCached?'1px solid rgba(61,150,61,.5)':'1px solid rgba(150,200,255,.2)');
     var op=(!sel||isSel)?'1':'0.35';
-    return '<div onclick="window.mapSelectState(\''+code+'\')" title="'+nm+'" style="width:52px;height:44px;background:'+bg+';border:'+bd+';border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:'+op+';transition:all .15s;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.05em;color:'+(isSel?'#111':'rgba(220,235,255,.85)')+';font-weight:'+(isSel?'bold':'400')+'">'+code+'</div>';
+    return '<div onclick="window.mapSelectState(\''+code+'\')" title="'+nm+(isCached?' (cached)':'')+'" style="width:52px;height:44px;background:'+bg+';border:'+bd+';border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;opacity:'+op+';transition:all .15s;gap:2px">'
+      +'<span style="font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.05em;color:'+(isSel?'#111':'rgba(220,235,255,.85)')+';font-weight:'+(isSel?'bold':'400')+'">'+code+'</span>'
+      +(isCached?'<span style="font-size:.45rem;color:rgba(100,220,100,.7)">&#9679;</span>':'')
+      +'</div>';
   }
 
   var rows=[
@@ -3220,72 +2235,132 @@ PAGES.mapview = function(r,m){
   ];
 
   var opts=Object.entries(STATE_DATA).sort(function(a,b){return a[1].name.localeCompare(b[1].name);})
-    .map(function(e){return '<option value="'+e[0]+'"'+(e[0]===sel?' selected':'')+'>'+e[1].name+'</option>';}).join('');
+    .map(function(e){ return '<option value="'+e[0]+'"'+(e[0]===sel?' selected':'')+'>'+e[1].name+'</option>'; }).join('');
+
+  // ── SETUP / DOWNLOAD VIEW ──
+  if(view === 'setup'){
+    return '<div class="ph"><span class="pi">&#11015;&#65039;</span><h2>Download Maps for Offline Use</h2>'
+      +'<p class="sub">Cache all 50 state maps while connected to internet. After that, maps work completely offline on your USB.</p></div>'
+      +'<div style="background:linear-gradient(135deg,#0a1a0a,#0a0d1a);border:1px solid rgba(184,146,42,.3);border-radius:6px;padding:24px;margin-bottom:20px">'
+      // How it works
+      +'<h3 style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold);letter-spacing:.1em;margin-bottom:14px">&#128712; HOW IT WORKS</h3>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px">'
+      +'<div style="background:rgba(184,146,42,.08);border:1px solid rgba(184,146,42,.2);border-radius:4px;padding:12px">'
+      +'<div style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold);margin-bottom:6px">STEP 1 — CONNECT</div>'
+      +'<div style="font-size:.85rem;color:rgba(242,232,213,.75);line-height:1.6">Connect your device to internet (WiFi or mobile data). You only need to do this once.</div>'
+      +'</div>'
+      +'<div style="background:rgba(184,146,42,.08);border:1px solid rgba(184,146,42,.2);border-radius:4px;padding:12px">'
+      +'<div style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold);margin-bottom:6px">STEP 2 — DOWNLOAD</div>'
+      +'<div style="font-size:.85rem;color:rgba(242,232,213,.75);line-height:1.6">Click the button below. The app downloads map tiles for all 50 states and saves them to your device\'s browser cache.</div>'
+      +'</div>'
+      +'<div style="background:rgba(184,146,42,.08);border:1px solid rgba(184,146,42,.2);border-radius:4px;padding:12px">'
+      +'<div style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold);margin-bottom:6px">STEP 3 — OFFLINE</div>'
+      +'<div style="font-size:.85rem;color:rgba(242,232,213,.75);line-height:1.6">Disconnect. All maps now load instantly from your local cache. Full zoom, terrain, satellite — no internet needed.</div>'
+      +'</div>'
+      +'</div>'
+      // Cache status
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap">'
+      +'<div style="font-family:Cinzel,serif;font-size:.8rem;color:var(--ash)">MAPS CACHED:</div>'
+      +'<div style="font-family:Cinzel,serif;font-size:1.4rem;color:var(--gold)" id="setup-cache-count">'+cached+'/50</div>'
+      +'<div style="flex:1;height:12px;background:rgba(100,150,220,.15);border-radius:6px;overflow:hidden;min-width:100px">'
+      +'<div id="setup-cache-bar" style="height:100%;background:linear-gradient(90deg,var(--moss),#5a9a5a);border-radius:6px;width:'+(cached*2)+'%;transition:width .5s"></div>'
+      +'</div>'
+      +(cached===50?'<div style="color:#5a9a5a;font-family:Cinzel,serif;font-size:.75rem">&#10003; ALL MAPS CACHED</div>':'')
+      +'</div>'
+      // Main download button
+      +'<div id="setup-controls">'
+      +(cached < 50
+        ? '<button id="dl-all-btn" onclick="window.startDownloadAll()" style="background:var(--moss);color:#fff;border:none;padding:14px 32px;cursor:pointer;border-radius:4px;font-family:Cinzel,serif;font-size:.85rem;letter-spacing:.12em;margin-right:12px;margin-bottom:10px">&#11015; DOWNLOAD ALL 50 STATES</button>'
+        : '<button onclick="window.startDownloadAll()" style="background:#1a3a1a;color:#5a9a5a;border:1px solid rgba(61,150,61,.4);padding:14px 32px;cursor:pointer;border-radius:4px;font-family:Cinzel,serif;font-size:.85rem;letter-spacing:.12em;margin-right:12px;margin-bottom:10px">&#11015; RE-DOWNLOAD ALL MAPS</button>'
+      )
+      +'<button onclick="window.setMapView(\'grid\')" style="background:#1a2840;color:#a0c4f0;border:1px solid rgba(100,150,220,.3);padding:14px 24px;cursor:pointer;border-radius:4px;font-family:Cinzel,serif;font-size:.75rem;letter-spacing:.1em">SKIP — USE ONLINE ONLY</button>'
+      +'</div>'
+      // Progress area (hidden until download starts)
+      +'<div id="dl-progress-area" style="display:none;margin-top:20px">'
+      +'<div style="font-family:Cinzel,serif;font-size:.8rem;color:var(--gold);letter-spacing:.1em;margin-bottom:10px" id="dl-status-text">Starting download...</div>'
+      +'<div style="height:16px;background:rgba(100,150,220,.15);border-radius:8px;overflow:hidden;margin-bottom:8px">'
+      +'<div id="dl-progress-fill" style="height:100%;background:linear-gradient(90deg,#1a6a2a,#3a9a5a);border-radius:8px;width:0%;transition:width .4s;position:relative">'
+      +'<div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.6rem;color:rgba(255,255,255,.8);font-family:Cinzel,serif" id="dl-pct">0%</div>'
+      +'</div>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--ash);margin-bottom:14px">'
+      +'<span id="dl-current-state">Preparing...</span>'
+      +'<span id="dl-count">0 / 50 states</span>'
+      +'</div>'
+      // Live state grid showing download progress
+      +'<div id="dl-state-grid" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">'
+      +Object.keys(MAP_CENTERS).sort().map(function(code){
+        return '<div id="dlst-'+code+'" title="'+((STATE_DATA[code]||{}).name||code)+'" style="width:36px;height:28px;background:'+(window.MAP_CACHE_STATUS[code]?'rgba(61,150,61,.5)':'rgba(30,50,30,.6)')+';border:1px solid '+(window.MAP_CACHE_STATUS[code]?'rgba(61,150,61,.6)':'rgba(100,150,100,.2)')+';border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:Cinzel,serif;font-size:.55rem;color:'+(window.MAP_CACHE_STATUS[code]?'#80e880':'rgba(150,200,150,.5)')+'">'+code+'</div>';
+      }).join('')
+      +'</div>'
+      +'<button id="dl-cancel-btn" onclick="window.cancelDownload()" style="display:none;background:#3a1a1a;color:#e88080;border:1px solid rgba(220,100,100,.3);padding:8px 20px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em;margin-top:12px">&#9632; STOP DOWNLOAD</button>'
+      +'</div>'
+      +'</div>'
+      +'<button onclick="window.setMapView(\'grid\')" style="background:#1a2840;color:#a0c4f0;border:1px solid rgba(100,150,220,.3);padding:8px 18px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em">&#8592; BACK TO MAP</button>';
+  }
 
   // ── STATE MAP VIEW ──
-  if(sel && view!=='grid'){
-    var sm = STATE_MAP[sel]||{lat:39,lng:-98,z:6};
-    var isGeo = view==='geo';
-    var isTerrain = view==='terrain';
+  if(sel && view !== 'grid'){
+    var isGeo = view === 'geo';
+    var ts = function(active){ return 'padding:8px 16px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.08em;border:1px solid '+(active?'rgba(184,146,42,.5)':'rgba(100,150,220,.25)')+';background:'+(active?'rgba(184,146,42,.2)':'#0d1520')+';color:'+(active?'var(--gold)':'#8ab4cc')+';margin-right:6px;margin-bottom:6px'; };
 
-    var tabStyle = function(active){
-      return 'padding:8px 16px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.08em;border:1px solid '+(active?'rgba(184,146,42,.5)':'rgba(100,150,220,.25)')+';background:'+(active?'rgba(184,146,42,.2)':'#0d1520')+';color:'+(active?'var(--gold)':'#8ab4cc')+';margin-right:6px';
-    };
-
-    var infoHTML = isGeo
-      ? '<div class="cg" style="margin-top:0">'
+    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">'
+      +'<button onclick="window.setMapView(\'grid\')" style="'+ts(false)+'">&#8592; ALL STATES</button>'
+      +'<span style="font-family:Cinzel,serif;font-size:1rem;color:var(--gold)">&#9733; '+sd.name+'</span>'
+      +(window.MAP_CACHE_STATUS[sel]?'<span style="font-size:.7rem;color:#5a9a5a;font-family:Cinzel,serif">&#9679; CACHED</span>':'<span style="font-size:.7rem;color:var(--ash);font-family:Cinzel,serif">&#9675; not cached</span>')
+      +'</div>'
+      +'<div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap">'
+      +'<button onclick="window.setMapView(\'map\')" style="'+ts(view==='map')+'">&#128506; STREET</button>'
+      +'<button onclick="window.setMapView(\'terrain\')" style="'+ts(view==='terrain')+'">&#127956; TERRAIN</button>'
+      +'<button onclick="window.setMapView(\'satellite\')" style="'+ts(view==='satellite')+'">&#128640; SATELLITE</button>'
+      +'<button onclick="window.setMapView(\'geo\')" style="'+ts(isGeo)+'">&#127807; INFO</button>'
+      +'</div>'
+      +(isGeo
+        ? '<div class="cg">'
           +'<div class="card"><div class="ct">&#128167; Rivers</div>'+sd.rivers.map(function(v){return '<p style="margin-bottom:4px;font-size:.85rem">&bull; '+v+'</p>';}).join('')+'</div>'
           +'<div class="card"><div class="ct">&#127956; Mountains</div>'+sd.mountains.map(function(v){return '<p style="margin-bottom:4px;font-size:.85rem">&bull; '+v+'</p>';}).join('')+'</div>'
           +'<div class="card"><div class="ct">&#127975; Key Zones</div>'+sd.landmarks.slice(0,5).map(function(v){return '<p style="margin-bottom:4px;font-size:.85rem">&bull; '+v+'</p>';}).join('')+'</div>'
-        +'</div>'
-      : '';
-
-    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">'
-      +'<button onclick="window.setMapView(\'grid\')" style="'+tabStyle(false)+'">&#8592; ALL STATES</button>'
-      +'<span style="font-family:Cinzel,serif;font-size:1rem;color:var(--gold)">&#9733; '+sd.name+'</span>'
-      +'</div>'
-      +'<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'
-      +'<button onclick="window.setMapView(\'map\')" style="'+tabStyle(!isGeo)+'">&#128506; STREET MAP</button>'
-      +'<button onclick="window.setMapView(\'terrain\')" style="'+tabStyle(isTerrain)+'">&#127956; TERRAIN</button>'
-      +'<button onclick="window.setMapView(\'geo\')" style="'+tabStyle(isGeo)+'">&#127807; RIVERS &amp; INFO</button>'
-      +'</div>'
-      // Map container
-      +'<div id="map-container" style="height:480px;border-radius:4px;overflow:hidden;position:relative;border:1px solid rgba(100,150,220,.2)">'
-      +'<div id="leaflet-map" style="height:100%;width:100%"></div>'
-      +'<div id="map-offline-msg" style="display:none;position:absolute;inset:0;background:rgba(6,13,26,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(200,220,200,.8);font-family:Cinzel,serif;text-align:center;padding:30px">'
-      +'<div style="font-size:2rem;margin-bottom:12px">&#127758;</div>'
-      +'<div style="font-size:.9rem;color:var(--gold);letter-spacing:.1em;margin-bottom:10px">MAP TILES REQUIRE INTERNET</div>'
-      +'<div style="font-size:.82rem;line-height:1.7;color:rgba(200,220,200,.6);max-width:380px">Connect to the internet once to cache map tiles for this state. After that, they work fully offline. The survival content below works without internet.</div>'
-      +'</div>'
-      +'</div>'
-      // Zoom controls hint
-      +'<div style="display:flex;gap:12px;font-size:.75rem;color:var(--ash);margin-top:8px;font-style:italic">'
-      +'<span>&#128269; Scroll to zoom</span><span>&#128432; Click &amp; drag to pan</span><span>&#127758; Tiles cache after first load</span>'
-      +'</div>'
-      // Info section
-      +(isGeo ? '<div style="margin-top:18px">'+infoHTML+'</div>' : '')
-      // Leaflet init script
-      
-      // Survival info always shows
-      +'<div class="kb" style="margin-top:20px"><h3>&#127807; Survival Resource Zones</h3>'
+          +'</div>'
+        : '<div style="position:relative;border-radius:4px;overflow:hidden;border:1px solid rgba(100,150,220,.2)">'
+          +'<div id="leaflet-map" style="height:480px;width:100%;background:#1a2a3a"></div>'
+          +'<div id="map-offline-msg" style="display:none;position:absolute;inset:0;background:rgba(6,13,26,.95);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;gap:14px">'
+          +'<div style="font-size:2.5rem">&#127758;</div>'
+          +'<div style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold);letter-spacing:.12em">CONNECT TO INTERNET FOR MAPS</div>'
+          +'<div style="font-size:.82rem;line-height:1.8;color:rgba(200,220,200,.65);max-width:380px">Download maps once while online and they\'ll work offline forever on this device.</div>'
+          +'<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px">'
+          +'<button onclick="window.initLeafletMap()" style="background:var(--moss);color:#fff;border:none;padding:10px 20px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.1em">&#128257; TRY AGAIN</button>'
+          +'<button onclick="window.setMapView(\'setup\')" style="background:#0a2a4a;color:#a0c4f0;border:1px solid rgba(100,150,220,.4);padding:10px 20px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.1em">&#11015; DOWNLOAD MAPS</button>'
+          +'</div></div>'
+          +'</div>'
+          +'<div style="font-size:.75rem;color:var(--ash);margin-top:6px;font-style:italic">&#128269; Scroll to zoom &nbsp;&#8226;&nbsp; Drag to pan &nbsp;&#8226;&nbsp; <span style="color:#5a9a5a">&#9679;</span> = cached for offline</div>'
+      )
+      +'<div class="kb" style="margin-top:18px"><h3>&#127807; Survival Resource Zones</h3>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">'
       +sd.landmarks.map(function(l){return '<div style="background:#0d1a12;border:1px solid rgba(61,92,46,.3);border-radius:3px;padding:9px 13px;font-size:.85rem;color:rgba(242,232,213,.85)">&#127975; '+l+'</div>';}).join('')
       +'</div></div>';
   }
 
   // ── GRID VIEW ──
-  var gridHTML='<div style="overflow-x:auto;padding:4px"><div style="display:inline-block;padding:14px">';
+  var gridHTML = '<div style="overflow-x:auto;padding:4px"><div style="display:inline-block;padding:14px">';
   rows.forEach(function(row,ri){
-    gridHTML+='<div style="display:flex;gap:5px;margin-bottom:5px">';
-    row.forEach(function(c){gridHTML+=makeTile(c);});
-    gridHTML+='</div>';
-    if(ri===6) gridHTML+='<div style="height:8px;border-top:1px dashed rgba(150,200,255,.1);margin:5px 0"></div>';
+    gridHTML += '<div style="display:flex;gap:5px;margin-bottom:5px">';
+    row.forEach(function(c){ gridHTML += makeTile(c); });
+    gridHTML += '</div>';
+    if(ri===6) gridHTML += '<div style="height:8px;border-top:1px dashed rgba(150,200,255,.1);margin:5px 0"></div>';
   });
-  gridHTML+='</div></div>';
+  gridHTML += '</div></div>';
 
   return '<div class="ph"><span class="pi">&#128506;&#65039;</span><h2>US Interactive Map</h2>'
-    +'<p class="sub">Click any state for a real interactive map with zoom, terrain, roads and satellite view.</p></div>'
-    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px">'
+    +'<p class="sub">Real maps — streets, terrain, satellite. Click any state. Green dot = cached for offline.</p></div>'
+    // Offline setup banner
+    +'<div style="background:linear-gradient(135deg,rgba(10,42,74,.3),rgba(26,74,42,.2));border:1px solid rgba(100,150,220,.25);border-radius:4px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'
+    +'<div>'
+    +'<div style="font-family:Cinzel,serif;font-size:.75rem;color:var(--gold);letter-spacing:.1em;margin-bottom:3px">MAP CACHE STATUS: <span id="cache-count">'+cached+'</span>/50 states downloaded</div>'
+    +'<div style="font-size:.8rem;color:rgba(200,220,200,.6)">Download maps once with internet — then all 50 states work fully offline.</div>'
+    +'</div>'
+    +'<button onclick="window.setMapView(\'setup\')" style="background:var(--moss);color:#fff;border:none;padding:9px 20px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.12em;white-space:nowrap">&#11015; DOWNLOAD MAPS</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">'
     +'<select id="stateSelect" onchange="window.mapSelectState(this.value)" style="font-size:.88rem;padding:7px 11px;min-width:180px">'
     +'<option value="">&#8212; Select a State &#8212;</option>'+opts+'</select>'
     +(sel?'<button onclick="window.mapSelectState(\'\')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 13px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.1em">CLEAR</button>':'')
@@ -3294,81 +2369,194 @@ PAGES.mapview = function(r,m){
     +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:.7rem;font-family:Cinzel,serif;letter-spacing:.08em">'
     +Object.entries({Pacific:'#1a4a2a',Southwest:'#4a2a0a',Mountain:'#0a2a4a',Midwest:'#1a3a0a',Southeast:'#3a1a0a',Northeast:'#0a1a3a',"Mid-Atlantic":'#2a1a3a',Texas:'#3a1a1a'})
       .map(function(e){return '<span style="display:flex;align-items:center;gap:5px;color:rgba(220,235,255,.6)"><span style="width:10px;height:10px;background:'+e[1]+';border:1px solid rgba(150,200,255,.3);border-radius:2px;display:inline-block"></span>'+e[0]+'</span>';}).join('')
-    +'</div>'
-    +'<div class="tip" style="margin-top:12px">&#127758; <strong>Click any state</strong> for a real map. Street Map shows roads and cities. Terrain shows elevation and geography. <strong>Map tiles require internet</strong> but cache locally after first view.</div>';
+    +'<span style="display:flex;align-items:center;gap:5px;color:rgba(100,220,100,.6)"><span style="font-size:.9rem">&#9679;</span>Cached offline</span>'
+    +'</div>';
 };
 
+// ── DOWNLOAD ALL MAPS ──
+var _downloadCancelled = false;
+var _downloadActive = false;
+
+window.cancelDownload = function(){
+  _downloadCancelled = true;
+  _downloadActive = false;
+  var btn = document.getElementById('dl-cancel-btn');
+  if(btn) btn.style.display = 'none';
+  var statusText = document.getElementById('dl-status-text');
+  if(statusText) statusText.textContent = 'Download paused. Click Download to resume.';
+  var dlBtn = document.getElementById('dl-all-btn');
+  if(dlBtn){ dlBtn.textContent = '\u2193 RESUME DOWNLOAD'; dlBtn.disabled = false; }
+};
+
+window.startDownloadAll = function(){
+  if(_downloadActive) return;
+  _downloadCancelled = false;
+  _downloadActive = true;
+
+  var progressArea = document.getElementById('dl-progress-area');
+  if(progressArea) progressArea.style.display = 'block';
+
+  var dlBtn = document.getElementById('dl-all-btn');
+  if(dlBtn){ dlBtn.disabled = true; dlBtn.textContent = 'Downloading...'; }
+
+  var cancelBtn = document.getElementById('dl-cancel-btn');
+  if(cancelBtn) cancelBtn.style.display = 'inline-block';
+
+  var states = Object.keys(MAP_CENTERS);
+  var total = states.length;
+  var completed = getCachedCount();
+  var i = 0;
+
+  // Skip already-cached states
+  function findNext(){
+    while(i < states.length && window.MAP_CACHE_STATUS[states[i]]) i++;
+    return i < states.length ? states[i] : null;
+  }
+
+  function updateUI(code, done, total){
+    var pct = Math.round((done/total)*100);
+    var fill = document.getElementById('dl-progress-fill');
+    var pctEl = document.getElementById('dl-pct');
+    var countEl = document.getElementById('dl-count');
+    var currentEl = document.getElementById('dl-current-state');
+    var setupCount = document.getElementById('setup-cache-count');
+    var setupBar = document.getElementById('setup-cache-bar');
+    var mainCount = document.getElementById('cache-count');
+
+    if(fill) fill.style.width = pct + '%';
+    if(pctEl) pctEl.textContent = pct + '%';
+    if(countEl) countEl.textContent = done + ' / ' + total + ' states';
+    if(currentEl) currentEl.textContent = code ? 'Downloading: ' + (STATE_DATA[code]||{}).name + ' (' + code + ')' : 'Complete!';
+    if(setupCount) setupCount.textContent = done + '/50';
+    if(setupBar) setupBar.style.width = (done*2) + '%';
+    if(mainCount) mainCount.textContent = done;
+
+    // Update the state tile in the grid
+    if(code){
+      var tile = document.getElementById('dlst-' + code);
+      if(tile){
+        tile.style.background = 'rgba(61,150,61,.5)';
+        tile.style.border = '1px solid rgba(61,150,61,.6)';
+        tile.style.color = '#80e880';
+      }
+    }
+  }
+
+  function downloadState(code){
+    return new Promise(function(resolve){
+      if(!code || _downloadCancelled){ resolve(); return; }
+
+      var sm = MAP_CENTERS[code];
+      var tempDiv = document.createElement('div');
+      tempDiv.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:600px;height:400px;visibility:hidden';
+      document.body.appendChild(tempDiv);
+
+      var tilesLoaded = 0;
+      var tilesTotal = 0;
+      var timeout = null;
+
+      try {
+        var tmpMap = L.map(tempDiv, {zoomControl:false,attributionControl:false})
+          .setView([sm.lat, sm.lng], sm.z);
+
+        var layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18});
+
+        layer.on('loading', function(){ tilesTotal++; });
+        layer.on('tileload', function(){
+          tilesLoaded++;
+          if(tilesLoaded >= Math.max(tilesTotal, 1)){
+            clearTimeout(timeout);
+            finish();
+          }
+        });
+        layer.on('tileerror', function(){
+          tilesLoaded++;
+          if(tilesLoaded >= Math.max(tilesTotal, 1)){
+            clearTimeout(timeout);
+            finish();
+          }
+        });
+
+        layer.addTo(tmpMap);
+
+        function finish(){
+          try{ tmpMap.remove(); }catch(e){}
+          try{ document.body.removeChild(tempDiv); }catch(e){}
+          window.MAP_CACHE_STATUS[code] = true;
+          saveMapCacheStatus();
+          resolve();
+        }
+
+        // Timeout after 8 seconds regardless
+        timeout = setTimeout(function(){
+          finish();
+        }, 8000);
+
+      } catch(e){
+        try{ document.body.removeChild(tempDiv); }catch(err){}
+        resolve();
+      }
+    });
+  }
+
+  function next(){
+    var code = findNext();
+    if(!code || _downloadCancelled){
+      _downloadActive = false;
+      var done = getCachedCount();
+      var statusText = document.getElementById('dl-status-text');
+      if(statusText){
+        statusText.textContent = _downloadCancelled
+          ? 'Download paused at ' + done + '/50 states.'
+          : '&#10003; All ' + done + ' states cached! Maps now work fully offline.';
+        statusText.innerHTML = statusText.textContent;
+      }
+      var cancelBtn = document.getElementById('dl-cancel-btn');
+      if(cancelBtn) cancelBtn.style.display = 'none';
+      var dlBtn = document.getElementById('dl-all-btn');
+      if(dlBtn){ dlBtn.disabled = false; dlBtn.textContent = done===50 ? '&#10003; ALL CACHED' : '\u2193 RESUME DOWNLOAD'; }
+      return;
+    }
+
+    var statusText = document.getElementById('dl-status-text');
+    if(statusText) statusText.textContent = 'Downloading maps for ' + ((STATE_DATA[code]||{}).name||code) + '...';
+
+    downloadState(code).then(function(){
+      i++;
+      var done = getCachedCount();
+      updateUI(code, done, total);
+      setTimeout(next, 300); // Brief pause between states
+    });
+  }
+
+  next();
+};
+
+
+
+PAGES.security = function(r,m){return `<div class="ph"><span class="pi">&#128270;</span><h2>Security &amp; Alert Systems</h2><p class="sub">Perimeter warning, deterrents, and situational awareness.</p></div><div class="kb"><h3>&#128270; Primitive Perimeter Systems</h3><ul><li><strong>Tripwire &amp; cans:</strong> Monofilament at ankle height tied to cans with pebbles. Invisible at night.</li><li><strong>Gravel paths:</strong> Loose gravel around sleeping areas — footsteps unmistakable.</li><li><strong>Dogs:</strong> Most effective alarm. Detects threats far earlier than any mechanical system.</li><li><strong>Clear sight lines:</strong> Remove brush within 30-50 feet. Anyone approaching must cross open ground.</li></ul></div><div class="kb"><h3>&#128065; Awareness Principles</h3><ul><li><strong>Watch wildlife:</strong> Deer and birds alarm before humans hear anything.</li><li><strong>Fire management:</strong> Fire visible for miles. Dakota holes (underground fire) for concealed cooking.</li><li><strong>Vary routines:</strong> Predictable behavior is exploitable.</li></ul></div>`;};
+
+PAGES.livestock = function(r,m){return `<div class="ph"><span class="pi">&#128023;</span><h2>Livestock &amp; Homestead Animals</h2><p class="sub">Chickens, rabbits, goats, cattle, pigs — keeping them alive and productive.</p></div><div class="kb"><h3>&#128020; Chickens</h3><ul><li><strong>Best breeds:</strong> Rhode Island Red, Plymouth Rock, Australorp. Lay well and produce good meat.</li><li><strong>Free-range cuts feed costs 30-50%.</strong> Supplement with kitchen scraps and insects.</li><li><strong>Diseases to watch:</strong> Respiratory (rattling breathing), coccidiosis (bloody droppings), mites (pale comb).</li></ul></div><div class="kb"><h3>&#128007; Rabbits</h3><ul><li><strong>Best meat-to-feed ratio</strong> of any animal. Ready at 8-10 weeks. Silent. Small footprint.</li><li><strong>Heat kills:</strong> Die rapidly above 85F. Frozen water bottles and shade in summer.</li></ul></div><div class="kb"><h3>&#128016; Goats</h3><ul><li><strong>Milk breeds:</strong> Nigerian Dwarf, LaMancha, Nubian — 1-3 quarts per day.</li><li><strong>Parasites are the #1 killer.</strong> FAMACHA score monthly. Rotate pastures every 21 days.</li></ul></div>`;};
+
+PAGES.butchering = function(r,m){return `<div class="ph"><span class="pi">&#129482;</span><h2>Hunting, Skinning &amp; Butchering</h2><p class="sub">From the field to the table. Nothing wasted.</p></div><div class="kb"><h3>&#129482; Field Dressing Deer</h3><ol><li>Roll deer on back. Shallow cut sternum to tail — two fingers tent skin away from organs.</li><li>Sever the diaphragm separating chest from abdomen.</li><li>Grip windpipe, pull all organs out in one motion.</li><li>Sever rectum, tie off. Prop cavity open with stick to cool.</li></ol><div class="warn"><strong>Temperature:</strong> Meat must cool below 40F within 4 hours. In warm weather quarter immediately.</div></div><div class="kb"><h3>&#128007; Small Game</h3><ol><li>Pinch skin on back, make 2-inch cut through skin only.</li><li>Pull in opposite directions — skin tears clean both ways.</li><li>Pull skin off like a sock. Remove head and feet at joints.</li></ol></div><div class="kb"><h3>&#127993; Preserving</h3><ul><li><strong>Smoking:</strong> Salt 24 hours, smoke over hardwood 6-12 hours at 150-175F. Lasts months.</li><li><strong>Rendering fat:</strong> Slow-heat with water. Pour off clean tallow for cooking, candles, waterproofing.</li></ul></div>`;};
+
+PAGES.crafts = function(r,m){return `<div class="ph"><span class="pi">&#129534;</span><h2>Homestead Crafts</h2><p class="sub">Soap, butter, candles — making essentials from what you have.</p></div><div class="kb"><h3>&#129534; Soap from Wood Ash Lye</h3><ol><li>Pack hardwood ash in bucket with holes. Pour rainwater through — collect the drip (lye water).</li><li>Test: fresh egg floats at surface = correct strength.</li><li>Melt animal fat. Heat lye to same temperature. Slowly pour lye into fat — never reverse.</li><li>Stir until mixture traces (leaves trail). Pour into molds. Cure 4-6 weeks.</li></ol></div><div class="kb"><h3>&#129370; Butter</h3><ol><li>Skim cream from whole milk after 12-24 hours rest.</li><li>Fill jar half full, seal tight. Shake vigorously 10-20 minutes.</li><li>When butter granules appear, drain buttermilk. Knead in cold water until clear. Salt and store.</li></ol></div>`;};
+
+PAGES.trees = function(r,m){return `<div class="ph"><span class="pi">&#127795;</span><h2>Trees by Region</h2><p class="sub">Identification, survival uses, and edible parts for ${RN[r]}.</p></div><div class="rn">&#127758; Region: <strong>${RN[r]}</strong>. Change region selector above to update.</div><div class="kb"><h3>&#127795; Key Trees</h3><table class="tbl"><tr><th>Tree</th><th>ID Features</th><th>Survival Uses</th><th>Edible Parts</th></tr><tr><td>White Oak</td><td>Rounded leaf lobes, gray scaly bark</td><td>Superior firewood, bark for tannin</td><td>Acorns — leach tannins in multiple water changes, dry and grind to flour</td></tr><tr><td>Sugar Maple</td><td>5-lobed leaves, winged seeds</td><td>Excellent firewood, tap for syrup (40:1 ratio)</td><td>Sap in early spring, inner bark</td></tr><tr><td>Black Walnut</td><td>Compound leaves, round green husked nuts</td><td>Hard wood for tools, husks for dye</td><td>Walnuts — very calorie dense, harvest Oct-Nov</td></tr><tr><td>Pine (various)</td><td>Needles in bundles, resinous bark</td><td>Resin for firestarter, fatwood in any conditions</td><td>Inner bark, pine nuts (some species), needles for vitamin C tea</td></tr><tr><td>Eastern Cottonwood</td><td>Triangular leaves, cottony seeds</td><td>Friction fire board, quick shelter poles</td><td>Inner bark in emergency, spring buds</td></tr></table></div>`;};
+
+PAGES.naturaltp = function(r,m){return `<div class="ph"><span class="pi">&#127807;</span><h2>Natural Hygiene Plants</h2><p class="sub">Plants that clean, heal, and maintain hygiene without modern products.</p></div><div class="kb"><h3>&#129494; Natural Toothbrushes</h3><ul><li><strong>Willow or birch twig:</strong> Chew end until fibrous. Willow contains natural salicin (antiseptic).</li><li><strong>Charcoal powder:</strong> Grind hardwood charcoal fine. Kills bacteria and removes stains.</li><li><strong>Salt water rinse:</strong> 1 tsp salt in 8oz water kills oral bacteria.</li></ul></div><div class="kb"><h3>&#127798; Natural Soap Alternatives</h3><ul><li><strong>Yucca root:</strong> Crush and add water — rich lather. Found across Southwest and Plains.</li><li><strong>Soapwort:</strong> Crush leaves in water. Gentle lather good for skin and hair.</li><li><strong>Wood ash wash:</strong> Mix with water for lye wash. Cuts grease, kills bacteria.</li></ul></div><div class="kb"><h3>&#127774; Insect Repellents</h3><ul><li><strong>Yarrow:</strong> Crush leaves, rub on skin. Effective against mosquitoes.</li><li><strong>Black walnut husks:</strong> Rub on skin. Repels insects and is antifungal.</li><li><strong>Smoke:</strong> Oldest repellent. Sleep near a low smoky fire in bug season.</li></ul></div>`;};
 
 PAGES.animalhealth = function(r,m){
-  const season = [12,1,2].includes(m)?'winter':[3,4,5].includes(m)?'spring':[6,7,8].includes(m)?'summer':'fall';
-  const sName = season.charAt(0).toUpperCase()+season.slice(1);
-  const tasks = {
-    winter:{
-      '🐓 Chickens':['Check combs/wattles for frostbite — apply tallow or petroleum jelly','Ensure liquid water 3x daily or use a heated waterer','Add extra protein (mealworms, sunflower seeds) — cold weather burns more calories','Ventilate coop without drafts — moisture causes respiratory disease, not cold alone','Check for mites/lice — bugs concentrate in dry winter bedding'],
-      '🐇 Rabbits':['Protect from wind and wet — rabbits tolerate cold well if completely dry','Check water 3x daily — freezes quickly','Increase hay proportion — gut needs fiber to keep moving in cold','Watch for snuffles (runny nose) — cold stress triggers respiratory infection','Move does with newborn kits indoors if below 20°F'],
-      '🐐 Goats':['Provide extra hay — 2x summer amount in cold weather','Check hooves — hoof rot thrives in mud and wet winter conditions','Inspect for lice — part hair near the spine to check skin','Ensure fresh water — goats refuse cold water and will dehydrate rather than drink it','Supplement selenium/vitamin E if not on a mineral block','Pregnant does: increase grain to 1.5 lbs/day in the last 6 weeks before kidding'],
-      '🐄 Cattle':['Body condition score monthly — add feed immediately if ribs become visible','Wind protection is non-negotiable — a windbreak reduces feed needs by 20%','Check feet for foot rot (foul smell + swelling) — wet winter mud is prime time','Watch for respiratory disease in calves — cold stress plus crowding is dangerous','Plan 30 lbs of hay per 1,000 lb cow per cold day'],
-      '🐴 Horses':['Increase hay dramatically — horses generate heat by fermenting hay, not grain','Check weight weekly — blanketing hides body condition loss','Pick hooves daily — thrush (black rot) thrives in wet winter conditions','Watch for impaction colic — horses drink less cold water, risk rises','Be consistent with blanketing — blanket all winter or none at all']
-    },
-    spring:{
-      '🐓 Chickens':['Deep clean coop — remove all bedding, scrub walls, dry completely before re-bedding','Deworm naturally: grind pumpkin seeds into feed — cucurbitacin paralyzes worms','Watch for Marek\'s disease if introducing new birds to the flock','Spring is best time to hatch new chicks','Check molt status — some birds may still be in late molt from winter'],
-      '🐇 Rabbits':['Breeding season beginning — verify does are at good weight before breeding','Coccidiosis risk rises with warmth and wet — add apple cider vinegar to water daily','Expand cage ventilation — heat stress kills rabbits faster than cold','Transition to fresh grass slowly — sudden green grass causes GI stasis'],
-      '🐐 Goats':['Hoof trim — hoof growth accelerates in spring','Deworm if FAMACHA score indicates anemia — check eyelid color','Kidding season — provide clean private pen, iodine for umbilical cord','Watch for white muscle disease in kids — selenium injection at birth if in deficient region','Test for CAE if bringing in any new animals'],
-      '🐄 Cattle':['Slow pasture introduction — 2 hrs/day increasing over 2 weeks or risk frothy bloat','Deworm calves','Begin fly control program — face flies spread pinkeye','Check for hardware disease (swallowed metal) if cattle seem off','Spring vaccination boosters if on annual program'],
-      '🐴 Horses':['Introduce spring pasture gradually — laminitis risk is high on lush fast-growing grass','First deworming of the year','Dental float if not done in 12+ months — sharp teeth cause weight loss','Shed winter coat — daily currying improves circulation and skin health','Watch for rain rot — wet spring coat develops bacterial skin infections easily']
-    },
-    summer:{
-      '🐓 Chickens':['Heat kills chickens faster than cold — shade and ventilation are critical','Provide frozen treats (frozen watermelon, ice water bowls)','Move waterers into shade and refresh frequently','Reduce corn in feed — it generates more body heat than other grains','Signs of heat stress: panting, wings spread, pale comb — act immediately'],
-      '🐇 Rabbits':['CRITICAL: Rabbits die rapidly above 85°F — place frozen water bottles in cages','Move cages to the shadiest location available','Suspend breeding — pregnant does and newborn kits are most vulnerable to heat','Drape a wet towel over cage for evaporative cooling','Provide unlimited fresh water and hay at all times'],
-      '🐐 Goats':['FAMACHA scoring monthly — check lower eyelid color for anemia (internal parasites peak)','Hoof rot peaks in summer — trim and inspect hooves every 6 weeks','Check milk for chunks before every milking — mastitis watch','Pinkeye spreads rapidly in summer — isolate any animal with runny or cloudy eye','Provide shade — goats pant and go off feed in direct sun'],
-      '🐄 Cattle':['Horn flies and face flies peak — affect weight gain significantly','Watch for summer mastitis in dry cows','Pinkeye peak season — shade dramatically reduces spread','Heat stress reduces conception rates in breeding cattle','Grass tetany risk on lush fast-growing pasture — magnesium supplement helps'],
-      '🐴 Horses':['Remove bot fly eggs from legs — yellow dots on hair, use bot knife or warm cloth','Ensure salt block always available — horses sweat heavily','Check for laminitis in easy-keeper breeds on summer grass','Rain rot and fungal skin issues increase in sweaty horses — keep groomed and dry when possible','West Nile vaccination if in endemic area (most of US)']
-    },
-    fall:{
-      '🐓 Chickens':['Molt begins — reduced egg production is completely normal, increase protein in feed','Pre-winter coop repairs and weatherproofing before first hard freeze','Stock extra feed — winter reserves','Treat for mites/lice now — they spike in fall and are easier to eliminate before cold','Cull non-productive birds before winter if feed is limited'],
-      '🐇 Rabbits':['Breed now if you want winter/early spring meat — kits born in fall ready Jan–Feb','Winterize hutch — block north and west winds with tarps or solid barriers','Stock extra hay now — rabbits eat significantly more in cold','Pregnant and nursing does need extra nutrition: add black oil sunflower seeds to feed'],
-      '🐐 Goats':['Buck season — bucks become aggressive and noisy, separate from does until breeding time','Does come into heat every 21 days — watch for standing behavior','Pre-breeding body condition: does should be in good flesh but not fat','Hoof trim before winter mud season','Pre-breeding vaccination booster (CD&T)'],
-      '🐄 Cattle':['Wean calves','Pre-winter body condition assessment — add feed NOW, much cheaper than emergency winter feeding','Pre-breeding or pregnancy check','Build your hay inventory — know your full winter needs before snow falls','Pre-winter vaccination booster'],
-      '🐴 Horses':['Fall deworming — tapeworms most effectively treated in fall with praziquantel','Pre-winter dental float','Body condition assessment — add weight before winter sets in','Last barefoot trim or shoeing before ground freezes','Begin blanketing protocol if you blanket — be consistent all winter']
-    }
+  var season=[12,1,2].includes(m)?'winter':[3,4,5].includes(m)?'spring':[6,7,8].includes(m)?'summer':'fall';
+  var sName=season.charAt(0).toUpperCase()+season.slice(1);
+  var tasks={
+    winter:{Chickens:['Check combs for frostbite — apply tallow','Fresh water 3x daily — freezes quickly','Extra protein in cold — sunflower seeds, mealworms','Ventilate coop without drafts — moisture causes disease, not cold'],Rabbits:['Protect from wind and wet — handle cold well if dry','Check water 3x daily — freezes quickly','Increase hay — gut needs fiber to keep moving in cold'],Goats:['Provide 2x summer hay amount in cold','Check hooves — hoof rot in winter mud','Supplement selenium if not on mineral block','Pregnant does: increase grain last 6 weeks before kidding']},
+    spring:{Chickens:['Deep clean coop — all bedding out, scrub, dry','Deworm naturally with pumpkin seeds ground into feed','Parasite eggs hatch in warmth — treat proactively'],Rabbits:['Breeding season — check weight before breeding','Coccidiosis risk rises with warmth and wet','Transition to fresh grass slowly — sudden green grass causes stasis'],Goats:['Hoof trim — growth accelerates','FAMACHA scoring if animals look pale or weak','Kidding season — clean pen, iodine for umbilical cord at birth']},
+    summer:{Chickens:['Heat kills faster than cold — shade and airflow critical','Frozen watermelon treats and cool water help','Reduce scratch grains — they generate body heat'],Rabbits:['Dies above 85F — frozen water bottles in cages essential','Move to shadiest spot available','Suspend breeding — kits cannot handle heat'],Goats:['FAMACHA scoring monthly — peak parasite season','Check milk before every milking — mastitis watch','Isolate any animal with runny eye — pinkeye spreads by flies']},
+    fall:{Chickens:['Molt begins — reduced eggs is normal, increase protein','Pre-winter repairs and weatherproofing','Treat for mites and lice now — easier before cold'],Rabbits:['Breed now for winter meat','Block north and west wind from hutch','Stock extra hay before winter'],Goats:['Breeding season — bucks are aggressive','Does cycle every 21 days','CD&T vaccination booster before breeding']}
   };
-
-  const st = tasks[season];
-  return `
-<div class="ph"><span class="pi">&#128197;</span><h2>Livestock Health Calendar</h2>
-<p class="sub">${MN[m]} &mdash; ${sName} health tasks and disease prevention for your animals.</p></div>
-<div class="rn">&#127758; Currently showing <strong>${sName.toUpperCase()}</strong> protocols for <strong>${MN[m]}</strong>. Change the month selector above to see a different season.</div>
-
-${Object.entries(st).map(([animal,taskList])=>`
-<div class="kb"><h3>${animal} &mdash; ${sName} Tasks</h3>
-<ul>${taskList.map(t=>`<li>${t}</li>`).join('')}</ul>
-</div>`).join('')}
-
-<div class="kb"><h3>&#127807; Natural Treatment Reference</h3>
-<table class="tbl">
-<tr><th>Condition</th><th>Animals</th><th>Natural Treatment</th><th>Notes</th></tr>
-<tr><td>Bacterial infection</td><td>All</td><td>Crushed raw garlic in water or feed. Oregano oil diluted in water. Raw honey on wounds.</td><td>Isolate the sick animal immediately — stopping spread is as important as treating.</td></tr>
-<tr><td>Internal parasites (worms)</td><td>All</td><td>Ground pumpkin seeds in feed (cucurbitacin paralyzes worms). Rotate pastures — most effective long-term prevention. Diatomaceous earth (food grade) in feed.</td><td>Resistance to chemical dewormers is widespread. Pasture rotation is the lasting solution.</td></tr>
-<tr><td>Respiratory infection</td><td>Chickens, rabbits, goats</td><td>Oregano oil in water. Improve ventilation first — most respiratory disease is caused by ammonia and moisture, not cold. Isolate immediately.</td><td>Spreads rapidly through a flock or herd. Isolation is treatment step one.</td></tr>
-<tr><td>Mastitis (udder)</td><td>Goats, cattle</td><td>Milk out the affected quarter frequently (every 2 hours). Cabbage leaf compress on udder. Dilute oregano oil massaged in.</td><td>Chunks or blood in milk = mastitis. Early treatment prevents chronic infection.</td></tr>
-<tr><td>Wounds</td><td>All</td><td>Irrigate thoroughly with boiled water. Pack with raw honey. Pine pitch as sealant. Keep flies off — maggots in wounds are serious.</td><td>Thorough irrigation is the most important step. Most wound infections start from contamination that could have been washed out.</td></tr>
-<tr><td>Pinkeye</td><td>Cattle, goats</td><td>Dilute raw honey eyewash. Strong black tea compress. Isolate — pinkeye spreads by flies.</td><td>Shade reduces spread dramatically. Fly control = pinkeye prevention.</td></tr>
-<tr><td>Bloat</td><td>Cattle, goats</td><td>Walk continuously (movement breaks gas bubble). Drench with 1 cup vegetable oil. Massage left flank. Simethicone (Gas-X) works on ruminants.</td><td>Frothy bloat from lush legumes is most dangerous. Slow pasture introduction prevents it.</td></tr>
-<tr><td>Scours / diarrhea (young)</td><td>Calves, kids, chicks</td><td>Oral electrolytes: 1 tsp salt + 1 tsp baking soda + 1 qt warm water. Kaolin clay. Yogurt with live cultures. Withhold milk 12 hrs, replace with electrolytes.</td><td>Dehydration kills faster than the infection. Electrolytes first, always.</td></tr>
-</table></div>`;
-};
-
-
-
-
-
-
-
-
-
-
-
-
+  var st=tasks[season]||tasks.winter;
+  return `<div class="ph"><span class="pi">&#128197;</span><h2>Livestock Health Calendar</h2><p class="sub">${MN[m]} — ${sName} health protocols for your animals.</p></div><div class="rn">&#127758; <strong>${sName.toUpperCase()}</strong> tasks for <strong>${MN[m]}</strong>. Change month above to update.</div>${Object.entries(st).map(([animal,tl])=>'<div class="kb"><h3>'+animal+' — '+sName+'</h3><ul>'+tl.map(t=>'<li>'+t+'</li>').join('')+'</ul></div>').join('')}`;};
 
 </script>
 </body>
