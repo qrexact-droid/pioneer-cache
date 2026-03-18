@@ -84,6 +84,16 @@ select:focus{border-color:var(--gold)}
 </style>
   </head>
 <body>
+<div id="dl-banner" style="background:linear-gradient(135deg,#1a3a0a,#0a2a14);border-bottom:2px solid #5a9a3a;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:200">
+  <div>
+    <div style="font-family:Cinzel,serif;font-size:.8rem;color:#8ad48a;letter-spacing:.12em;margin-bottom:3px">&#10003; PURCHASE COMPLETE — YOU OWN THIS GUIDE FOREVER</div>
+    <div style="font-size:.8rem;color:rgba(200,220,200,.7)">Save this file to your computer, USB drive, or phone. Open it anytime — no internet needed.</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a id="dl-btn" href="#" onclick="downloadGuide();return false;" style="background:#3d7c2e;color:#fff;border:none;padding:10px 22px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.75rem;letter-spacing:.1em;text-decoration:none;display:inline-flex;align-items:center;gap:8px">&#11015; DOWNLOAD FILE</a>
+    <button onclick="document.getElementById('dl-banner').style.display='none'" style="background:transparent;color:rgba(200,220,200,.4);border:1px solid rgba(200,220,200,.2);padding:10px 14px;cursor:pointer;border-radius:3px;font-size:.75rem">DISMISS</button>
+  </div>
+</div>
 <div id="hdr"><div class="hi">
   <svg width="46" height="46" viewBox="0 0 52 52" fill="none">
     <circle cx="26" cy="26" r="24" stroke="#b8922a" stroke-width="1.5" fill="none" opacity=".5"/>
@@ -241,6 +251,21 @@ select:focus{border-color:var(--gold)}
   <span class="fm">THE PIONEER CACHE &middot; OFFLINE EDITION &middot; V1.0</span>
 </div>
 <script>
+
+function downloadGuide() {
+  var content = document.documentElement.outerHTML;
+  var blob = new Blob([content], {type: 'text/html'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'PioneerCache.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
 
 
 
