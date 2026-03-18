@@ -83,7 +83,7 @@ select:focus{border-color:var(--gold)}
 @media(max-width:700px){.catbox-items{grid-template-columns:1fr 1fr}.dg{grid-template-columns:1fr 1fr}.mg{grid-template-columns:1fr 1fr}.hi{padding:10px 16px}#main{padding:20px 16px 40px}}
 </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
 </head>
 <body>
 <div id="hdr"><div class="hi">
@@ -236,6 +236,7 @@ select:focus{border-color:var(--gold)}
 
 
 
+
 const MN=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const RN={pacific:'Pacific Coast',southwest:'Southwest Desert',mountain:'Mountain West',midwest:'Midwest/Plains',southeast:'Southeast',northeast:'Northeast',midatlantic:'Mid-Atlantic',texas:'Texas/Gulf',alaska:'Alaska',hawaii:'Hawaii'};
 
@@ -264,7 +265,7 @@ function go(p){
   _currentPage = p;
   document.getElementById('navgrid').style.display='none';
   document.getElementById('content').innerHTML = fn(R(),M());
-  if(p==='mapview'){ setTimeout(initMapControls,50); }
+  if(p==='mapview'){ setTimeout(window.initLeafletMap,200); }
   document.getElementById('content').classList.add('show');
   document.getElementById('backbar').classList.add('show');
   window.scrollTo({top:0,behavior:'smooth'});
@@ -2111,6 +2112,15 @@ var MAP_CENTERS = {
 window._leafletMap = null;
 
 window.initLeafletMap = function(){
+  // Use requestAnimationFrame to ensure DOM is painted before Leaflet init
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      window._doInitLeafletMap();
+    });
+  });
+};
+
+window._doInitLeafletMap = function(){
   var container = document.getElementById('leaflet-map');
   if(!container) return;
   var msg = document.getElementById('map-offline-msg');
@@ -2557,6 +2567,7 @@ PAGES.animalhealth = function(r,m){
   };
   var st=tasks[season]||tasks.winter;
   return `<div class="ph"><span class="pi">&#128197;</span><h2>Livestock Health Calendar</h2><p class="sub">${MN[m]} — ${sName} health protocols for your animals.</p></div><div class="rn">&#127758; <strong>${sName.toUpperCase()}</strong> tasks for <strong>${MN[m]}</strong>. Change month above to update.</div>${Object.entries(st).map(([animal,tl])=>'<div class="kb"><h3>'+animal+' — '+sName+'</h3><ul>'+tl.map(t=>'<li>'+t+'</li>').join('')+'</ul></div>').join('')}`;};
+
 
 </script>
 </body>
