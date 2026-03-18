@@ -2053,7 +2053,6 @@ function showHome(){
 
 
 function initMapControls(){
-  var vb = [80,95,640,400];
   var dragging=false, lastX=0, lastY=0, scale=1, tx=0, ty=0;
   var svg = document.getElementById('usmap');
   var states = document.getElementById('states');
@@ -2063,7 +2062,7 @@ function initMapControls(){
   }
 
   window.mapZoom = function(factor){
-    scale = Math.min(8, Math.max(0.5, scale*factor));
+    scale = Math.min(10, Math.max(0.4, scale*factor));
     applyTransform();
   };
   window.mapReset = function(){
@@ -2098,9 +2097,30 @@ function initMapControls(){
   window.selectState = function(code){
     if(!code) return;
     window._selectedState = code;
+    window._mapView = 'overview';
     var sel = document.getElementById('stateSelect');
     if(sel) sel.value = code;
     go('mapview');
+  };
+
+  window.mapSelectState = function(code){
+    window._selectedState = code || null;
+    window._mapView = code ? 'overview' : 'overview';
+    var sel = document.getElementById('stateSelect');
+    if(sel && code) sel.value = code;
+    // Re-render the page
+    if(PAGES.mapview){
+      document.getElementById('content').innerHTML = PAGES.mapview(R(),M());
+      setTimeout(initMapControls, 50);
+    }
+  };
+
+  window.setMapView = function(v){
+    window._mapView = v;
+    if(PAGES.mapview){
+      document.getElementById('content').innerHTML = PAGES.mapview(R(),M());
+      if(v !== 'info') setTimeout(initMapControls, 50);
+    }
   };
 
 }
@@ -3036,53 +3056,110 @@ return `
 
 
 PAGES.mapview = function(r,m){
-  const selectedState = (window._selectedState) || null;
-  const sd = selectedState ? STATE_DATA[selectedState] : null;
+  var sel = window._selectedState || null;
+  var view = window._mapView || 'overview'; // 'overview' | 'geo' | 'info'
+  var sd = sel ? STATE_DATA[sel] : null;
 
-  const stateOptions = Object.entries(STATE_DATA)
-    .sort((a,b)=>a[1].name.localeCompare(b[1].name))
-    .map(([code,d])=>`<option value="${code}" ${code===selectedState?'selected':''}>${d.name}</option>`)
-    .join('');
+  // State detail panels
+  function stateInfoHTML(code){
+    var d = STATE_DATA[code];
+    if(!d) return '';
+    var lm = getLandmarks(d.region)||[];
+    return `
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:18px">
+  <div class="card">
+    <div class="ct">&#128167; Major Rivers</div>
+    ${d.rivers.map(function(r){return '<p style="margin-bottom:4px;font-size:.83rem">&bull; '+r+'</p>';}).join('')}
+  </div>
+  <div class="card">
+    <div class="ct">&#127956; Mountains &amp; Elevation</div>
+    ${d.mountains.map(function(m){return '<p style="margin-bottom:4px;font-size:.83rem">&bull; '+m+'</p>';}).join('')}
+  </div>
+  <div class="card">
+    <div class="ct">&#127795; Key Landmarks</div>
+    ${d.landmarks.map(function(l){return '<p style="margin-bottom:4px;font-size:.83rem">&bull; '+l+'</p>';}).join('')}
+  </div>
+</div>
+<div class="tip" style="margin-top:12px">
+  <strong>Survival value:</strong> Rivers are your water and navigation corridors — always follow drainages downhill. 
+  Mountain ranges create weather shadows, altitude zones, and defensible terrain. 
+  National forests are your best foraging, hunting, and shelter zones.
+</div>`;
+  }
 
-  const detailHtml = sd ? `
-    <div class="kb" style="margin-top:20px">
-      <h3>&#128205; ${sd.name} &mdash; Geographic Reference</h3>
-      <div class="cg">
-        <div class="card"><div class="ct">&#128167; Major Rivers</div>
-          ${sd.rivers.map(r=>`<p style="margin-bottom:4px">&bull; ${r}</p>`).join('')}
-        </div>
-        <div class="card"><div class="ct">&#127956;&#65039; Mountains &amp; High Points</div>
-          ${sd.mountains.map(m=>`<p style="margin-bottom:4px">&bull; ${m}</p>`).join('')}
-        </div>
-        <div class="card"><div class="ct">&#127795; Key Landmarks &amp; Forests</div>
-          ${sd.landmarks.map(l=>`<p style="margin-bottom:4px">&bull; ${l}</p>`).join('')}
-        </div>
-      </div>
-      <div class="tip" style="margin-top:14px"><strong>Survival note:</strong> Rivers are your primary navigation corridor and water source. Follow any drainage downhill to find the next river. National forests are your best resource zones for foraging, game, water, and shelter.</div>
-    </div>` : `<div class="tip" style="margin-top:16px"><strong>Select a state above</strong> to see its rivers, mountains, and key landmarks.</div>`;
+  // Build state SVG paths — highlighted state gets gold, others dimmed
+  function buildStates(selectedCode){
+    return Object.entries(US_SVG_PATHS).map(function(entry){
+      var code = entry[0], path = entry[1];
+      var isSel = code === selectedCode;
+      var reg = (STATE_DATA[code]||{}).region||'midwest';
+      var rc = {pacific:'#1a4a2a',southwest:'#4a2a0a',mountain:'#0a2a4a',midwest:'#1a3a0a',
+                southeast:'#3a1a0a',northeast:'#0a1a3a',midatlantic:'#2a1a3a',
+                texas:'#3a1a1a',alaska:'#0a3a4a',hawaii:'#2a0a3a'};
+      var fill = isSel ? '#b8922a' : (selectedCode ? '#0d1a12' : (rc[reg]||'#1a2020'));
+      var stroke = isSel ? '#ffd700' : (selectedCode ? 'rgba(150,200,255,.2)' : 'rgba(150,200,255,.4)');
+      var sw = isSel ? '2' : '0.8';
+      var opacity = isSel ? '1' : (selectedCode ? '0.4' : '0.9');
+      return '<path d="'+path+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" opacity="'+opacity+'" data-state="'+code+'" onclick="window.mapSelectState(\''+code+'\')" style="cursor:pointer" onmouseover="if(\''+code+'\'!==\''+selectedCode+'\'){this.style.opacity=\'0.8\';this.style.filter=\'brightness(1.5)\';}" onmouseout="this.style.opacity=\''+opacity+'\';this.style.filter=\'\'"/>';
+    }).join('');
+  }
+
+  // State labels
+  function buildLabels(){
+    return Object.entries(US_SVG_PATHS).filter(function(e){return e[0]!=='AK'&&e[0]!=='HI'&&e[0]!=='DC';}).map(function(entry){
+      var code = entry[0], path = entry[1];
+      var nums = (path.match(/[\d.]+/g)||[]).map(Number);
+      var xs=[],ys=[];
+      for(var i=0;i<nums.length-1;i+=2){xs.push(nums[i]);ys.push(nums[i+1]);}
+      if(!xs.length) return '';
+      var cx=((Math.min.apply(null,xs)+Math.max.apply(null,xs))/2).toFixed(1);
+      var cy=((Math.min.apply(null,ys)+Math.max.apply(null,ys))/2+2).toFixed(1);
+      return '<text x="'+cx+'" y="'+cy+'" style="pointer-events:none">'+code+'</text>';
+    }).join('') + '<text x="175" y="465" style="pointer-events:none">AK</text><text x="250" y="518" style="pointer-events:none">HI</text>';
+  }
+
+  var stateOptions = Object.entries(STATE_DATA).sort(function(a,b){return a[1].name.localeCompare(b[1].name);}).map(function(e){
+    return '<option value="'+e[0]+'"'+(e[0]===sel?' selected':'')+'>'+e[1].name+'</option>';
+  }).join('');
 
   return `
-<div class="ph"><span class="pi">&#128506;&#65039;</span><h2>US Geographic Map</h2>
-<p class="sub">Rivers, mountains, and key landmarks for every state. Select your state for detailed geography.</p></div>
+<div class="ph">
+  <span class="pi">&#128506;&#65039;</span>
+  <h2>US Geographic Map</h2>
+  <p class="sub">Click any state to zoom in, explore geography, rivers, mountains and landmarks.</p>
+</div>
 
-<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
-  <select id="stateSelect" onchange="window.selectState(this.value)" style="font-size:.95rem;padding:8px 14px;min-width:200px">
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+  <select id="stateSelect" onchange="window.mapSelectState(this.value)" style="font-size:.9rem;padding:7px 12px;min-width:190px">
     <option value="">&#8212; Select a State &#8212;</option>
     ${stateOptions}
   </select>
-  <button onclick="window.mapReset()" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:6px 14px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.1em">RESET MAP</button>
-  <button onclick="window.mapZoom(1.3)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:6px 12px;cursor:pointer;border-radius:3px;font-size:1rem">+</button>
-  <button onclick="window.mapZoom(0.75)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:6px 12px;cursor:pointer;border-radius:3px;font-size:1rem">&#8722;</button>
-  ${selectedState?`<span style="font-family:Cinzel,serif;font-size:.75rem;color:var(--gold);letter-spacing:.1em">VIEWING: ${sd.name.toUpperCase()}</span>`:''}
+  <button onclick="window.mapSelectState('')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 14px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.1em">OVERVIEW</button>
+  <button onclick="window.mapZoom(1.35)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 13px;cursor:pointer;border-radius:3px;font-size:1rem;font-weight:bold">+</button>
+  <button onclick="window.mapZoom(0.74)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 13px;cursor:pointer;border-radius:3px;font-size:1rem;font-weight:bold">&#8722;</button>
+  ${sel ? `<div style="display:flex;gap:8px">
+    <button onclick="window.setMapView('overview')" style="background:${view==='overview'?'rgba(184,146,42,.3)':'#1a2840'};border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:6px 12px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.08em">MAP</button>
+    <button onclick="window.setMapView('geo')" style="background:${view==='geo'?'rgba(184,146,42,.3)':'#1a2840'};border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:6px 12px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.08em">GEOGRAPHY</button>
+    <button onclick="window.setMapView('info')" style="background:${view==='info'?'rgba(184,146,42,.3)':'#1a2840'};border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:6px 12px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.08em">DETAILS</button>
+  </div>` : ''}
+  ${sel ? `<span style="font-family:Cinzel,serif;font-size:.8rem;color:var(--gold);letter-spacing:.1em">&#9733; ${(sd||{}).name||''}</span>` : ''}
 </div>
 
-<div id="mapwrap" style="background:#0a1628;border:1px solid rgba(100,150,220,.2);border-radius:4px;overflow:hidden;position:relative;touch-action:none">
-  <svg id="usmap" viewBox="80 95 640 400" style="width:100%;height:480px;cursor:grab;display:block"
+${view === 'info' && sel ? `
+<div class="rn" style="margin-bottom:16px">&#128205; <strong>${(sd||{}).name}</strong> — Detailed geographic reference</div>
+${stateInfoHTML(sel)}
+<div style="margin-top:16px;text-align:center">
+  <button onclick="window.setMapView('overview')" style="background:rgba(184,146,42,.1);border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:8px 20px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.1em">&#8592; BACK TO MAP</button>
+</div>
+` : `
+<div id="mapwrap" style="background:#060d1a;border:1px solid rgba(100,150,220,.2);border-radius:4px;overflow:hidden;position:relative;touch-action:none">
+  <svg id="usmap" viewBox="80 95 640 400" style="width:100%;height:500px;cursor:grab;display:block"
        xmlns="http://www.w3.org/2000/svg"
        onmousedown="window.mapDragStart(event)" onmousemove="window.mapDragMove(event)"
        onmouseup="window.mapDragEnd()" onmouseleave="window.mapDragEnd()">
-    <rect width="100%" height="100%" fill="#0a1628"/>
-    <g stroke="rgba(100,150,220,.07)" stroke-width=".5">
+    <rect width="100%" height="100%" fill="#060d1a"/>
+    <!-- Grid -->
+    <g stroke="rgba(100,150,220,.06)" stroke-width=".5">
       <line x1="80" y1="150" x2="720" y2="150"/><line x1="80" y1="200" x2="720" y2="200"/>
       <line x1="80" y1="250" x2="720" y2="250"/><line x1="80" y1="300" x2="720" y2="300"/>
       <line x1="80" y1="350" x2="720" y2="350"/><line x1="80" y1="400" x2="720" y2="400"/>
@@ -3091,7 +3168,8 @@ PAGES.mapview = function(r,m){
       <line x1="430" y1="95" x2="430" y2="495"/><line x1="500" y1="95" x2="500" y2="495"/>
       <line x1="570" y1="95" x2="570" y2="495"/><line x1="640" y1="95" x2="640" y2="495"/>
     </g>
-    <g stroke="#3a6fa8" stroke-width="1.2" fill="none" opacity=".6" stroke-linecap="round">
+    <!-- Rivers -->
+    <g stroke="#2a5a8a" stroke-width="1.3" fill="none" opacity=".65" stroke-linecap="round">
       <path d="M515,130 C510,160 507,200 505,240 C503,270 500,300 502,330 C504,355 512,380 510,410"/>
       <path d="M240,172 C280,175 360,185 400,188 C440,192 475,200 510,225"/>
       <path d="M575,228 C590,245 618,260 648,268"/>
@@ -3099,60 +3177,103 @@ PAGES.mapview = function(r,m){
       <path d="M280,295 C330,345 365,420 375,440"/>
       <path d="M95,130 C150,138 175,140 205,148"/>
       <path d="M195,180 C225,190 255,200 278,210"/>
+      <path d="M335,285 C370,290 410,295 450,295 C480,295 505,298 512,300"/>
+      <path d="M527,305 C540,308 578,305 615,302"/>
+      <path d="M130,445 C160,448 210,455 255,456"/>
     </g>
-    <g fill="rgba(140,180,120,.18)" stroke="rgba(140,180,120,.4)" stroke-width=".8">
+    <!-- Mountains -->
+    <g fill="rgba(120,160,100,.22)" stroke="rgba(120,160,100,.5)" stroke-width=".9">
       <polygon points="240,130 250,110 260,130"/><polygon points="260,140 270,120 280,140"/>
       <polygon points="280,150 290,130 300,150"/><polygon points="300,160 310,140 320,160"/>
+      <polygon points="320,170 330,150 340,170"/><polygon points="240,175 250,155 260,175"/>
+      <polygon points="260,185 270,165 280,185"/><polygon points="280,200 290,180 300,200"/>
       <polygon points="115,180 125,160 135,180"/><polygon points="130,200 140,180 150,200"/>
+      <polygon points="115,220 125,200 135,220"/><polygon points="120,240 130,220 140,240"/>
       <polygon points="115,105 125,90 135,105"/><polygon points="135,115 145,100 155,115"/>
-      <polygon points="575,165 582,150 589,165"/><polygon points="575,195 582,180 589,195"/>
-      <polygon points="562,215 569,200 576,215"/><polygon points="568,260 575,245 582,260"/>
-      <polygon points="568,280 575,265 582,280"/><polygon points="400,165 407,153 414,165"/>
+      <polygon points="115,130 125,115 135,130"/>
+      <polygon points="575,165 582,150 589,165"/><polygon points="589,175 596,160 603,175"/>
+      <polygon points="575,195 582,180 589,195"/><polygon points="562,215 569,200 576,215"/>
+      <polygon points="575,240 582,225 589,240"/><polygon points="568,260 575,245 582,260"/>
+      <polygon points="568,280 575,265 582,280"/><polygon points="570,300 577,285 584,300"/>
       <polygon points="155,442 165,425 175,442"/><polygon points="175,447 185,430 195,447"/>
+      <polygon points="195,450 205,433 215,450"/>
+      <polygon points="490,270 497,258 504,270"/><polygon points="500,280 507,268 514,280"/>
+      <polygon points="400,165 407,153 414,165"/>
     </g>
+    <!-- State fills -->
     <g id="states">
-      ${Object.entries(US_SVG_PATHS).map(([code,path])=>{
-        const isSel = code===selectedState;
-        const reg = (STATE_DATA[code]||{}).region||'midwest';
-        const rc = {pacific:'#1a3d2a',southwest:'#3d2a0a',mountain:'#0a2a3d',midwest:'#1a2a0a',southeast:'#2a1a0a',northeast:'#0a1a2a',midatlantic:'#1a1a2a',texas:'#2a1a1a',alaska:'#0a2a3a',hawaii:'#1a0a2a'};
-        const fill = isSel?'#b8922a':(rc[reg]||'#1a2020');
-        const sw = isSel?'2':'0.8';
-        const stroke = isSel?'#ffd700':'rgba(150,200,255,.4)';
-        return `<path d="${path}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" data-state="${code}" onclick="window.selectState('${code}')" style="cursor:pointer" onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'"/>`;
-      }).join('')}
+      ${buildStates(sel)}
     </g>
-    <g font-family="sans-serif" font-size="6" fill="rgba(200,225,255,.75)" text-anchor="middle" style="pointer-events:none">
-      ${Object.entries(US_SVG_PATHS).filter(([c])=>c!=='AK'&&c!=='HI'&&c!=='DC').map(([code,path])=>{
-        const nums = (path.match(/[\d.]+/g)||[]).map(Number);
-        const xs=[],ys=[];
-        for(let i=0;i<nums.length-1;i+=2){xs.push(nums[i]);ys.push(nums[i+1]);}
-        if(!xs.length) return '';
-        const cx=(Math.min(...xs)+Math.max(...xs))/2;
-        const cy=(Math.min(...ys)+Math.max(...ys))/2;
-        return `<text x="${cx.toFixed(1)}" y="${(cy+2).toFixed(1)}">${code}</text>`;
-      }).join('')}
-      <text x="175" y="465">AK</text>
-      <text x="250" y="518">HI</text>
+    <!-- State labels -->
+    <g font-family="sans-serif" font-size="6" fill="rgba(220,235,255,.8)" text-anchor="middle">
+      ${buildLabels()}
     </g>
+    <!-- Compass -->
     <g transform="translate(690,118)">
-      <circle r="14" fill="rgba(10,22,40,.8)" stroke="rgba(100,150,220,.3)" stroke-width="1"/>
+      <circle r="15" fill="rgba(6,13,26,.85)" stroke="rgba(100,150,220,.35)" stroke-width="1.2"/>
       <polygon points="0,-12 -3,-4 3,-4" fill="#c8d8f0"/>
       <polygon points="0,12 -3,4 3,4" fill="rgba(100,150,220,.35)"/>
       <polygon points="-12,0 -4,-3 -4,3" fill="rgba(100,150,220,.35)"/>
       <polygon points="12,0 4,-3 4,3" fill="rgba(100,150,220,.35)"/>
-      <text y="-15" text-anchor="middle" font-size="7" fill="#c8d8f0" font-family="sans-serif">N</text>
+      <text y="-16" text-anchor="middle" font-size="7" fill="#c8d8f0" font-family="sans-serif">N</text>
     </g>
+    <!-- Legend -->
+    <g transform="translate(83,458)">
+      <rect width="175" height="30" fill="rgba(6,13,26,.85)" rx="3"/>
+      <line x1="6" y1="10" x2="30" y2="10" stroke="#2a5a8a" stroke-width="1.5"/>
+      <text x="34" y="13" font-size="7" fill="#8ab4d4" font-family="sans-serif">Rivers</text>
+      <polygon points="50,18 54,10 58,18" fill="rgba(120,160,100,.3)" stroke="rgba(120,160,100,.6)" stroke-width=".8"/>
+      <text x="62" y="21" font-size="7" fill="#8ab4d4" font-family="sans-serif">Mountains</text>
+      <rect x="110" y="6" width="8" height="8" fill="#b8922a"/>
+      <text x="122" y="13" font-size="7" fill="#b8922a" font-family="sans-serif">Selected</text>
+    </g>
+    <!-- Landmark dots for selected state -->
+    ${sel ? (function(){
+      var lms = getLandmarks((STATE_DATA[sel]||{}).region||'midwest');
+      if(!lms||!lms.length) return '';
+      // We can't easily convert lat/lng to SVG coords accurately without a projection
+      // Show a note instead
+      return '';
+    })() : ''}
   </svg>
 </div>
 
-${detailHtml}
+${sel ? `
+<div style="background:#0a1628;border:1px solid rgba(100,150,220,.15);border-radius:3px;padding:14px 18px;margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+  <div>
+    <div style="font-family:Cinzel,serif;font-size:.9rem;color:var(--gold);letter-spacing:.08em;margin-bottom:4px">${(sd||{}).name}</div>
+    <div style="font-size:.82rem;color:var(--ash)">${(sd||{}).mountains&&sd.mountains[0]||''}</div>
+  </div>
+  <button onclick="window.setMapView('geo')" style="background:rgba(61,92,46,.2);border:1px solid rgba(61,92,46,.4);color:#a8d48a;padding:8px 16px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em">VIEW GEOGRAPHY &#9654;</button>
+  <button onclick="window.setMapView('info')" style="background:rgba(184,146,42,.1);border:1px solid rgba(184,146,42,.3);color:var(--gold);padding:8px 16px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em">RIVERS &amp; LANDMARKS &#9654;</button>
+</div>` : `
+<div class="tip" style="margin-top:12px"><strong>Click any state</strong> on the map to zoom in and explore its geography, rivers, mountains, and survival landmarks. Use + / &#8722; to zoom, drag to pan.</div>`}
 
-<div class="tip" style="margin-top:16px"><strong>How to use:</strong> Click any state on the map or use the dropdown to see rivers, mountains, and landmarks. Use +/&#8722; to zoom. Drag to pan. Blue lines are major rivers. Green triangles are mountain ranges.</div>`;
+${view === 'geo' && sel ? `
+<div class="kb" style="margin-top:20px">
+  <h3>&#127956; ${(sd||{}).name} — Geographic Overview</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div>
+      <h4 style="color:var(--gold);font-family:Cinzel,serif;font-size:.78rem;letter-spacing:.1em;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid rgba(184,146,42,.15)">&#128167; RIVERS &amp; WATERWAYS</h4>
+      ${(sd||{rivers:[]}).rivers.map(function(r){return '<div style="padding:6px 0;border-bottom:1px solid rgba(184,146,42,.06);font-size:.88rem;color:rgba(242,232,213,.82)">&bull; '+r+'</div>';}).join('')}
+    </div>
+    <div>
+      <h4 style="color:var(--gold);font-family:Cinzel,serif;font-size:.78rem;letter-spacing:.1em;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid rgba(184,146,42,.15)">&#127956; MOUNTAINS &amp; ELEVATION</h4>
+      ${(sd||{mountains:[]}).mountains.map(function(m){return '<div style="padding:6px 0;border-bottom:1px solid rgba(184,146,42,.06);font-size:.88rem;color:rgba(242,232,213,.82)">&bull; '+m+'</div>';}).join('')}
+    </div>
+  </div>
+  <div style="margin-top:16px">
+    <h4 style="color:var(--gold);font-family:Cinzel,serif;font-size:.78rem;letter-spacing:.1em;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid rgba(184,146,42,.15)">&#127795; KEY LANDMARKS, FORESTS &amp; SURVIVAL ZONES</h4>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">
+      ${(sd||{landmarks:[]}).landmarks.map(function(l){return '<div style="background:#0d1a12;border:1px solid rgba(61,92,46,.25);border-radius:3px;padding:8px 12px;font-size:.85rem;color:rgba(242,232,213,.82)">&#127975; '+l+'</div>';}).join('')}
+    </div>
+  </div>
+  <div class="tip" style="margin-top:14px">
+    <strong>Elevation note:</strong> Higher elevations mean shorter growing seasons, harder winters, and different plant/animal species every 1,000 ft of gain. Mountain passes are critical travel corridors — know yours. River valleys are historically where settlements form: water, flat land, game corridors, and trade routes all converge there.
+  </div>
+</div>` : ''}
+`}`;
 };
-
-
-
-
 
 PAGES.animalhealth = function(r,m){
   const season = [12,1,2].includes(m)?'winter':[3,4,5].includes(m)?'spring':[6,7,8].includes(m)?'summer':'fall';
