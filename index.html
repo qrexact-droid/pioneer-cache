@@ -229,6 +229,7 @@ select:focus{border-color:var(--gold)}
 
 
 
+
 const MN=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const RN={pacific:'Pacific Coast',southwest:'Southwest Desert',mountain:'Mountain West',midwest:'Midwest/Plains',southeast:'Southeast',northeast:'Northeast',midatlantic:'Mid-Atlantic',texas:'Texas/Gulf',alaska:'Alaska',hawaii:'Hawaii'};
 
@@ -2055,19 +2056,20 @@ function showHome(){
 // Map state functions — defined at top level so always available
 window.mapSelectState = function(code){
   window._selectedState = code || null;
-  window._mapView = 'map';
+  window._mapView = code ? 'detail' : 'grid';
   var el = document.getElementById('stateSelect');
   if(el) el.value = code || '';
   if(PAGES.mapview){
     document.getElementById('content').innerHTML = PAGES.mapview(R(), M());
+    window.scrollTo({top:0, behavior:'smooth'});
   }
 };
 
 window.setMapView = function(v){
   window._mapView = v;
   if(PAGES.mapview){
-    document.getElementById('content').innerHTML = PAGES.mapview(R(),M());
-    if(v !== 'info') setTimeout(initMapControls, 60);
+    document.getElementById('content').innerHTML = PAGES.mapview(R(), M());
+    window.scrollTo({top:0, behavior:'smooth'});
   }
 };
 
@@ -3087,57 +3089,24 @@ return `
 
 PAGES.mapview = function(r,m){
   var sel = window._selectedState || null;
-  var view = window._mapView || 'map';
+  var view = window._mapView || 'grid';
   var sd = sel ? STATE_DATA[sel] : null;
+  var SR = {WA:'pacific',OR:'pacific',CA:'pacific',MT:'mountain',ID:'mountain',WY:'mountain',CO:'mountain',UT:'mountain',NV:'mountain',ND:'midwest',SD:'midwest',NE:'midwest',KS:'midwest',MN:'midwest',IA:'midwest',MO:'midwest',WI:'midwest',IL:'midwest',IN:'midwest',OH:'midwest',MI:'midwest',AZ:'southwest',NM:'southwest',TX:'texas',OK:'texas',AR:'southeast',LA:'southeast',TN:'southeast',MS:'southeast',AL:'southeast',GA:'southeast',FL:'southeast',SC:'southeast',NC:'midatlantic',VA:'midatlantic',WV:'midatlantic',KY:'southeast',MD:'midatlantic',DE:'midatlantic',PA:'midatlantic',NJ:'midatlantic',NY:'northeast',CT:'northeast',RI:'northeast',MA:'northeast',VT:'northeast',NH:'northeast',ME:'northeast',AK:'alaska',HI:'hawaii',DC:'midatlantic'};
+  var RC = {pacific:'#1a4a2a',southwest:'#4a2a0a',mountain:'#0a2a4a',midwest:'#1a3a0a',southeast:'#3a1a0a',northeast:'#0a1a3a',midatlantic:'#2a1a3a',texas:'#3a1a1a',alaska:'#0a3a4a',hawaii:'#2a0a3a'};
+  var CITIES={"AL": "Birmingham, Montgomery (capital), Huntsville, Mobile, Tuscaloosa", "AK": "Anchorage, Fairbanks, Juneau (capital), Sitka, Ketchikan", "AZ": "Phoenix (capital), Tucson, Mesa, Scottsdale, Flagstaff", "AR": "Little Rock (capital), Fort Smith, Fayetteville, Springdale", "CA": "Los Angeles, San Francisco, Sacramento (capital), San Diego, San Jose, Fresno", "CO": "Denver (capital), Colorado Springs, Aurora, Fort Collins, Boulder", "CT": "Hartford (capital), New Haven, Bridgeport, Stamford, Waterbury", "DE": "Dover (capital), Wilmington, Newark", "FL": "Jacksonville, Miami, Tampa, Orlando, Tallahassee (capital), Fort Lauderdale", "GA": "Atlanta (capital), Columbus, Augusta, Savannah, Athens, Macon", "HI": "Honolulu (capital), Hilo, Kailua, Kaneohe, Pearl City", "ID": "Boise (capital), Nampa, Meridian, Idaho Falls, Pocatello", "IL": "Chicago, Aurora, Rockford, Joliet, Springfield (capital)", "IN": "Indianapolis (capital), Fort Wayne, Evansville, South Bend", "IA": "Des Moines (capital), Cedar Rapids, Davenport, Sioux City", "KS": "Wichita, Overland Park, Topeka (capital), Lawrence, Kansas City", "KY": "Louisville, Lexington, Bowling Green, Frankfort (capital)", "LA": "New Orleans, Baton Rouge (capital), Shreveport, Lafayette", "ME": "Portland, Augusta (capital), Bangor, Lewiston, Auburn", "MD": "Baltimore, Frederick, Rockville, Annapolis (capital)", "MA": "Boston (capital), Worcester, Springfield, Lowell, Cambridge", "MI": "Detroit, Grand Rapids, Warren, Sterling Heights, Lansing (capital)", "MN": "Minneapolis, Saint Paul (capital), Rochester, Duluth, Bloomington", "MS": "Jackson (capital), Gulfport, Southaven, Hattiesburg, Biloxi", "MO": "Kansas City, Saint Louis, Springfield, Columbia, Jefferson City (capital)", "MT": "Billings, Missoula, Great Falls, Bozeman, Helena (capital)", "NE": "Omaha, Lincoln (capital), Bellevue, Grand Island, Kearney", "NV": "Las Vegas, Henderson, Reno, North Las Vegas, Carson City (capital)", "NH": "Manchester, Nashua, Concord (capital), Derry, Dover", "NJ": "Newark, Jersey City, Paterson, Elizabeth, Trenton (capital)", "NM": "Albuquerque, Las Cruces, Rio Rancho, Santa Fe (capital), Roswell", "NY": "New York City, Buffalo, Rochester, Yonkers, Albany (capital), Syracuse", "NC": "Charlotte, Raleigh (capital), Greensboro, Durham, Winston-Salem", "ND": "Fargo, Bismarck (capital), Grand Forks, Minot", "OH": "Columbus (capital), Cleveland, Cincinnati, Toledo, Akron, Dayton", "OK": "Oklahoma City (capital), Tulsa, Norman, Broken Arrow, Lawton", "OR": "Portland, Eugene, Salem (capital), Gresham, Hillsboro, Bend", "PA": "Philadelphia, Pittsburgh, Allentown, Erie, Reading, Harrisburg (capital)", "RI": "Providence (capital), Cranston, Warwick, Pawtucket, Newport", "SC": "Columbia (capital), Charleston, North Charleston, Greenville, Mount Pleasant", "SD": "Sioux Falls, Rapid City, Aberdeen, Brookings, Pierre (capital)", "TN": "Nashville (capital), Memphis, Knoxville, Chattanooga, Clarksville", "TX": "Houston, San Antonio, Dallas, Austin (capital), Fort Worth, El Paso", "UT": "Salt Lake City (capital), West Valley City, Provo, West Jordan, Sandy", "VT": "Burlington, Essex, South Burlington, Montpelier (capital), Barre", "VA": "Virginia Beach, Norfolk, Chesapeake, Richmond (capital), Arlington", "WA": "Seattle, Spokane, Tacoma, Vancouver, Bellevue, Olympia (capital)", "WV": "Charleston (capital), Huntington, Parkersburg, Morgantown, Wheeling", "WI": "Milwaukee, Madison (capital), Green Bay, Kenosha, Racine, Appleton", "WY": "Cheyenne (capital), Casper, Laramie, Gillette, Rock Springs", "DC": "Washington D.C. \u2014 capital of the United States"};
+  var HWY={"AL": "I-20, I-59, I-65 (north-south spine), I-85, US-80, US-431", "AK": "Alaska Highway (Alcan), Parks Hwy (AK-3), Richardson Hwy, Seward Hwy", "AZ": "I-10 (east-west), I-17 (Phoenix to Flagstaff), I-40 (old Route 66), US-89, US-93", "AR": "I-30, I-40 (east-west), I-49, I-530, US-65, US-71", "CA": "I-5 (Pacific Coast spine), I-80, I-10, I-15, US-101, CA-1 (Pacific Coast Hwy)", "CO": "I-25 (north-south), I-70 (over Rockies), US-40, US-50, US-285, CO-9", "CT": "I-84, I-91, I-95 (coastal), CT-15 (Merritt Pkwy)", "DE": "I-95, US-13, US-40, DE-1", "FL": "I-4 (Tampa-Daytona), I-10, I-75, I-95 (east coast), US-1, US-27, US-41", "GA": "I-20, I-75, I-85, I-95, US-1, US-78, US-441", "HI": "H-1 (Honolulu), H-2, H-3, Kamehameha Hwy, Mamalahoa Hwy", "ID": "I-84 (southern), I-86, I-90 (northern), US-12, US-20, US-93, US-95", "IL": "I-55, I-57, I-64, I-70, I-72, I-80, I-90/94 (Chicago)", "IN": "I-65, I-69, I-70, I-74, I-80/90 (toll), I-94, US-31, US-41", "IA": "I-29, I-35, I-80 (east-west spine), I-380, US-20, US-30, US-61", "KS": "I-35, I-70 (east-west spine), I-135, US-36, US-50, US-56, US-83", "KY": "I-24, I-64, I-65, I-71, I-75, US-25, US-31, US-60, US-68", "LA": "I-10 (east-west), I-12, I-20, I-49, I-55, US-61 (Great River Rd), US-90", "ME": "I-95, US-1 (coastal), US-2, US-201, ME-27", "MD": "I-68, I-70, I-83, I-95 (Baltimore-Washington), I-270, US-1, US-50", "MA": "I-90 (Mass Pike), I-93, I-95, I-495, US-1, US-3, US-6 (Cape Cod)", "MI": "I-75 (north-south spine), I-94, I-96, I-275, US-23, US-31, US-131", "MN": "I-35, I-90, I-94 (Twin Cities), I-494/694, US-2, US-10, US-61 (Lake Superior)", "MS": "I-20, I-55 (north-south spine), I-59, US-45, US-61 (Blues Hwy), US-90", "MO": "I-29, I-35, I-44, I-55, I-70 (east-west spine), US-36, US-50, US-61", "MT": "I-15 (north-south), I-90 (east-west), I-94, US-2, US-12, US-89, US-93", "NE": "I-80 (full length east-west), I-29, I-180, US-20, US-26, US-30, US-81", "NV": "I-15 (Las Vegas), I-80 (northern), US-50 (Loneliest Road), US-93, US-395", "NH": "I-89, I-93, I-95, US-2, US-3, US-4, NH-9", "NJ": "I-78, I-80, I-95 (NJ Turnpike), I-195, I-287, Garden State Pkwy, AC Expressway", "NM": "I-10 (southern), I-25 (north-south), I-40 (east-west, old Route 66), US-54, US-285", "NY": "I-87 (Thruway), I-90, I-95, I-81, US-9, US-11, US-20", "NC": "I-26, I-40 (east-west), I-77, I-85, I-95 (eastern), US-1, US-17, US-74", "ND": "I-29 (north-south), I-94 (east-west), US-2, US-52, US-83, US-85", "OH": "I-70 (east-west), I-71, I-75, I-76, I-77, I-80/90 (turnpike), US-23, US-33", "OK": "I-35, I-40 (east-west), I-44, I-240, US-60, US-69, US-75, US-81", "OR": "I-5 (north-south), I-84 (Columbia Gorge), US-20, US-26, US-97, US-101 (coast)", "PA": "I-76 (turnpike), I-78, I-80, I-81, I-83, I-95, US-1, US-11, US-30", "RI": "I-95, I-195, I-295, US-1, US-6, US-44, RI-4", "SC": "I-20, I-26, I-77, I-85, I-95 (eastern), US-17 (coast), US-76, US-278", "SD": "I-29 (north-south), I-90 (east-west), US-14, US-16, US-18, US-83, US-212", "TN": "I-24, I-40 (east-west spine), I-65, I-75, I-81, US-19, US-41, US-70", "TX": "I-10, I-20, I-27, I-30, I-35 (north-south spine), I-37, I-40, I-45, US-83, US-90", "UT": "I-15 (north-south spine), I-70, I-80, I-84, US-6, US-40, US-89, US-191", "VT": "I-89, I-91, US-2, US-4, US-7, VT-100 (scenic north-south corridor)", "VA": "I-64, I-66, I-77, I-81 (Shenandoah Valley), I-85, I-95, US-1, US-11, US-17", "WA": "I-5 (north-south), I-82, I-90 (Seattle-east), I-405, US-2, US-12, US-101 (Olympic)", "WV": "I-64, I-68, I-77, I-79, US-19, US-33, US-50, US-60, US-119", "WI": "I-39/90/94, I-41, I-43, I-90, I-94, US-2, US-8, US-10, US-41, US-53, US-151", "WY": "I-25 (north-south), I-80 (east-west), I-90, US-14, US-16, US-20, US-26, US-189", "DC": "I-66, I-295, I-395, I-495 (Beltway), US-1, US-29, US-50"};
+  var TERRAIN={"pacific": "Coastal ranges and Pacific shoreline, Sierra Nevada and Cascades (peaks 10,000-14,000 ft), Central Valley agricultural corridor, deep river canyons, old-growth redwood and Douglas fir forest.", "southwest": "Desert basins and canyon country, high plateau terrain, extreme temperatures (120F+ in summer, freezing at elevation), sparse water sources \u2014 springs are critical, flash flood terrain in arroyos.", "mountain": "Rocky Mountain ranges with 50+ peaks over 14,000 ft, high mountain passes (8,000-12,000 ft), alpine meadow and tundra above treeline, river valleys, heavy winter snowpack.", "midwest": "Flat to gently rolling glaciated plains, some of the richest agricultural soil on earth, river corridors (Mississippi, Missouri, Ohio), tornado alley exposure in spring/summer, limited natural shelter.", "southeast": "Coastal plain and barrier islands, extensive pine forest, swamp and wetland terrain (Okefenokee, Everglades), river deltas, humid subtropical climate, Atlantic and Gulf hurricane coast.", "northeast": "Appalachian Mountains and foothills, rocky Atlantic coastline, mixed hardwood and boreal forest, cold winters with heavy snowfall, dense river and stream network.", "midatlantic": "Piedmont plateau rolling into Blue Ridge Mountains, coastal plain and Chesapeake Bay watershed, mixed hardwood forest, rolling farmland and river valleys.", "texas": "Edwards Plateau (Texas Hill Country), Llano Estacado high plains, Gulf Coast marshland, East Texas Piney Woods, Chihuahuan Desert in the west, tornado corridor through center.", "alaska": "Arctic and subarctic tundra, boreal forest (taiga), massive glaciers and icefields, volcanic Pacific coast, permafrost ground, extreme seasonal darkness and cold \u2014 50 below in interior winters.", "hawaii": "Active shield volcanoes (Big Island), tropical rainforest on windward slopes, hardened lava fields, coral reef coastline, consistent trade winds drive rainfall to east-facing mountain slopes."};
 
-  // State regions for coloring
-  var SR = {
-    WA:'pacific',OR:'pacific',CA:'pacific',
-    MT:'mountain',ID:'mountain',WY:'mountain',CO:'mountain',UT:'mountain',NV:'mountain',
-    ND:'midwest',SD:'midwest',NE:'midwest',KS:'midwest',MN:'midwest',IA:'midwest',
-    MO:'midwest',WI:'midwest',IL:'midwest',IN:'midwest',OH:'midwest',MI:'midwest',
-    AZ:'southwest',NM:'southwest',
-    TX:'texas',OK:'texas',AR:'southeast',LA:'southeast',
-    TN:'southeast',MS:'southeast',AL:'southeast',GA:'southeast',FL:'southeast',
-    SC:'southeast',NC:'midatlantic',VA:'midatlantic',WV:'midatlantic',KY:'southeast',
-    MD:'midatlantic',DE:'midatlantic',PA:'midatlantic',NJ:'midatlantic',NY:'northeast',
-    CT:'northeast',RI:'northeast',MA:'northeast',VT:'northeast',NH:'northeast',ME:'northeast',
-    AK:'alaska',HI:'hawaii',DC:'midatlantic'
-  };
-
-  var RC = {
-    pacific:'#1a4a2a',southwest:'#4a2a0a',mountain:'#0a2a4a',midwest:'#1a3a0a',
-    southeast:'#3a1a0a',northeast:'#0a1a3a',midatlantic:'#2a1a3a',
-    texas:'#3a1a1a',alaska:'#0a3a4a',hawaii:'#2a0a3a'
-  };
-
-  function tileColor(code){
-    if(code === sel) return '#b8922a';
-    if(sel) return 'rgba(20,30,20,.4)';
-    return RC[SR[code]]||'#1a2a1a';
-  }
-  function tileBorder(code){
-    return code === sel ? '2px solid #ffd700' : '1px solid rgba(150,200,255,.2)';
-  }
-  function tileOpacity(code){
-    return (!sel || code === sel) ? '1' : '0.4';
-  }
-
+  function tileColor(code){ if(code===sel) return '#b8922a'; if(sel) return 'rgba(15,25,15,.5)'; return RC[SR[code]]||'#1a2a1a'; }
   function makeTile(code){
     if(!code) return '<div style="width:52px;height:44px"></div>';
-    var bg = tileColor(code);
-    var border = tileBorder(code);
-    var op = tileOpacity(code);
-    var name = (STATE_DATA[code]||{}).name||code;
-    var isSel = code===sel;
-    return '<div onclick="window.mapSelectState(\''+ code +'\')"' 
-      + ' title="' + name + '"' 
-      + ' style="width:52px;height:44px;background:' + bg + ';border:' + border + ';border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:' + op + ';transition:all .15s;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.05em;color:' + (isSel?'#000':'rgba(220,235,255,.85)') + ';font-weight:' + (isSel?'bold':'400') + '">' 
-      + code + '</div>';
+    var isSel=code===sel, nm=(STATE_DATA[code]||{}).name||code;
+    var bg=tileColor(code), bd=isSel?'2px solid #ffd700':'1px solid rgba(150,200,255,.2)', op=(!sel||isSel)?'1':'0.35';
+    var col=isSel?'#111':'rgba(220,235,255,.85)', fw=isSel?'bold':'400';
+    return '<div onclick="window.mapSelectState(\''+code+'\')" title="'+nm+'" style="width:52px;height:44px;background:'+bg+';border:'+bd+';border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:'+op+';transition:all .15s;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.05em;color:'+col+';font-weight:'+fw+'">'+code+'</div>';
   }
 
-  // Geographic grid — rows and columns approximate real US geography
-  var rows = [
+  var rows=[
     [null,'WA','MT','ND','MN',null,null,null,'ME',null,null],
     [null,'OR','ID','WY','SD','WI','MI',null,'VT','NH',null],
     [null,'CA','NV','CO','NE','IA','IN','OH','PA','NY','MA'],
@@ -3149,64 +3118,84 @@ PAGES.mapview = function(r,m){
     ['AK',null,null,'HI',null,null,null,null,null,null,null]
   ];
 
-  // GEO detail view
-  if(view === 'geo' && sd){
-    return '<div class="ph"><span class="pi">&#127956;</span><h2>' + sd.name + ' &mdash; Geography</h2>'
-      + '<p class="sub">Rivers, mountains, elevation zones and key survival landmarks.</p></div>'
-      + '<button onclick="window.setMapView(\'map\')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:8px 18px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em;margin-bottom:20px">&#8592; BACK TO MAP</button>'
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">'
-      + '<div class="card"><div class="ct">&#128167; Rivers &amp; Waterways</div>'
-      + sd.rivers.map(function(rv){ return '<p style="margin-bottom:5px;font-size:.87rem">&bull; ' + rv + '</p>'; }).join('')
-      + '</div><div class="card"><div class="ct">&#127956; Mountains &amp; High Points</div>'
-      + sd.mountains.map(function(mt){ return '<p style="margin-bottom:5px;font-size:.87rem">&bull; ' + mt + '</p>'; }).join('')
-      + '</div></div>'
-      + '<div class="kb"><h3>&#127795; Landmarks, Forests &amp; Survival Zones</h3>'
-      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">'
-      + sd.landmarks.map(function(l){ return '<div style="background:#0d1a12;border:1px solid rgba(61,92,46,.3);border-radius:3px;padding:9px 13px;font-size:.85rem;color:rgba(242,232,213,.85)">&#127975; ' + l + '</div>'; }).join('')
-      + '</div></div>'
-      + '<div class="tip"><strong>Survival note:</strong> Rivers are your primary water and navigation corridor. Follow any drainage downhill to reach the next river. National forests are prime zones for foraging, hunting, water, and shelter material.</div>';
+  var opts=Object.entries(STATE_DATA).sort(function(a,b){return a[1].name.localeCompare(b[1].name);})
+    .map(function(e){return '<option value="'+e[0]+'"'+(e[0]===sel?' selected':'')+'>'+e[1].name+'</option>';}).join('');
+
+  // ── STATE DETAIL VIEW ──
+  if(sel && view!=='grid'){
+    var isGeo=view==='geo';
+    var cities=CITIES[sel]||'Major cities not available';
+    var hwy=HWY[sel]||'Highway data not available';
+    var terrain=TERRAIN[SR[sel]]||'Terrain data not available';
+    var tabBtn=function(v,label,icon){
+      var active=view===v;
+      return '<button onclick="window.setMapView(\''+v+'\')" style="background:'+(active?'rgba(184,146,42,.25)':'#0d1a0d')+';border:1px solid '+(active?'rgba(184,146,42,.5)':'rgba(150,200,255,.2)')+';color:'+(active?'var(--gold)':'rgba(200,220,200,.7)')+';padding:8px 18px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.08em;margin-right:6px">'+icon+' '+label+'</button>';
+    };
+
+    return '<div style="margin-bottom:14px">'
+      +'<button onclick="window.setMapView(\'grid\')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 15px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.1em;margin-right:10px">&#8592; ALL STATES</button>'
+      +'<span style="font-family:Cinzel,serif;font-size:1rem;color:var(--gold);letter-spacing:.08em">&#9733; '+sd.name+'</span>'
+      +'</div>'
+      +tabBtn('detail','OVERVIEW','&#128506;&#65039;')
+      +tabBtn('geo','GEOGRAPHY','&#127956;')
+      +'<div style="height:1px;background:rgba(184,146,42,.15);margin:14px 0 18px"></div>'
+      +(isGeo
+        ? '<div class="cg"><div class="card"><div class="ct">&#128167; Rivers &amp; Waterways</div>'
+          +sd.rivers.map(function(v){return '<p style="margin-bottom:5px;font-size:.87rem">&bull; '+v+'</p>';}).join('')
+          +'</div><div class="card"><div class="ct">&#127956; Mountains &amp; High Points</div>'
+          +sd.mountains.map(function(v){return '<p style="margin-bottom:5px;font-size:.87rem">&bull; '+v+'</p>';}).join('')
+          +'</div><div class="card"><div class="ct">&#127758; Terrain &amp; Landscape</div>'
+          +'<p style="font-size:.87rem;line-height:1.7">'+terrain+'</p>'
+          +'</div></div>'
+          +'<div class="kb"><h3>&#127795; National Forests, Parks &amp; Survival Zones</h3>'
+          +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">'
+          +sd.landmarks.map(function(l){return '<div style="background:#0d1a12;border:1px solid rgba(61,92,46,.3);border-radius:3px;padding:9px 13px;font-size:.85rem;color:rgba(242,232,213,.85)">&#127975; '+l+'</div>';}).join('')
+          +'</div></div>'
+          +'<div class="tip"><strong>Navigation:</strong> Rivers are your primary water and trail corridor. Follow drainage downhill to reach the next river. National forest land is public — you can camp, forage, and hunt. High ground gives observation and signaling advantage.</div>'
+        : '<div class="kb"><h3>&#127961;&#65039; Major Cities &amp; Population Centers</h3>'
+          +'<p style="font-size:.92rem;line-height:1.85;color:rgba(242,232,213,.88)">'+cities+'</p></div>'
+          +'<div class="kb"><h3>&#128739; Interstate &amp; US Highways</h3>'
+          +'<p style="font-size:.92rem;line-height:1.85;color:rgba(242,232,213,.88)">'+hwy+'</p>'
+          +'<div class="tip" style="margin-top:10px"><strong>Grid-down navigation tip:</strong> Interstates run N-S (odd numbers) and E-W (even numbers). Mile markers count up from south/west. US highways predate interstates and pass through town centers and rural areas that interstates bypass — critical for local navigation and resupply.</div></div>'
+          +'<div class="kb"><h3>&#127758; Regional Terrain</h3>'
+          +'<p style="font-size:.92rem;line-height:1.85;color:rgba(242,232,213,.88)">'+terrain+'</p></div>'
+          +'<div class="kb"><h3>&#127956; Key Geographic Features</h3>'
+          +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+          +'<div><div style="font-family:Cinzel,serif;font-size:.72rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(184,146,42,.15)">RIVERS</div>'
+          +sd.rivers.map(function(v){return '<p style="margin-bottom:4px;font-size:.85rem;color:rgba(242,232,213,.8)">&bull; '+v+'</p>';}).join('')
+          +'</div><div><div style="font-family:Cinzel,serif;font-size:.72rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(184,146,42,.15)">MOUNTAINS</div>'
+          +sd.mountains.map(function(v){return '<p style="margin-bottom:4px;font-size:.85rem;color:rgba(242,232,213,.8)">&bull; '+v+'</p>';}).join('')
+          +'</div></div></div>'
+      )
+      +'<div class="kb"><h3>&#127807; Survival Resource Zones</h3>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">'
+      +sd.landmarks.map(function(l){return '<div style="background:#0d1a12;border:1px solid rgba(61,92,46,.3);border-radius:3px;padding:9px 13px;font-size:.85rem;color:rgba(242,232,213,.85)">&#127975; '+l+'</div>';}).join('')
+      +'</div></div>';
   }
 
-  // State dropdown
-  var opts = Object.entries(STATE_DATA).sort(function(a,b){return a[1].name.localeCompare(b[1].name);})
-    .map(function(e){ return '<option value="' + e[0] + '"' + (e[0]===sel?' selected':'') + '>' + e[1].name + '</option>'; }).join('');
-
-  // Build grid HTML
-  var gridHTML = '<div style="overflow-x:auto;padding-bottom:8px">' 
-    + '<div style="display:inline-block;padding:16px">';
-  rows.forEach(function(row, ri){
-    gridHTML += '<div style="display:flex;gap:5px;margin-bottom:5px">';
-    row.forEach(function(code){
-      gridHTML += makeTile(code);
-    });
-    gridHTML += '</div>';
-    // Separator before AK/HI
-    if(ri === 6) gridHTML += '<div style="height:10px;border-top:1px dashed rgba(150,200,255,.15);margin:6px 0"></div>';
+  // ── GRID VIEW ──
+  var gridHTML='<div style="overflow-x:auto;padding:4px"><div style="display:inline-block;padding:14px">';
+  rows.forEach(function(row,ri){
+    gridHTML+='<div style="display:flex;gap:5px;margin-bottom:5px">';
+    row.forEach(function(c){gridHTML+=makeTile(c);});
+    gridHTML+='</div>';
+    if(ri===6) gridHTML+='<div style="height:8px;border-top:1px dashed rgba(150,200,255,.1);margin:5px 0"></div>';
   });
-  gridHTML += '</div></div>';
+  gridHTML+='</div></div>';
 
-  return '<div class="ph"><span class="pi">&#128506;&#65039;</span><h2>US Geographic Map</h2>'
-    + '<p class="sub">States arranged by geography. Click any state to select it.</p></div>'
-    + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px">'
-    + '<select id="stateSelect" onchange="window.mapSelectState(this.value)" style="font-size:.88rem;padding:7px 11px;min-width:180px">'
-    + '<option value="">&#8212; Select a State &#8212;</option>' + opts + '</select>'
-    + '<button onclick="window.mapSelectState(\'\')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 13px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.1em">CLEAR</button>'
-    + (sel ? '<button onclick="window.setMapView(\'geo\')" style="background:rgba(61,92,46,.25);border:1px solid rgba(61,92,46,.5);color:#a8d48a;padding:7px 14px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.08em">VIEW GEOGRAPHY &#9654;</button>' : '')
-    + (sel ? '<span style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold);letter-spacing:.1em">&#9733; ' + sd.name + '</span>' : '')
-    + '</div>'
-    + '<div style="background:#060d1a;border:1px solid rgba(100,150,220,.2);border-radius:4px">'
-    + gridHTML
-    + '</div>'
-    + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:.72rem;font-family:Cinzel,serif;letter-spacing:.08em">'
-    + Object.entries({Pacific:'#1a4a2a',Southwest:'#4a2a0a',Mountain:'#0a2a4a',Midwest:'#1a3a0a',Southeast:'#3a1a0a',Northeast:'#0a1a3a',"Mid-Atlantic":'#2a1a3a',Texas:'#3a1a1a'})
-        .map(function(e){ return '<span style="display:flex;align-items:center;gap:5px;color:rgba(220,235,255,.6)"><span style="width:12px;height:12px;background:' + e[1] + ';border:1px solid rgba(150,200,255,.3);border-radius:2px;display:inline-block"></span>' + e[0] + '</span>'; }).join('')
-    + '</div>'
-    + (sel ? '<div style="background:#0a1628;border:1px solid rgba(100,150,220,.15);border-radius:3px;padding:13px 18px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'
-        + '<div><div style="font-family:Cinzel,serif;font-size:.95rem;color:var(--gold);letter-spacing:.08em">&#9733; ' + sd.name + '</div>'
-        + '<div style="font-size:.8rem;color:var(--ash);margin-top:3px">' + sd.mountains[0] + '</div></div>'
-        + '<button onclick="window.setMapView(\'geo\')" style="background:rgba(61,92,46,.2);border:1px solid rgba(61,92,46,.4);color:#a8d48a;padding:8px 18px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em">VIEW GEOGRAPHY &#9654;</button>'
-        + '</div>' 
-      : '<div class="tip" style="margin-top:12px"><strong>Click any state tile</strong> to select it, then click <strong>VIEW GEOGRAPHY</strong> to see rivers, mountains, and survival landmarks.</div>');
+  return '<div class="ph"><span class="pi">&#128506;&#65039;</span><h2>US State Reference</h2>'
+    +'<p class="sub">Click any state for cities, highways, terrain, rivers and survival zones.</p></div>'
+    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px">'
+    +'<select id="stateSelect" onchange="window.mapSelectState(this.value)" style="font-size:.88rem;padding:7px 11px;min-width:180px">'
+    +'<option value="">&#8212; Select a State &#8212;</option>'+opts+'</select>'
+    +(sel?'<button onclick="window.mapSelectState(\'\')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 13px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.1em">CLEAR</button>':'')
+    +'</div>'
+    +'<div style="background:#060d1a;border:1px solid rgba(100,150,220,.2);border-radius:4px">'+gridHTML+'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:.7rem;font-family:Cinzel,serif;letter-spacing:.08em">'
+    +Object.entries({Pacific:'#1a4a2a',Southwest:'#4a2a0a',Mountain:'#0a2a4a',Midwest:'#1a3a0a',Southeast:'#3a1a0a',Northeast:'#0a1a3a',"Mid-Atlantic":'#2a1a3a',Texas:'#3a1a1a'})
+      .map(function(e){return '<span style="display:flex;align-items:center;gap:5px;color:rgba(220,235,255,.6)"><span style="width:10px;height:10px;background:'+e[1]+';border:1px solid rgba(150,200,255,.3);border-radius:2px;display:inline-block"></span>'+e[0]+'</span>';}).join('')
+    +'</div>'
+    +'<div class="tip" style="margin-top:12px"><strong>Click any state tile</strong> to see its cities, highway network, rivers, mountains, terrain and survival resource zones.</div>';
 };
 PAGES.animalhealth = function(r,m){
   const season = [12,1,2].includes(m)?'winter':[3,4,5].includes(m)?'spring':[6,7,8].includes(m)?'summer':'fall';
@@ -3266,6 +3255,7 @@ ${Object.entries(st).map(([animal,taskList])=>`
 <tr><td>Scours / diarrhea (young)</td><td>Calves, kids, chicks</td><td>Oral electrolytes: 1 tsp salt + 1 tsp baking soda + 1 qt warm water. Kaolin clay. Yogurt with live cultures. Withhold milk 12 hrs, replace with electrolytes.</td><td>Dehydration kills faster than the infection. Electrolytes first, always.</td></tr>
 </table></div>`;
 };
+
 
 
 
