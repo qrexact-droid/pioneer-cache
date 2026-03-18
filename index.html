@@ -228,6 +228,7 @@ select:focus{border-color:var(--gold)}
 
 
 
+
 const MN=['','January','February','March','April','May','June','July','August','September','October','November','December'];
 const RN={pacific:'Pacific Coast',southwest:'Southwest Desert',mountain:'Mountain West',midwest:'Midwest/Plains',southeast:'Southeast',northeast:'Northeast',midatlantic:'Mid-Atlantic',texas:'Texas/Gulf',alaska:'Alaska',hawaii:'Hawaii'};
 
@@ -2054,12 +2055,11 @@ function showHome(){
 // Map state functions — defined at top level so always available
 window.mapSelectState = function(code){
   window._selectedState = code || null;
-  window._mapView = 'overview';
-  var sel = document.getElementById('stateSelect');
-  if(sel) sel.value = code || '';
+  window._mapView = 'map';
+  var el = document.getElementById('stateSelect');
+  if(el) el.value = code || '';
   if(PAGES.mapview){
-    document.getElementById('content').innerHTML = PAGES.mapview(R(),M());
-    setTimeout(initMapControls, 60);
+    document.getElementById('content').innerHTML = PAGES.mapview(R(), M());
   }
 };
 
@@ -3090,196 +3090,124 @@ PAGES.mapview = function(r,m){
   var view = window._mapView || 'map';
   var sd = sel ? STATE_DATA[sel] : null;
 
-  var stateOptions = Object.entries(STATE_DATA)
-    .sort(function(a,b){ return a[1].name.localeCompare(b[1].name); })
-    .map(function(e){
-      return '<option value="'+e[0]+'"'+(e[0]===sel?' selected':'')+'>'+e[1].name+'</option>';
-    }).join('');
+  // State regions for coloring
+  var SR = {
+    WA:'pacific',OR:'pacific',CA:'pacific',
+    MT:'mountain',ID:'mountain',WY:'mountain',CO:'mountain',UT:'mountain',NV:'mountain',
+    ND:'midwest',SD:'midwest',NE:'midwest',KS:'midwest',MN:'midwest',IA:'midwest',
+    MO:'midwest',WI:'midwest',IL:'midwest',IN:'midwest',OH:'midwest',MI:'midwest',
+    AZ:'southwest',NM:'southwest',
+    TX:'texas',OK:'texas',AR:'southeast',LA:'southeast',
+    TN:'southeast',MS:'southeast',AL:'southeast',GA:'southeast',FL:'southeast',
+    SC:'southeast',NC:'midatlantic',VA:'midatlantic',WV:'midatlantic',KY:'southeast',
+    MD:'midatlantic',DE:'midatlantic',PA:'midatlantic',NJ:'midatlantic',NY:'northeast',
+    CT:'northeast',RI:'northeast',MA:'northeast',VT:'northeast',NH:'northeast',ME:'northeast',
+    AK:'alaska',HI:'hawaii',DC:'midatlantic'
+  };
 
-  // Color each state path based on region and selection
-  function getStateFill(code){
-    var isSel = code === sel;
-    if(isSel) return '#b8922a';
-    var reg = (STATE_DATA[code]||{}).region||'midwest';
-    var rc = {pacific:'#1a4a2a',southwest:'#4a2a0a',mountain:'#0a2a4a',
-              midwest:'#1a3a0a',southeast:'#3a1a0a',northeast:'#0a1a3a',
-              midatlantic:'#2a1a3a',texas:'#3a1a1a',alaska:'#0a3a4a',hawaii:'#2a0a3a'};
-    return sel ? '#070e06' : (rc[reg]||'#1a2020');
+  var RC = {
+    pacific:'#1a4a2a',southwest:'#4a2a0a',mountain:'#0a2a4a',midwest:'#1a3a0a',
+    southeast:'#3a1a0a',northeast:'#0a1a3a',midatlantic:'#2a1a3a',
+    texas:'#3a1a1a',alaska:'#0a3a4a',hawaii:'#2a0a3a'
+  };
+
+  function tileColor(code){
+    if(code === sel) return '#b8922a';
+    if(sel) return 'rgba(20,30,20,.4)';
+    return RC[SR[code]]||'#1a2a1a';
+  }
+  function tileBorder(code){
+    return code === sel ? '2px solid #ffd700' : '1px solid rgba(150,200,255,.2)';
+  }
+  function tileOpacity(code){
+    return (!sel || code === sel) ? '1' : '0.4';
   }
 
-  function getStateOpacity(code){
-    if(code === sel) return '1';
-    return sel ? '0.3' : '0.9';
+  function makeTile(code){
+    if(!code) return '<div style="width:52px;height:44px"></div>';
+    var bg = tileColor(code);
+    var border = tileBorder(code);
+    var op = tileOpacity(code);
+    var name = (STATE_DATA[code]||{}).name||code;
+    var isSel = code===sel;
+    return '<div onclick="window.mapSelectState(\''+ code +'\')"' 
+      + ' title="' + name + '"' 
+      + ' style="width:52px;height:44px;background:' + bg + ';border:' + border + ';border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:' + op + ';transition:all .15s;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.05em;color:' + (isSel?'#000':'rgba(220,235,255,.85)') + ';font-weight:' + (isSel?'bold':'400') + '">' 
+      + code + '</div>';
   }
 
-  function getStateStroke(code){
-    if(code === sel) return '#ffd700';
-    return sel ? 'rgba(150,200,255,.1)' : 'rgba(150,200,255,.4)';
-  }
+  // Geographic grid — rows and columns approximate real US geography
+  var rows = [
+    [null,'WA','MT','ND','MN',null,null,null,'ME',null,null],
+    [null,'OR','ID','WY','SD','WI','MI',null,'VT','NH',null],
+    [null,'CA','NV','CO','NE','IA','IN','OH','PA','NY','MA'],
+    [null,null,'UT','KS','MO','IL','KY','WV','VA','NJ','CT'],
+    [null,'AZ','NM','OK','AR','TN','NC','MD','DE','RI',null],
+    [null,null,'TX',null,'LA','MS','AL','GA','SC',null,null],
+    [null,null,null,null,null,null,null,'FL',null,null,null],
+    [null,null,null,null,null,null,null,null,null,null,null],
+    ['AK',null,null,'HI',null,null,null,null,null,null,null]
+  ];
 
-  // GEO view — detailed info panel
+  // GEO detail view
   if(view === 'geo' && sd){
-    return '<div class="ph"><span class="pi">&#127956;</span><h2>'+sd.name+' &mdash; Geography</h2>'
-      +'<p class="sub">Rivers, mountains, elevation zones and key survival landmarks.</p></div>'
-      +'<button onclick="window.setMapView(\'map\')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:8px 18px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em;margin-bottom:20px">&#8592; BACK TO MAP</button>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">'
-      +'<div class="card"><div class="ct">&#128167; Rivers &amp; Waterways</div>'
-      +sd.rivers.map(function(rv){ return '<p style="margin-bottom:5px;font-size:.87rem">&bull; '+rv+'</p>'; }).join('')
-      +'</div><div class="card"><div class="ct">&#127956; Mountains &amp; Elevation</div>'
-      +sd.mountains.map(function(mt){ return '<p style="margin-bottom:5px;font-size:.87rem">&bull; '+mt+'</p>'; }).join('')
-      +'</div></div>'
-      +'<div class="kb"><h3>&#127795; Key Landmarks, Forests &amp; Survival Zones</h3>'
-      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">'
-      +sd.landmarks.map(function(l){ return '<div style="background:#0d1a12;border:1px solid rgba(61,92,46,.3);border-radius:3px;padding:9px 13px;font-size:.85rem;color:rgba(242,232,213,.85)">&#127975; '+l+'</div>'; }).join('')
-      +'</div></div>'
-      +'<div class="tip"><strong>Survival note:</strong> Rivers are your primary navigation and water corridor. Follow drainage downhill to find the next river. National forests are your best resource zones for foraging, game, shelter and water.</div>';
+    return '<div class="ph"><span class="pi">&#127956;</span><h2>' + sd.name + ' &mdash; Geography</h2>'
+      + '<p class="sub">Rivers, mountains, elevation zones and key survival landmarks.</p></div>'
+      + '<button onclick="window.setMapView(\'map\')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:8px 18px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em;margin-bottom:20px">&#8592; BACK TO MAP</button>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">'
+      + '<div class="card"><div class="ct">&#128167; Rivers &amp; Waterways</div>'
+      + sd.rivers.map(function(rv){ return '<p style="margin-bottom:5px;font-size:.87rem">&bull; ' + rv + '</p>'; }).join('')
+      + '</div><div class="card"><div class="ct">&#127956; Mountains &amp; High Points</div>'
+      + sd.mountains.map(function(mt){ return '<p style="margin-bottom:5px;font-size:.87rem">&bull; ' + mt + '</p>'; }).join('')
+      + '</div></div>'
+      + '<div class="kb"><h3>&#127795; Landmarks, Forests &amp; Survival Zones</h3>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">'
+      + sd.landmarks.map(function(l){ return '<div style="background:#0d1a12;border:1px solid rgba(61,92,46,.3);border-radius:3px;padding:9px 13px;font-size:.85rem;color:rgba(242,232,213,.85)">&#127975; ' + l + '</div>'; }).join('')
+      + '</div></div>'
+      + '<div class="tip"><strong>Survival note:</strong> Rivers are your primary water and navigation corridor. Follow any drainage downhill to reach the next river. National forests are prime zones for foraging, hunting, water, and shelter material.</div>';
   }
 
-  // Build state color overrides as CSS
-  var stateStyles = Object.keys(STATE_DATA).map(function(code){
-    return '#'+code+'{fill:'+getStateFill(code)+';opacity:'+getStateOpacity(code)+';stroke:'+getStateStroke(code)+';stroke-width:'+(code===sel?'2.5':'0.8')+'}';
-  }).join('');
+  // State dropdown
+  var opts = Object.entries(STATE_DATA).sort(function(a,b){return a[1].name.localeCompare(b[1].name);})
+    .map(function(e){ return '<option value="' + e[0] + '"' + (e[0]===sel?' selected':'') + '>' + e[1].name + '</option>'; }).join('');
+
+  // Build grid HTML
+  var gridHTML = '<div style="overflow-x:auto;padding-bottom:8px">' 
+    + '<div style="display:inline-block;padding:16px">';
+  rows.forEach(function(row, ri){
+    gridHTML += '<div style="display:flex;gap:5px;margin-bottom:5px">';
+    row.forEach(function(code){
+      gridHTML += makeTile(code);
+    });
+    gridHTML += '</div>';
+    // Separator before AK/HI
+    if(ri === 6) gridHTML += '<div style="height:10px;border-top:1px dashed rgba(150,200,255,.15);margin:6px 0"></div>';
+  });
+  gridHTML += '</div></div>';
 
   return '<div class="ph"><span class="pi">&#128506;&#65039;</span><h2>US Geographic Map</h2>'
-    +'<p class="sub">Click any state to select it, then VIEW GEOGRAPHY for rivers, mountains and landmarks.</p></div>'
-    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px">'
-    +'<select id="stateSelect" onchange="window.mapSelectState(this.value)" style="font-size:.88rem;padding:7px 11px;min-width:180px">'
-    +'<option value="">&#8212; Select a State &#8212;</option>'+stateOptions+'</select>'
-    +'<button onclick="window.mapSelectState(\'\')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 13px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.1em">OVERVIEW</button>'
-    +'<button onclick="window.mapZoom(1.4)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 12px;cursor:pointer;border-radius:3px;font-size:1.1rem;font-weight:bold">+</button>'
-    +'<button onclick="window.mapZoom(0.7)" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 12px;cursor:pointer;border-radius:3px;font-size:1.1rem;font-weight:bold">&#8722;</button>'
-    +(sel ? '<button onclick="window.setMapView(\'geo\')" style="background:rgba(61,92,46,.25);border:1px solid rgba(61,92,46,.5);color:#a8d48a;padding:7px 14px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.08em">GEO &#9654;</button>' : '')
-    +(sel ? '<span style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold);letter-spacing:.1em">&#9733; '+sd.name+'</span>' : '')
-    +'</div>'
-    +'<style>'+stateStyles+'</style>'
-    +'<div id="mapwrap" style="background:#060d1a;border:1px solid rgba(100,150,220,.2);border-radius:4px;overflow:hidden;touch-action:none;position:relative">'
-    +'<svg id="usmap" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" style="width:100%;height:500px;display:block;cursor:grab">'
-    +'<defs><style>.sp{cursor:pointer;transition:fill 0.15s,opacity 0.15s}.sp:hover{opacity:1 !important;filter:brightness(1.6)}.state-label{font:10px sans-serif;pointer-events:none;fill:rgba(220,235,255,.8);text-anchor:middle}</style></defs>'
-    // Background
-    +'<rect width="960" height="600" fill="#060d1a"/>'
-    // Continental US states
-    +'<g id="states">'
-    +'<path id="AL" data-state="AL" class="sp" d="M 561,486 L 556,487 L 549,490 L 546,491 L 544,491 L 537,491 L 534,490 L 534,468 L 535,432 L 536,407 L 537,373 L 537,358 L 538,330 L 539,316 L 540,292 L 561,293 L 583,294 L 591,294 L 591,304 L 593,320 L 593,337 L 589,354 L 585,375 L 582,398 L 581,420 L 580,444 L 578,460 L 574,473 L 568,481 Z"/>'
-    +'<path id="AZ" data-state="AZ" class="sp" d="M 187,407 L 185,378 L 183,348 L 181,318 L 180,298 L 208,296 L 241,295 L 268,294 L 289,293 L 290,315 L 291,338 L 292,362 L 292,385 L 293,407 L 264,408 L 235,408 L 210,409 Z"/>'
-    +'<path id="AR" data-state="AR" class="sp" d="M 490,330 L 490,310 L 491,295 L 492,280 L 510,281 L 530,281 L 540,282 L 541,292 L 540,315 L 539,330 L 539,350 L 538,362 L 514,363 L 491,363 L 490,350 Z"/>'
-    +'<path id="CA" data-state="CA" class="sp" d="M 117,253 L 112,241 L 105,223 L 97,200 L 91,178 L 87,160 L 88,140 L 92,125 L 100,112 L 113,103 L 126,98 L 140,99 L 155,102 L 168,110 L 178,122 L 182,138 L 180,155 L 172,167 L 163,175 L 155,185 L 153,200 L 157,215 L 164,228 L 168,245 L 167,260 L 160,272 L 149,280 L 138,285 L 130,293 L 127,308 L 125,325 L 122,340 L 117,352 L 112,362 L 102,367 L 90,368 L 80,365 L 76,355 L 78,342 L 84,330 L 90,318 L 94,305 L 95,290 L 100,275 L 108,263 Z"/>'
-    +'<path id="CO" data-state="CO" class="sp" d="M 289,235 L 290,212 L 290,188 L 370,190 L 413,191 L 413,215 L 413,238 L 413,262 L 370,261 L 290,260 Z"/>'
-    +'<path id="CT" data-state="CT" class="sp" d="M 821,163 L 832,159 L 840,165 L 838,180 L 828,185 L 818,180 L 815,170 Z"/>'
-    +'<path id="DE" data-state="DE" class="sp" d="M 796,203 L 804,198 L 812,202 L 813,215 L 806,222 L 796,218 Z"/>'
-    +'<path id="FL" data-state="FL" class="sp" d="M 591,420 L 596,404 L 600,385 L 605,370 L 610,358 L 618,350 L 630,348 L 643,350 L 652,358 L 658,372 L 658,390 L 652,410 L 641,428 L 624,445 L 605,457 L 588,460 L 578,452 L 574,438 L 578,426 Z"/>'
-    +'<path id="GA" data-state="GA" class="sp" d="M 590,294 L 618,295 L 642,297 L 662,300 L 671,312 L 670,330 L 664,350 L 653,365 L 643,373 L 628,376 L 612,374 L 600,366 L 594,352 L 590,335 L 588,315 Z"/>'
-    +'<path id="ID" data-state="ID" class="sp" d="M 185,80 L 192,68 L 204,62 L 218,64 L 226,76 L 228,92 L 225,108 L 219,122 L 215,138 L 214,155 L 216,172 L 220,186 L 222,200 L 220,215 L 213,228 L 205,238 L 198,248 L 190,255 L 182,260 L 175,265 L 175,250 L 178,232 L 181,215 L 183,198 L 181,180 L 175,163 L 170,147 L 169,130 L 172,113 L 178,98 Z"/>'
-    +'<path id="IL" data-state="IL" class="sp" d="M 518,196 L 519,175 L 520,155 L 522,135 L 534,137 L 550,140 L 564,145 L 572,155 L 570,173 L 565,192 L 558,210 L 548,225 L 535,235 L 522,240 L 515,248 L 510,260 L 507,250 L 508,235 L 512,218 Z"/>'
-    +'<path id="IN" data-state="IN" class="sp" d="M 565,145 L 580,148 L 596,152 L 606,162 L 605,180 L 600,198 L 593,215 L 582,228 L 568,235 L 553,237 L 545,228 L 546,210 L 550,192 L 556,175 L 560,160 Z"/>'
-    +'<path id="IA" data-state="IA" class="sp" d="M 470,150 L 473,132 L 477,115 L 500,115 L 524,117 L 545,120 L 553,130 L 552,148 L 547,162 L 532,164 L 512,163 L 490,161 L 472,160 Z"/>'
-    +'<path id="KS" data-state="KS" class="sp" d="M 413,240 L 413,262 L 413,285 L 455,284 L 497,283 L 518,282 L 519,262 L 519,243 L 497,242 L 455,241 Z"/>'
-    +'<path id="KY" data-state="KY" class="sp" d="M 575,245 L 582,232 L 590,224 L 604,222 L 618,224 L 635,228 L 650,232 L 665,235 L 680,238 L 695,240 L 705,248 L 700,260 L 688,268 L 672,272 L 656,274 L 638,272 L 620,268 L 602,262 L 586,255 Z"/>'
-    +'<path id="LA" data-state="LA" class="sp" d="M 490,363 L 491,345 L 492,328 L 514,328 L 538,328 L 548,332 L 552,350 L 550,368 L 542,384 L 528,392 L 512,392 L 498,385 L 490,374 Z"/>'
-    +'<path id="ME" data-state="ME" class="sp" d="M 876,72 L 886,64 L 900,64 L 910,74 L 908,88 L 896,96 L 882,94 L 872,85 Z"/>'
-    +'<path id="MD" data-state="MD" class="sp" d="M 762,213 L 775,208 L 790,206 L 800,210 L 805,220 L 798,230 L 784,235 L 768,233 L 756,225 Z"/>'
-    +'<path id="MA" data-state="MA" class="sp" d="M 834,145 L 846,140 L 860,140 L 872,145 L 872,158 L 860,163 L 845,163 L 833,158 Z"/>'
-    +'<path id="MI" data-state="MI" class="sp" d="M 592,88 L 600,80 L 613,78 L 624,84 L 626,98 L 618,108 L 604,112 L 591,107 Z M 549,113 L 558,105 L 570,103 L 582,108 L 585,122 L 577,133 L 562,135 L 549,128 Z"/>'
-    +'<path id="MN" data-state="MN" class="sp" d="M 469,60 L 473,42 L 480,28 L 493,20 L 508,18 L 523,20 L 535,28 L 540,42 L 540,58 L 538,75 L 533,90 L 530,105 L 516,108 L 500,108 L 484,107 L 470,100 Z"/>'
-    +'<path id="MS" data-state="MS" class="sp" d="M 539,292 L 540,315 L 539,337 L 538,362 L 538,380 L 535,400 L 528,415 L 516,420 L 505,415 L 496,403 L 491,388 L 490,370 L 491,350 L 491,330 L 491,312 L 492,295 L 510,295 Z"/>'
-    +'<path id="MO" data-state="MO" class="sp" d="M 490,240 L 491,220 L 491,198 L 491,178 L 491,162 L 510,162 L 530,163 L 546,165 L 548,180 L 547,198 L 543,215 L 540,232 L 540,250 L 540,268 L 540,282 L 519,282 L 500,281 L 490,280 Z"/>'
-    +'<path id="MT" data-state="MT" class="sp" d="M 180,60 L 185,42 L 192,28 L 250,30 L 310,32 L 370,34 L 395,35 L 393,55 L 390,75 L 388,95 L 387,115 L 358,113 L 326,110 L 295,108 L 262,105 L 231,102 L 208,100 L 194,88 Z"/>'
-    +'<path id="NE" data-state="NE" class="sp" d="M 387,165 L 388,145 L 390,125 L 420,126 L 452,128 L 478,130 L 490,132 L 489,150 L 488,168 L 466,167 L 440,166 L 412,166 Z"/>'
-    +'<path id="NV" data-state="NV" class="sp" d="M 174,162 L 175,142 L 178,122 L 183,105 L 192,95 L 200,100 L 210,112 L 216,128 L 215,148 L 214,168 L 212,188 L 208,210 L 202,228 L 195,245 L 186,258 L 176,264 L 172,252 L 173,235 L 175,218 L 175,198 Z"/>'
-    +'<path id="NH" data-state="NH" class="sp" d="M 856,112 L 862,102 L 870,96 L 879,98 L 880,110 L 875,122 L 864,128 L 853,124 Z"/>'
-    +'<path id="NJ" data-state="NJ" class="sp" d="M 810,186 L 820,180 L 830,182 L 832,195 L 825,208 L 813,213 L 803,207 L 803,195 Z"/>'
-    +'<path id="NM" data-state="NM" class="sp" d="M 263,260 L 263,237 L 264,212 L 290,213 L 318,214 L 345,215 L 372,216 L 371,240 L 370,265 L 369,290 L 368,315 L 340,315 L 312,315 L 285,315 L 263,315 Z"/>'
-    +'<path id="NY" data-state="NY" class="sp" d="M 718,147 L 728,132 L 742,122 L 758,118 L 775,120 L 788,130 L 792,145 L 783,158 L 766,165 L 748,167 L 730,163 L 716,155 Z"/>'
-    +'<path id="NC" data-state="NC" class="sp" d="M 668,270 L 676,256 L 690,250 L 707,248 L 725,250 L 742,255 L 756,262 L 765,272 L 758,283 L 742,288 L 724,290 L 705,288 L 686,284 L 668,278 Z"/>'
-    +'<path id="ND" data-state="ND" class="sp" d="M 388,60 L 390,40 L 392,22 L 430,22 L 468,23 L 478,28 L 474,45 L 471,62 L 470,80 L 452,80 L 424,78 L 398,75 Z"/>'
-    +'<path id="OH" data-state="OH" class="sp" d="M 607,162 L 620,157 L 634,158 L 646,165 L 652,178 L 650,195 L 644,212 L 632,224 L 616,230 L 600,228 L 588,218 L 583,202 L 585,185 L 593,172 Z"/>'
-    +'<path id="OK" data-state="OK" class="sp" d="M 370,290 L 370,268 L 370,248 L 412,248 L 455,249 L 497,249 L 519,250 L 520,268 L 519,288 L 496,288 L 455,288 L 412,288 Z"/>'
-    +'<path id="OR" data-state="OR" class="sp" d="M 86,135 L 92,118 L 100,103 L 113,96 L 129,94 L 148,96 L 165,100 L 174,112 L 176,128 L 173,145 L 165,158 L 152,168 L 136,175 L 118,178 L 100,175 L 87,163 Z"/>'
-    +'<path id="PA" data-state="PA" class="sp" d="M 650,168 L 665,162 L 683,160 L 702,160 L 720,162 L 735,167 L 738,180 L 735,193 L 726,202 L 710,206 L 692,206 L 673,203 L 658,196 L 648,185 Z"/>'
-    +'<path id="RI" data-state="RI" class="sp" d="M 848,160 L 856,156 L 863,160 L 862,170 L 854,174 L 845,170 Z"/>'
-    +'<path id="SC" data-state="SC" class="sp" d="M 672,312 L 680,298 L 693,290 L 708,290 L 720,298 L 724,312 L 715,326 L 698,333 L 680,330 Z"/>'
-    +'<path id="SD" data-state="SD" class="sp" d="M 390,95 L 390,75 L 392,58 L 415,58 L 443,60 L 468,62 L 470,82 L 470,100 L 468,118 L 444,117 L 418,115 L 394,113 Z"/>'
-    +'<path id="TN" data-state="TN" class="sp" d="M 575,272 L 580,260 L 586,250 L 600,248 L 617,248 L 634,248 L 650,250 L 666,252 L 680,256 L 695,258 L 706,265 L 700,275 L 686,280 L 668,282 L 650,280 L 630,277 L 610,274 L 590,272 Z"/>'
-    +'<path id="TX" data-state="TX" class="sp" d="M 310,318 L 312,295 L 315,270 L 318,245 L 368,248 L 368,270 L 368,295 L 368,320 L 368,345 L 370,368 L 370,390 L 365,413 L 356,435 L 340,452 L 318,462 L 294,462 L 272,452 L 254,435 L 244,415 L 240,393 L 240,370 L 244,348 L 255,330 L 271,318 L 290,312 Z"/>'
-    +'<path id="UT" data-state="UT" class="sp" d="M 208,212 L 210,190 L 212,168 L 215,148 L 237,150 L 260,152 L 282,155 L 288,170 L 288,192 L 288,215 L 288,238 L 261,236 L 234,234 L 208,232 Z"/>'
-    +'<path id="VT" data-state="VT" class="sp" d="M 820,118 L 828,110 L 838,108 L 845,116 L 843,130 L 835,138 L 823,135 L 816,126 Z"/>'
-    +'<path id="VA" data-state="VA" class="sp" d="M 676,235 L 690,228 L 707,225 L 725,226 L 742,230 L 756,237 L 762,248 L 755,260 L 740,265 L 722,267 L 703,265 L 684,260 L 668,252 L 663,242 Z"/>'
-    +'<path id="WA" data-state="WA" class="sp" d="M 86,60 L 93,44 L 106,35 L 124,32 L 144,35 L 160,44 L 172,58 L 175,74 L 168,88 L 153,96 L 134,98 L 114,96 L 97,86 Z"/>'
-    +'<path id="WV" data-state="WV" class="sp" d="M 650,210 L 662,202 L 675,200 L 686,208 L 688,222 L 680,234 L 665,238 L 650,232 L 644,220 Z"/>'
-    +'<path id="WI" data-state="WI" class="sp" d="M 524,118 L 534,108 L 548,103 L 562,106 L 572,118 L 572,135 L 562,148 L 547,153 L 532,150 L 520,140 Z"/>'
-    +'<path id="WY" data-state="WY" class="sp" d="M 237,115 L 240,92 L 243,70 L 280,73 L 318,76 L 356,78 L 388,80 L 386,102 L 383,125 L 380,148 L 344,145 L 307,142 L 272,138 L 240,135 Z"/>'
-    +'<path id="DC" data-state="DC" class="sp" d="M 762,228 L 768,224 L 773,228 L 770,234 L 763,233 Z"/>'
-    +'</g>'
-    // Alaska inset
-    +'<g transform="translate(0,350) scale(0.38)">'
-    +'<path id="AK" data-state="AK" class="sp" d="M 157,502 L 165,498 L 179,498 L 196,503 L 208,509 L 215,516 L 214,524 L 205,531 L 192,533 L 177,530 L 164,523 L 156,514 Z M 100,530 L 108,525 L 118,527 L 123,535 L 116,542 L 105,540 Z M 132,543 L 140,538 L 150,540 L 154,548 L 146,555 L 135,552 Z"/>'
-    +'<text class="state-label" x="185" y="517">AK</text>'
-    +'</g>'
-    // Hawaii inset
-    +'<g transform="translate(150,350) scale(0.6)">'
-    +'<path id="HI" data-state="HI" class="sp" d="M 230,500 L 242,496 L 254,498 L 258,508 L 250,516 L 237,517 L 228,510 Z M 272,504 L 284,500 L 296,502 L 300,512 L 292,520 L 279,519 Z M 314,493 L 328,489 L 340,492 L 343,502 L 334,510 L 320,508 Z M 358,476 L 374,471 L 388,474 L 392,485 L 382,492 L 366,490 Z"/>'
-    +'<text class="state-label" x="310" y="500">HI</text>'
-    +'</g>'
-    // State labels
-    +'<g><text class="state-label" x="560" y="430">AL</text>'
-    +'<text class="state-label" x="240" y="360">AZ</text>'
-    +'<text class="state-label" x="515" y="325">AR</text>'
-    +'<text class="state-label" x="110" y="270">CA</text>'
-    +'<text class="state-label" x="350" y="225">CO</text>'
-    +'<text class="state-label" x="829" y="175">CT</text>'
-    +'<text class="state-label" x="804" y="213">DE</text>'
-    +'<text class="state-label" x="620" y="412">FL</text>'
-    +'<text class="state-label" x="632" y="335">GA</text>'
-    +'<text class="state-label" x="200" y="162">ID</text>'
-    +'<text class="state-label" x="541" y="200">IL</text>'
-    +'<text class="state-label" x="580" y="190">IN</text>'
-    +'<text class="state-label" x="510" y="140">IA</text>'
-    +'<text class="state-label" x="460" y="262">KS</text>'
-    +'<text class="state-label" x="640" y="252">KY</text>'
-    +'<text class="state-label" x="520" y="360">LA</text>'
-    +'<text class="state-label" x="888" y="82">ME</text>'
-    +'<text class="state-label" x="779" y="222">MD</text>'
-    +'<text class="state-label" x="852" y="152">MA</text>'
-    +'<text class="state-label" x="595" y="102">MI</text>'
-    +'<text class="state-label" x="505" y="65">MN</text>'
-    +'<text class="state-label" x="516" y="360">MS</text>'
-    +'<text class="state-label" x="518" y="228">MO</text>'
-    +'<text class="state-label" x="295" y="72">MT</text>'
-    +'<text class="state-label" x="440" y="148">NE</text>'
-    +'<text class="state-label" x="192" y="195">NV</text>'
-    +'<text class="state-label" x="867" y="115">NH</text>'
-    +'<text class="state-label" x="817" y="198">NJ</text>'
-    +'<text class="state-label" x="315" y="270">NM</text>'
-    +'<text class="state-label" x="752" y="144">NY</text>'
-    +'<text class="state-label" x="714" y="268">NC</text>'
-    +'<text class="state-label" x="432" y="52">ND</text>'
-    +'<text class="state-label" x="620" y="195">OH</text>'
-    +'<text class="state-label" x="445" y="270">OK</text>'
-    +'<text class="state-label" x="130" y="135">OR</text>'
-    +'<text class="state-label" x="692" y="183">PA</text>'
-    +'<text class="state-label" x="854" y="167">RI</text>'
-    +'<text class="state-label" x="696" y="314">SC</text>'
-    +'<text class="state-label" x="430" y="90">SD</text>'
-    +'<text class="state-label" x="638" y="262">TN</text>'
-    +'<text class="state-label" x="320" y="390">TX</text>'
-    +'<text class="state-label" x="248" y="192">UT</text>'
-    +'<text class="state-label" x="831" y="125">VT</text>'
-    +'<text class="state-label" x="714" y="248">VA</text>'
-    +'<text class="state-label" x="130" y="65">WA</text>'
-    +'<text class="state-label" x="668" y="220">WV</text>'
-    +'<text class="state-label" x="546" y="130">WI</text>'
-    +'<text class="state-label" x="313" y="110">WY</text>'
-    +'</g>'
-    +'</svg></div>'
-    +(sel
-      ? '<div style="background:#0a1628;border:1px solid rgba(100,150,220,.15);border-radius:3px;padding:13px 18px;margin-top:11px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'
-        +'<div><div style="font-family:Cinzel,serif;font-size:.95rem;color:var(--gold);letter-spacing:.08em">'+sd.name+'</div>'
-        +'<div style="font-size:.8rem;color:var(--ash);margin-top:3px">'+sd.mountains[0]+'</div></div>'
-        +'<button onclick="window.setMapView(\'geo\')" style="background:rgba(61,92,46,.2);border:1px solid rgba(61,92,46,.4);color:#a8d48a;padding:8px 18px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em">VIEW GEOGRAPHY &#9654;</button>'
-        +'</div>'
-      : '<div class="tip" style="margin-top:11px"><strong>Click any state</strong> on the map or use the dropdown. States are colored by region. Click VIEW GEOGRAPHY for rivers, mountains and landmarks. Drag to pan, +/&#8722; to zoom.</div>'
-    );
+    + '<p class="sub">States arranged by geography. Click any state to select it.</p></div>'
+    + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px">'
+    + '<select id="stateSelect" onchange="window.mapSelectState(this.value)" style="font-size:.88rem;padding:7px 11px;min-width:180px">'
+    + '<option value="">&#8212; Select a State &#8212;</option>' + opts + '</select>'
+    + '<button onclick="window.mapSelectState(\'\')" style="background:#1a2840;border:1px solid rgba(100,150,220,.3);color:#a0c4f0;padding:7px 13px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.1em">CLEAR</button>'
+    + (sel ? '<button onclick="window.setMapView(\'geo\')" style="background:rgba(61,92,46,.25);border:1px solid rgba(61,92,46,.5);color:#a8d48a;padding:7px 14px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.08em">VIEW GEOGRAPHY &#9654;</button>' : '')
+    + (sel ? '<span style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold);letter-spacing:.1em">&#9733; ' + sd.name + '</span>' : '')
+    + '</div>'
+    + '<div style="background:#060d1a;border:1px solid rgba(100,150,220,.2);border-radius:4px">'
+    + gridHTML
+    + '</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:.72rem;font-family:Cinzel,serif;letter-spacing:.08em">'
+    + Object.entries({Pacific:'#1a4a2a',Southwest:'#4a2a0a',Mountain:'#0a2a4a',Midwest:'#1a3a0a',Southeast:'#3a1a0a',Northeast:'#0a1a3a',"Mid-Atlantic":'#2a1a3a',Texas:'#3a1a1a'})
+        .map(function(e){ return '<span style="display:flex;align-items:center;gap:5px;color:rgba(220,235,255,.6)"><span style="width:12px;height:12px;background:' + e[1] + ';border:1px solid rgba(150,200,255,.3);border-radius:2px;display:inline-block"></span>' + e[0] + '</span>'; }).join('')
+    + '</div>'
+    + (sel ? '<div style="background:#0a1628;border:1px solid rgba(100,150,220,.15);border-radius:3px;padding:13px 18px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'
+        + '<div><div style="font-family:Cinzel,serif;font-size:.95rem;color:var(--gold);letter-spacing:.08em">&#9733; ' + sd.name + '</div>'
+        + '<div style="font-size:.8rem;color:var(--ash);margin-top:3px">' + sd.mountains[0] + '</div></div>'
+        + '<button onclick="window.setMapView(\'geo\')" style="background:rgba(61,92,46,.2);border:1px solid rgba(61,92,46,.4);color:#a8d48a;padding:8px 18px;cursor:pointer;border-radius:3px;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.1em">VIEW GEOGRAPHY &#9654;</button>'
+        + '</div>' 
+      : '<div class="tip" style="margin-top:12px"><strong>Click any state tile</strong> to select it, then click <strong>VIEW GEOGRAPHY</strong> to see rivers, mountains, and survival landmarks.</div>');
 };
-
 PAGES.animalhealth = function(r,m){
   const season = [12,1,2].includes(m)?'winter':[3,4,5].includes(m)?'spring':[6,7,8].includes(m)?'summer':'fall';
   const sName = season.charAt(0).toUpperCase()+season.slice(1);
@@ -3338,6 +3266,7 @@ ${Object.entries(st).map(([animal,taskList])=>`
 <tr><td>Scours / diarrhea (young)</td><td>Calves, kids, chicks</td><td>Oral electrolytes: 1 tsp salt + 1 tsp baking soda + 1 qt warm water. Kaolin clay. Yogurt with live cultures. Withhold milk 12 hrs, replace with electrolytes.</td><td>Dehydration kills faster than the infection. Electrolytes first, always.</td></tr>
 </table></div>`;
 };
+
 
 
 
