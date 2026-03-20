@@ -252,6 +252,20 @@ select:focus{border-color:var(--gold)}
 </div>
 <script>
 
+// Payment gate — verify ref param or redirect to sales page
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var ref = params.get('ref');
+  var session = params.get('session_id');
+  // Allow access if coming from Stripe (ref=paid or session_id present) or if already stored in session
+  if (!ref && !session && !sessionStorage.getItem('pc_access')) {
+    window.location.replace('https://thepioneercache.com/?blocked=1');
+  }
+  if (ref === 'paid' || session) {
+    sessionStorage.setItem('pc_access', '1');
+  }
+})();
+
 function downloadGuide() {
   var content = document.documentElement.outerHTML;
   var blob = new Blob([content], {type: 'text/html'});
