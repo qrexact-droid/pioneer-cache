@@ -270,7 +270,7 @@ function downloadGuide() {
   // Strip payment gate and download banner from offline file
   var content = document.documentElement.outerHTML;
   content = content.replace(/\/\/ Payment gate[\s\S]*?\}\)\(\);/m, '// Offline edition — no gate');
-  content = content.replace(/<div id="dl-banner"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/m, '');
+  content = content.replace('</head>', '<style>#dl-banner{display:none!important}</style></head>');
   var blob = new Blob([content], {type: 'text/html'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
