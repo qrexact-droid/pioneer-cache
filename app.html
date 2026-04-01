@@ -268,9 +268,13 @@ select:focus{border-color:var(--gold)}
 })();
 
 function downloadGuide() {
-  // Swap button for confirmation message
-  document.getElementById('dl-btn').style.display = 'none';
-  document.getElementById('dl-done').style.display = 'inline';
+  // Hide banner after download, show brief confirmation
+  var banner = document.getElementById('dl-banner');
+  var btn = document.getElementById('dl-btn');
+  var done = document.getElementById('dl-done');
+  if(btn) btn.style.display = 'none';
+  if(done) done.style.display = 'inline';
+  setTimeout(function(){ if(banner) banner.style.display = 'none'; }, 2000);
   // Strip payment gate and download banner from offline file
   var content = document.documentElement.outerHTML;
   content = content.replace(/\/\/ Payment gate[\s\S]*?\}\)\(\);/m, '// Offline edition — no gate');
