@@ -15,7 +15,7 @@ module.exports = async function handler(req, res) {
     const usedList = Array.isArray(usedScenes) && usedScenes.length > 0
       ? `NEVER repeat or resemble these previously used opening situations: ${usedScenes.slice(-10).map((s,i) => `${i+1}) "${s}..."`).join(' ')} — Use a completely different location, time of day, and situation opener each game.`
       : 'This is the first game — make it memorable.';
-    systemPrompt = `You are a survival thriller narrator. Write vivid, dark, cinematic scenes like a published thriller novel. Personalize every detail to the group (${groupSize} people, ${vulnerables}, in ${state}). Make it feel real and desperate. CRITICAL: The "scene" field MUST be exactly 85-100 words. Write slowly, dramatically, with sensory detail to reach that count. Do NOT write a short scene. Aim for 90 words minimum. End the scene with ONE urgent question offering exactly 3 labeled options: A) option one, B) option two, or C) option three. Escalate danger each round. If userResponse is provided, evaluate it and set scoreChange (great: +15 to +20, good: +5 to +15, neutral: -5 to +5, bad: -15 to -5, dangerous: -20 to -10). ${usedList} Return ONLY valid JSON no markdown: {"scene":"...","question":"...","scoreChange":0,"scoreReason":"..."}`;
+    systemPrompt = `You are a survival thriller narrator. Write vivid, dark, cinematic scenes like a published thriller novel. Personalize every detail to the group (${groupSize} people, ${vulnerables}, in ${state}). Make it feel real and desperate. CRITICAL: The "scene" field MUST be 85-95 words. Write slowly, dramatically, with sensory detail. Always end on a complete sentence — never cut off mid-thought. Aim for 90 words. Do NOT exceed 100 words. End the scene with ONE urgent question offering exactly 3 labeled options: A) option one, B) option two, or C) option three. Escalate danger each round. If userResponse is provided, evaluate it and set scoreChange (great: +15 to +20, good: +5 to +15, neutral: -5 to +5, bad: -15 to -5, dangerous: -20 to -10). ${usedList} Return ONLY valid JSON no markdown: {"scene":"...","question":"...","scoreChange":0,"scoreReason":"..."}`;
     userMessage = `Round ${round} of 5. Scenario: ${scenario}. Previous history: ${JSON.stringify(history)}. Current score: ${score}. User's last action: "${userResponse || 'none - this is round 1'}". Write the next scene.`;
   } else {
     systemPrompt = `You are a survival thriller narrator delivering a dramatic conclusion. Write powerfully based on their journey. Return ONLY valid JSON with no markdown: {"outcome":"survived|barely_survived|didnt_make_it|died","insight":"2-3 sentences on exactly what knowledge saved or killed them referencing The Pioneer Cache guide","decisions":"2-3 sentences summarizing their key choices throughout"}`;
@@ -45,7 +45,12 @@ module.exports = async function handler(req, res) {
       // Enforce 115 word max on scene
       if (parsed.scene) {
         const words = parsed.scene.split(' ');
-        if (words.length > 100) parsed.scene = words.slice(0, 100).join(' ');
+        if (words.length > 105) {
+          // Cut at last sentence boundary within 105 words, never mid-sentence
+          const truncated = words.slice(0, 105).join(' ');
+          const lastSentence = truncated.search(/[.!?][^.!?]*$/);
+          parsed.scene = lastSentence > 0 ? truncated.slice(0, lastSentence + 1) : truncated;
+        }
       }
       // Enforce A/B/C options — inject if missing
       if (parsed.question && !/\b[A-C]\)/.test(parsed.question)) {
