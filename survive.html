@@ -1118,11 +1118,7 @@ function checkUnlock() {
   return STATE.isUnlocked;
 }
 
-// ─── INIT ───
-(function init() {
-  checkUnlock();
-  updateScenarioCards();
-})();
+// ─── INIT (moved to boot block at end) ───
 
 // ═══════════════════════════════════════════════
 //  SCREEN NAV
@@ -1479,6 +1475,15 @@ function closeModal() {
 document.getElementById('paywall-modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+
+// ═══════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════
+(function boot() {
+  checkUnlock();
+  updateScenarioCards();
+  showScreen('setup');
+})();
 </script>
 </body>
 </html>
