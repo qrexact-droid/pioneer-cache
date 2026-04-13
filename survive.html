@@ -535,21 +535,7 @@
       height: 1px;
       background: rgba(184,133,42,0.2);
     }
-    .action-textarea {
-      width: 100%;
-      padding: 0.85rem 1rem;
-      background: rgba(15,11,6,0.9);
-      border: 1.5px solid rgba(184,133,42,0.25);
-      border-radius: 8px;
-      color: var(--parchment);
-      font-family: 'Source Serif 4', serif;
-      font-size: 0.95rem;
-      resize: none;
-      height: 80px;
-      transition: border-color 0.2s;
-    }
-    .action-textarea:focus { outline: none; border-color: var(--gold); }
-    .action-textarea::placeholder { color: var(--ash); font-style: italic; }
+    /* textarea removed — multiple choice only */
 
     .move-btn {
       padding: 1rem 1.5rem;
@@ -1080,9 +1066,7 @@
 
     <div class="action-panel" id="action-panel">
       <div class="choice-options" id="choice-options"></div>
-      <div class="choice-divider" id="choice-divider" style="display:none;">or type your own</div>
-      <textarea class="action-textarea" id="action-input" placeholder="What do you do? Describe your action..."></textarea>
-      <button class="move-btn" id="move-btn" onclick="makeMove()">MAKE YOUR MOVE →</button>
+      <button class="move-btn" id="move-btn" onclick="makeMove()" style="display:none;">MAKE YOUR MOVE →</button>
     </div>
   </div>
 </section>
@@ -1399,38 +1383,52 @@ function parseChoices(question) {
   return matches;
 }
 
+let selectedChoiceText = null;
+
 function renderChoices(question) {
   const container = document.getElementById('choice-options');
-  const divider = document.getElementById('choice-divider');
   container.innerHTML = '';
+  selectedChoiceText = null;
   const choices = parseChoices(question);
-  if (choices.length < 2) { divider.style.display = 'none'; return; }
-  divider.style.display = 'flex';
+  if (choices.length < 2) {
+    // No A/B/C detected — show a fallback single button
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-key">→</span><span>Continue</span>`;
+    btn.addEventListener('click', () => commitChoice('Continue', btn));
+    container.appendChild(btn);
+    return;
+  }
   choices.forEach(choice => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
     btn.innerHTML = `<span class="choice-key">${choice.key}</span><span>${choice.text}</span>`;
-    btn.addEventListener('click', () => selectChoice(choice.key, choice.text, btn));
+    btn.addEventListener('click', () => commitChoice(`${choice.key}) ${choice.text}`, btn));
     container.appendChild(btn);
   });
 }
 
-function selectChoice(key, text, btn) {
+function commitChoice(text, btn) {
+  if (STATE.isTyping) return;
+  // Highlight selected
   document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
-  const input = document.getElementById('action-input');
-  input.value = `${key}) ${text}`;
-  input.style.borderColor = 'var(--gold)';
+  // Disable all buttons to prevent double-click
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  selectedChoiceText = text;
+  // Auto-submit after brief visual feedback
+  setTimeout(() => {
+    doSubmit(text);
+  }, 350);
 }
 
-// Keyboard shortcut: press A/B/C to select that choice
+// Keyboard shortcut: press A/B/C to select
 document.addEventListener('keydown', function(e) {
   const panel = document.getElementById('action-panel');
-  const input = document.getElementById('action-input');
-  if (panel.style.display === 'none' || document.activeElement === input) return;
+  if (!panel || panel.style.display === 'none') return;
   const key = e.key.toUpperCase();
   if (['A','B','C'].includes(key)) {
-    const btns = document.querySelectorAll('.choice-btn');
+    const btns = document.querySelectorAll('.choice-btn:not(:disabled)');
     btns.forEach(btn => {
       const k = btn.querySelector('.choice-key');
       if (k && k.textContent.trim() === key) {
@@ -1441,15 +1439,11 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-function makeMove() {
-  if (STATE.isTyping) return;
-  const input = document.getElementById('action-input');
-  const response = input.value.trim();
-  if (!response) { input.style.borderColor = 'var(--ember)'; return; }
-  input.style.borderColor = '';
-  input.value = '';
+function makeMove() { /* kept for compatibility */ }
+
+function doSubmit(response) {
   document.getElementById('choice-options').innerHTML = '';
-  document.getElementById('choice-divider').style.display = 'none';
+  selectedChoiceText = null;
 
   if (STATE.round >= 5) {
     finishGame(response);
