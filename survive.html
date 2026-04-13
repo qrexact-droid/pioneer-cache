@@ -1345,18 +1345,28 @@ async function nextRound(userResponse) {
 }
 
 function parseChoices(question) {
-  // Match patterns like A) ... B) ... C) ... or (A) ... (B) ...
-  const pattern = /\b([A-C])\)\s*([^A-C\(]+?)(?=\s+[B-C]\)|$)/gi;
-  const pattern2 = /\(([A-C])\)\s*([^\(]+?)(?=\s*\([B-C]\)|$)/gi;
-  let matches = [];
+  // Split on A) B) C) boundaries — works with comma/or separators and any text
+  // e.g. "Do you: A) Shelter in place, B) Drive home, or C) Head to basement?"
+  const matches = [];
+  // Find all positions of A) B) C)
+  const positions = [];
+  const findRe = /\b([A-C])\)/g;
   let m;
-  const re = /\b([A-C])\)\s*(.*?)(?=\s+[B-C]\)|[,]\s+or\s+[B-C]\)|$)/gi;
-  // Simple split approach
-  const parts = question.split(/,\s*(?:or\s+)?\b([A-C])\)/i);
-  // Fallback: regex all A) B) C) occurrences
-  const simple = /([A-C])\)\s*([^A-Z]{10,}?)(?=\s*[B-C]\)|$)/gi;
-  while ((m = simple.exec(question)) !== null) {
-    matches.push({ key: m[1].toUpperCase(), text: m[2].trim().replace(/[,.]$/, '') });
+  while ((m = findRe.exec(question)) !== null) {
+    positions.push({ key: m[1].toUpperCase(), start: m.index + m[0].length });
+  }
+  if (positions.length < 2) return [];
+  for (let i = 0; i < positions.length; i++) {
+    const start = positions[i].start;
+    const end = positions[i + 1] ? positions[i + 1].start - 2 : question.length; // -2 to trim "B)" label
+    let text = question.slice(start, end).trim();
+    // Clean trailing punctuation like comma, "or", period
+    text = text.replace(/,?\s*or\s*$/i, '').replace(/[,;]$/, '').replace(/\?$/, '').trim();
+    matches.push({ key: positions[i].key, text });
+  }
+  // Also trim last option's trailing ?
+  if (matches.length > 0) {
+    matches[matches.length - 1].text = matches[matches.length - 1].text.replace(/\?$/, '').trim();
   }
   return matches;
 }
@@ -1601,7 +1611,7 @@ function openModal() {
 function closeModal() {
   document.getElementById('paywall-modal').classList.remove('active');
 }
-// Close modal on overlay click
+// Close modal on overlay click // memory-checkpoint: survive.html v3 — choices, keyboard, spacing, boot fix
 document.getElementById('paywall-modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
