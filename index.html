@@ -85,6 +85,14 @@ header{
   transition:background .2s;
 }
 .header-cta:hover{background:var(--moss-light)}
+.header-cta-survive{background:var(--ember);color:#fff;}
+.header-cta-survive:hover{background:#a84e22;}
+.header-btns{display:flex;gap:10px;align-items:center;flex-shrink:0;}
+@media(max-width:600px){
+  header{flex-wrap:wrap;gap:10px;padding:14px 16px;}
+  .header-btns{width:100%;display:flex;gap:8px;}
+  .header-cta{flex:1;text-align:center;padding:10px 8px;font-size:.75rem;}
+}
 
 /* ── HERO ── */
 .hero{
@@ -700,9 +708,9 @@ footer .footer-logo{
       <p>Complete Offline Survival Knowledge</p>
     </div>
   </a>
-  <div style="display:flex;gap:12px;align-items:center;">
-    <a href="/survive.html" class="header-cta" style="background:var(--ember);">&#9876; Can You Survive?</a>
+  <div class="header-btns">
     <a href="#buy" class="header-cta">GET IT NOW — $5.99</a>
+    <a href="/survive.html" class="header-cta header-cta-survive">&#9876; Can You Survive?</a>
   </div>
 </header>
 
