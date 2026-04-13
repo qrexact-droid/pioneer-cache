@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Survive — The Pioneer Cache</title>
+  <meta name="description" content="Can your group survive? A personalized survival story powered by AI. Find out what knowledge you're missing." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0f0b06;
+      --bark: #1c1208;
+      --parchment: #f4ead8;
+      --cream: #faf5ec;
+      --gold: #b8852a;
+      --gold-light: #d4a84b;
+      --moss: #3d5c2e;
+      --moss-light: #5a8040;
+      --ember: #c4622d;
+      --ash: #8c7b68;
+      --warm-gray: #e8ddd0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--ink);
+      color: var(--parchment);
+      font-family: 'Source Serif 4', Georgia, serif;
+      overflow-x: hidden;
+    }
+
+    /* ─── SCREEN SYSTEM ─── */
+    .screen {
+      display: none;
+      min-height: 100vh;
+      width: 100%;
+      animation: fadeIn 0.6s ease;
+    }
+    .screen.active { display: flex; flex-direction: column; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(196,98,45,0.7); background: #c4622d; }
+      50% { box-shadow: 0 0 0 6px rgba(196,98,45,0); background: #ff6b35; }
+    }
+    @keyframes revealScore {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes typewriterCursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* ─── SCREEN 1: SETUP ─── */
+    #screen-setup {
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, #1c1208 0%, #0f0b06 70%);
+      padding: 2rem;
+    }
+
+    .setup-container {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .setup-logo {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .setup-logo .tag {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .setup-logo h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 700;
+      color: var(--parchment);
+      line-height: 1.1;
+    }
+    .setup-logo .subtitle {
+      font-size: 0.9rem;
+      color: var(--ash);
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    .question-block {
+      display: none;
+      animation: slideUp 0.5s ease forwards;
+    }
+    .question-block.active { display: block; }
+
+    .question-label {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.2rem, 3vw, 1.6rem);
+      color: var(--parchment);
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+    .question-label .q-num {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .num-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .num-btn {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: transparent;
+      color: var(--gold);
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .num-btn:hover { background: var(--gold); color: var(--ink); }
+    .num-display {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--parchment);
+      min-width: 3rem;
+      text-align: center;
+    }
+
+    .vuln-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .vuln-btn {
+      padding: 1rem;
+      border: 2px solid rgba(184,133,42,0.3);
+      border-radius: 8px;
+      background: rgba(28,18,8,0.8);
+      color: var(--parchment);
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .vuln-btn:hover, .vuln-btn.selected {
+      border-color: var(--gold);
+      background: rgba(184,133,42,0.15);
+      color: var(--gold-light);
+    }
+
+    .state-select {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      border: 2px solid rgba(184,133,42,0.3);
+      border-radius: 8px;
+      background: rgba(28,18,8,0.9);
+      color: var(--parchment);
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8852a' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+    }
+    .state-select:focus { outline: none; border-color: var(--gold); }
+    .state-select option { background: #1c1208; }
+
+    .next-btn, .begin-btn {
+      margin-top: 2rem;
+      width: 100%;
+      padding: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--gold);
+      color: var(--ink);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .next-btn:hover, .begin-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .next-btn:active, .begin-btn:active { transform: translateY(0); }
+
+    .progress-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
+    .progress-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(184,133,42,0.25);
+      transition: background 0.3s;
+    }
+    .progress-dot.done { background: var(--gold); }
+
+    /* ─── SCREEN 2: SCENARIO SELECT ─── */
+    #screen-scenarios {
+      background: var(--ink);
+      padding: 2rem;
+      align-items: center;
+    }
+
+    .scenario-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      max-width: 600px;
+      width: 100%;
+    }
+    .scenario-header .back-link {
+      display: inline-block;
+      color: var(--ash);
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .scenario-header .back-link:hover { color: var(--gold); }
+    .scenario-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      color: var(--parchment);
+      margin-bottom: 0.5rem;
+    }
+    .scenario-header p {
+      color: var(--ash);
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+
+    .difficulty-bar {
+      display: none;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      background: rgba(28,18,8,0.8);
+      border: 1px solid rgba(184,133,42,0.2);
+      border-radius: 8px;
+      padding: 0.5rem;
+    }
+    .difficulty-bar.visible { display: flex; }
+    .diff-btn {
+      flex: 1;
+      padding: 0.6rem;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--ash);
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .diff-btn.active { background: var(--gold); color: var(--ink); font-weight: 600; }
+
+    .scenarios-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .scenario-card {
+      border-radius: 12px;
+      padding: 1.75rem;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .scenario-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.25s;
+      background: rgba(255,255,255,0.05);
+    }
+    .scenario-card:hover::before { opacity: 1; }
+    .scenario-card:hover { transform: translateY(-3px); border-color: rgba(184,133,42,0.5); }
+
+    .scenario-card.locked { cursor: pointer; }
+    .scenario-card.locked .card-emoji { filter: grayscale(1) opacity(0.5); }
+    .scenario-card.locked .lock-icon {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      font-size: 1.2rem;
+      opacity: 0.7;
+    }
+
+    /* Card gradients */
+    .card-power   { background: linear-gradient(135deg, #1a2030 0%, #252d3a 100%); }
+    .card-hurricane { background: linear-gradient(135deg, #0d2020 0%, #1a2e30 100%); }
+    .card-quake   { background: linear-gradient(135deg, #2a1810 0%, #3a2015 100%); }
+    .card-wild    { background: linear-gradient(135deg, #0d1f10 0%, #152a15 100%); }
+    .card-finance { background: linear-gradient(135deg, #111111 0%, #1e1e1e 100%); }
+    .card-pandemic { background: linear-gradient(135deg, #1a1025 0%, #221530 100%); }
+
+    .card-emoji { font-size: 2.2rem; margin-bottom: 0.75rem; display: block; }
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--parchment);
+      margin-bottom: 0.4rem;
+    }
+    .card-survival {
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ash);
+    }
+    .survival-bar {
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.1);
+      margin-top: 0.75rem;
+      overflow: hidden;
+    }
+    .survival-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--gold);
+      transition: width 1s ease;
+    }
+    .free-badge {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      background: var(--moss);
+      color: var(--parchment);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    /* ─── SCREEN 3: GAME ─── */
+    #screen-game {
+      background: var(--bark);
+      flex-direction: column;
+    }
+
+    .game-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: rgba(15,11,6,0.8);
+      border-bottom: 1px solid rgba(184,133,42,0.15);
+      flex-shrink: 0;
+    }
+    .round-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .pulse-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      animation: pulse-red 1.4s ease infinite;
+    }
+    .round-text {
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--parchment);
+    }
+    .round-pips {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .round-pip {
+      width: 24px; height: 4px;
+      border-radius: 2px;
+      background: rgba(184,133,42,0.2);
+      transition: background 0.4s;
+    }
+    .round-pip.done { background: var(--gold); }
+
+    .game-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+      padding: 1.5rem;
+      gap: 1.5rem;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .story-panel {
+      background: linear-gradient(180deg, rgba(28,18,8,0.95) 0%, rgba(15,11,6,0.98) 100%);
+      border: 1px solid rgba(184,133,42,0.2);
+      border-radius: 12px;
+      padding: 2rem;
+      flex: 1;
+      min-height: 220px;
+      position: relative;
+    }
+    .story-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23b8852a' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .story-text {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      line-height: 1.75;
+      color: var(--parchment);
+      position: relative;
+      z-index: 1;
+      min-height: 6em;
+    }
+    .story-cursor {
+      display: inline-block;
+      width: 2px; height: 1.1em;
+      background: var(--gold);
+      vertical-align: middle;
+      margin-left: 2px;
+      animation: typewriterCursor 0.7s ease infinite;
+    }
+    .story-question {
+      margin-top: 1.5rem;
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem;
+      color: var(--gold-light);
+      font-style: italic;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+      min-height: 1.5em;
+    }
+
+    .action-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .action-textarea {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      background: rgba(15,11,6,0.9);
+      border: 2px solid rgba(184,133,42,0.25);
+      border-radius: 8px;
+      color: var(--parchment);
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem;
+      resize: none;
+      height: 90px;
+      transition: border-color 0.2s;
+    }
+    .action-textarea:focus { outline: none; border-color: var(--gold); }
+    .action-textarea::placeholder { color: var(--ash); }
+
+    .move-btn {
+      padding: 1rem 1.5rem;
+      background: var(--moss);
+      border: none;
+      border-radius: 8px;
+      color: var(--parchment);
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .move-btn:hover:not(:disabled) { background: var(--moss-light); transform: translateY(-1px); }
+    .move-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .loading-indicator {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--ash);
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+    .loading-indicator.visible { display: flex; }
+    .loading-dots span {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: loadDot 1.2s ease infinite;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes loadDot {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ─── SCREEN 4: RESULT ─── */
+    #screen-result {
+      background: var(--ink);
+      align-items: center;
+      justify-content: flex-start;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .result-container {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      padding-bottom: 3rem;
+    }
+
+    .result-outcome {
+      text-align: center;
+      padding: 3rem 2rem;
+      border-radius: 16px;
+      animation: fadeIn 0.8s ease;
+    }
+    .result-outcome.survived {
+      background: linear-gradient(135deg, rgba(61,92,46,0.3), rgba(184,133,42,0.1));
+      border: 2px solid rgba(184,133,42,0.4);
+    }
+    .result-outcome.barely {
+      background: linear-gradient(135deg, rgba(196,98,45,0.2), rgba(184,133,42,0.1));
+      border: 2px solid rgba(196,98,45,0.4);
+    }
+    .result-outcome.didnt {
+      background: linear-gradient(135deg, rgba(140,0,0,0.2), rgba(28,18,8,0.4));
+      border: 2px solid rgba(140,0,0,0.4);
+    }
+    .result-outcome.died {
+      background: linear-gradient(135deg, rgba(30,20,10,0.6), rgba(15,11,6,0.8));
+      border: 2px solid rgba(140,123,104,0.2);
+    }
+    .outcome-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .outcome-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .survived .outcome-title { color: var(--gold-light); }
+    .barely .outcome-title { color: #d4884b; }
+    .didnt .outcome-title { color: #c44444; }
+    .died .outcome-title { color: var(--ash); }
+
+    .score-reveal {
+      display: inline-block;
+      font-family: 'Playfair Display', serif;
+      font-size: 4rem;
+      font-weight: 900;
+      animation: revealScore 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+    }
+    .survived .score-reveal { color: var(--gold); }
+    .barely .score-reveal { color: #d4884b; }
+    .didnt .score-reveal { color: #c44444; }
+    .died .score-reveal { color: var(--ash); }
+    .score-label { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ash); margin-top: 0.25rem; }
+
+    .result-insight, .result-decisions {
+      background: rgba(28,18,8,0.8);
+      border: 1px solid rgba(184,133,42,0.15);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    .result-section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+    .result-text {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--warm-gray);
+      font-style: italic;
+    }
+
+    .guide-cta {
+      background: linear-gradient(135deg, rgba(61,92,46,0.4), rgba(90,128,64,0.2));
+      border: 2px solid var(--moss-light);
+      border-radius: 12px;
+      padding: 1.75rem;
+      text-align: center;
+    }
+    .guide-cta h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: var(--parchment);
+      margin-bottom: 0.5rem;
+    }
+    .guide-cta p { color: var(--ash); font-size: 0.9rem; margin-bottom: 1.25rem; }
+    .guide-btn {
+      display: inline-block;
+      padding: 0.9rem 2rem;
+      background: var(--moss);
+      color: var(--parchment);
+      text-decoration: none;
+      border-radius: 8px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: background 0.2s;
+    }
+    .guide-btn:hover { background: var(--moss-light); }
+
+    /* ─── SHARE CARD ─── */
+    .share-card {
+      background: var(--bark);
+      border: 3px solid var(--gold);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+    .share-card-brand {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+    .share-card-outcome {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--parchment);
+      margin-bottom: 0.5rem;
+    }
+    .share-card-score {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--gold-light);
+    }
+    .share-card-scenario {
+      font-size: 0.85rem;
+      color: var(--ash);
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+    .share-card-url {
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      margin-top: 1rem;
+    }
+    .screenshot-btn {
+      margin-top: 1.25rem;
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: 2px solid var(--gold);
+      border-radius: 6px;
+      color: var(--gold);
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .screenshot-btn:hover { background: var(--gold); color: var(--ink); }
+
+    /* ─── POST-GAME PAYWALL ─── */
+    .postgame-paywall {
+      display: none;
+      background: rgba(15,11,6,0.95);
+      border: 2px solid rgba(184,133,42,0.3);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+    }
+    .postgame-paywall.visible { display: block; }
+    .postgame-paywall h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--parchment);
+      margin-bottom: 0.75rem;
+    }
+    .postgame-paywall p { color: var(--ash); margin-bottom: 1.25rem; font-size: 0.95rem; }
+    .paywall-cta-btn {
+      display: inline-block;
+      padding: 0.9rem 2rem;
+      background: var(--gold);
+      color: var(--ink);
+      text-decoration: none;
+      border-radius: 8px;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .paywall-cta-btn:hover { background: var(--gold-light); }
+    .free-replay-note { margin-top: 0.75rem; font-size: 0.85rem; color: var(--ash); }
+
+    /* ─── PAYWALL MODAL ─── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15,11,6,0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: linear-gradient(180deg, #1c1208 0%, #141008 100%);
+      border: 2px solid rgba(184,133,42,0.4);
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 460px;
+      position: relative;
+      animation: slideUp 0.4s ease;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      background: none;
+      border: none;
+      color: var(--ash);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--parchment); }
+    .modal-icon { font-size: 2.5rem; margin-bottom: 1rem; text-align: center; }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--parchment);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .modal-subtitle { color: var(--ash); text-align: center; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .modal-perks { list-style: none; margin-bottom: 1.75rem; }
+    .modal-perks li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--warm-gray);
+      font-size: 0.95rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(184,133,42,0.08);
+    }
+    .modal-perks li .check { color: var(--moss-light); font-size: 1.1rem; }
+    .modal-stripe-btn {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      background: var(--gold);
+      color: var(--ink);
+      text-align: center;
+      text-decoration: none;
+      border-radius: 8px;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      transition: background 0.2s;
+    }
+    .modal-stripe-btn:hover { background: var(--gold-light); }
+    .modal-fine-print { text-align: center; color: var(--ash); font-size: 0.75rem; margin-top: 0.75rem; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      .scenarios-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .scenario-card { padding: 1.2rem; min-height: 150px; }
+      .card-emoji { font-size: 1.8rem; }
+      .card-title { font-size: 1rem; }
+      .game-main { padding: 1rem; gap: 1rem; }
+      .story-panel { padding: 1.25rem; }
+    }
+    @media (max-width: 400px) {
+      .scenarios-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 1: CHARACTER SETUP
+════════════════════════════════════════════════ -->
+<section id="screen-setup" class="screen active">
+  <div class="setup-container">
+    <div class="setup-logo">
+      <div class="tag">The Pioneer Cache</div>
+      <h1>Will You Survive?</h1>
+      <div class="subtitle">A personalized survival story. Find out where your knowledge fails you.</div>
+    </div>
+
+    <!-- Q1: Group Size -->
+    <div class="question-block active" id="q1">
+      <div class="question-label">
+        <span class="q-num">Question 1 of 3</span>
+        How many people are in your group?
+      </div>
+      <div class="num-input-wrap">
+        <button class="num-btn" onclick="adjustGroup(-1)">−</button>
+        <div class="num-display" id="group-display">4</div>
+        <button class="num-btn" onclick="adjustGroup(1)">+</button>
+      </div>
+      <button class="next-btn" onclick="nextQuestion(1)">Next →</button>
+    </div>
+
+    <!-- Q2: Vulnerables -->
+    <div class="question-block" id="q2">
+      <div class="question-label">
+        <span class="q-num">Question 2 of 3</span>
+        Any children or elderly in your group?
+      </div>
+      <div class="vuln-grid">
+        <button class="vuln-btn" data-val="children" onclick="selectVuln(this)">👶 Children</button>
+        <button class="vuln-btn" data-val="elderly" onclick="selectVuln(this)">👴 Elderly</button>
+        <button class="vuln-btn" data-val="both" onclick="selectVuln(this)">👨‍👩‍👧 Both</button>
+        <button class="vuln-btn" data-val="none" onclick="selectVuln(this)">💪 None</button>
+      </div>
+      <button class="next-btn" onclick="nextQuestion(2)" id="q2-next" disabled>Next →</button>
+    </div>
+
+    <!-- Q3: State -->
+    <div class="question-block" id="q3">
+      <div class="question-label">
+        <span class="q-num">Question 3 of 3</span>
+        What US state do you live in?
+      </div>
+      <select class="state-select" id="state-select">
+        <option value="">Select your state...</option>
+        <option>Alabama</option><option>Alaska</option><option>Arizona</option>
+        <option>Arkansas</option><option>California</option><option>Colorado</option>
+        <option>Connecticut</option><option>Delaware</option><option>Florida</option>
+        <option>Georgia</option><option>Hawaii</option><option>Idaho</option>
+        <option>Illinois</option><option>Indiana</option><option>Iowa</option>
+        <option>Kansas</option><option>Kentucky</option><option>Louisiana</option>
+        <option>Maine</option><option>Maryland</option><option>Massachusetts</option>
+        <option>Michigan</option><option>Minnesota</option><option>Mississippi</option>
+        <option>Missouri</option><option>Montana</option><option>Nebraska</option>
+        <option>Nevada</option><option>New Hampshire</option><option>New Jersey</option>
+        <option>New Mexico</option><option>New York</option><option>North Carolina</option>
+        <option>North Dakota</option><option>Ohio</option><option>Oklahoma</option>
+        <option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option>
+        <option>South Carolina</option><option>South Dakota</option><option>Tennessee</option>
+        <option>Texas</option><option>Utah</option><option>Vermont</option>
+        <option>Virginia</option><option>Washington</option><option>West Virginia</option>
+        <option>Wisconsin</option><option>Wyoming</option>
+      </select>
+      <button class="begin-btn" onclick="beginStory()">BEGIN YOUR STORY →</button>
+    </div>
+
+    <div class="progress-dots">
+      <div class="progress-dot done" id="dot1"></div>
+      <div class="progress-dot" id="dot2"></div>
+      <div class="progress-dot" id="dot3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 2: SCENARIO SELECTION
+════════════════════════════════════════════════ -->
+<section id="screen-scenarios" class="screen">
+  <div class="scenario-header">
+    <div class="back-link" onclick="showScreen('setup')">← Start Over</div>
+    <h2>Choose Your Scenario</h2>
+    <p id="scenario-subtitle">Free preview: Power Grid Failure available now</p>
+  </div>
+
+  <!-- Difficulty (paid only) -->
+  <div class="difficulty-bar" id="difficulty-bar">
+    <button class="diff-btn active" data-diff="easy" onclick="selectDiff(this)">Easy</button>
+    <button class="diff-btn" data-diff="medium" onclick="selectDiff(this)">Medium</button>
+    <button class="diff-btn" data-diff="hard" onclick="selectDiff(this)">Hard</button>
+  </div>
+
+  <div class="scenarios-grid">
+    <!-- 1: Power Grid -->
+    <div class="scenario-card card-power" data-scenario="power_grid" data-locked="false" onclick="selectScenario(this)">
+      <div class="free-badge">Free</div>
+      <div>
+        <span class="card-emoji">🔌</span>
+        <div class="card-title">Power Grid Failure</div>
+        <div class="card-survival">34% survival rate</div>
+        <div class="survival-bar"><div class="survival-fill" style="width:34%"></div></div>
+      </div>
+    </div>
+    <!-- 2: Hurricane -->
+    <div class="scenario-card card-hurricane locked" data-scenario="hurricane" data-locked="true" onclick="selectScenario(this)">
+      <span class="lock-icon">🔒</span>
+      <div>
+        <span class="card-emoji">🌀</span>
+        <div class="card-title">Hurricane Evacuation</div>
+        <div class="card-survival">51% survival rate</div>
+        <div class="survival-bar"><div class="survival-fill" style="width:51%"></div></div>
+      </div>
+    </div>
+    <!-- 3: Earthquake -->
+    <div class="scenario-card card-quake locked" data-scenario="earthquake" data-locked="true" onclick="selectScenario(this)">
+      <span class="lock-icon">🔒</span>
+      <div>
+        <span class="card-emoji">🏔</span>
+        <div class="card-title">Earthquake</div>
+        <div class="card-survival">47% survival rate</div>
+        <div class="survival-bar"><div class="survival-fill" style="width:47%"></div></div>
+      </div>
+    </div>
+    <!-- 4: Wilderness -->
+    <div class="scenario-card card-wild locked" data-scenario="wilderness" data-locked="true" onclick="selectScenario(this)">
+      <span class="lock-icon">🔒</span>
+      <div>
+        <span class="card-emoji">🌲</span>
+        <div class="card-title">Wilderness Stranded</div>
+        <div class="card-survival">28% survival rate</div>
+        <div class="survival-bar"><div class="survival-fill" style="width:28%"></div></div>
+      </div>
+    </div>
+    <!-- 5: Financial -->
+    <div class="scenario-card card-finance locked" data-scenario="financial_collapse" data-locked="true" onclick="selectScenario(this)">
+      <span class="lock-icon">🔒</span>
+      <div>
+        <span class="card-emoji">💸</span>
+        <div class="card-title">Financial Collapse</div>
+        <div class="card-survival">22% survival rate</div>
+        <div class="survival-bar"><div class="survival-fill" style="width:22%"></div></div>
+      </div>
+    </div>
+    <!-- 6: Pandemic -->
+    <div class="scenario-card card-pandemic locked" data-scenario="pandemic" data-locked="true" onclick="selectScenario(this)">
+      <span class="lock-icon">🔒</span>
+      <div>
+        <span class="card-emoji">🦠</span>
+        <div class="card-title">Pandemic Lockdown</div>
+        <div class="card-survival">61% survival rate</div>
+        <div class="survival-bar"><div class="survival-fill" style="width:61%"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 3: GAME
+════════════════════════════════════════════════ -->
+<section id="screen-game" class="screen">
+  <div class="game-topbar">
+    <div class="round-indicator">
+      <div class="pulse-dot"></div>
+      <span class="round-text" id="round-label">ROUND 1 OF 5</span>
+    </div>
+    <div class="round-pips">
+      <div class="round-pip" id="pip1"></div>
+      <div class="round-pip" id="pip2"></div>
+      <div class="round-pip" id="pip3"></div>
+      <div class="round-pip" id="pip4"></div>
+      <div class="round-pip" id="pip5"></div>
+    </div>
+  </div>
+
+  <div class="game-main">
+    <div class="story-panel">
+      <div class="story-text" id="story-text"></div>
+      <div class="story-question" id="story-question"></div>
+    </div>
+
+    <div class="loading-indicator" id="loading-indicator">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <span>The story unfolds...</span>
+    </div>
+
+    <div class="action-panel" id="action-panel">
+      <textarea class="action-textarea" id="action-input" placeholder="What do you do? Describe your action..."></textarea>
+      <button class="move-btn" id="move-btn" onclick="makeMove()">MAKE YOUR MOVE →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 4: RESULT
+════════════════════════════════════════════════ -->
+<section id="screen-result" class="screen">
+  <div class="result-container">
+
+    <div class="result-outcome" id="result-outcome">
+      <div class="outcome-icon" id="outcome-icon">⚔</div>
+      <div class="outcome-title" id="outcome-title">YOU SURVIVED</div>
+      <div class="score-reveal" id="score-reveal">72</div>
+      <div class="score-label">SURVIVAL SCORE</div>
+    </div>
+
+    <div class="result-insight">
+      <div class="result-section-label">What Decided Your Fate</div>
+      <div class="result-text" id="result-insight">...</div>
+    </div>
+
+    <div class="result-decisions">
+      <div class="result-section-label">Your Key Decisions</div>
+      <div class="result-text" id="result-decisions">...</div>
+    </div>
+
+    <div class="guide-cta">
+      <h3>Fill the gaps in your knowledge</h3>
+      <p>Your survival story revealed the knowledge that could mean life or death. The Pioneer Cache guide covers every scenario — in detail.</p>
+      <a href="https://buy.stripe.com/fZubJ21jeaQ12ticeqcZa02" class="guide-btn">The Pioneer Cache — $5.99 →</a>
+    </div>
+
+    <!-- Share Card -->
+    <div class="share-card" id="share-card">
+      <div class="share-card-brand">⚡ THE PIONEER CACHE</div>
+      <div class="share-card-outcome" id="share-outcome">YOU SURVIVED</div>
+      <div class="share-card-score" id="share-score">72</div>
+      <div class="share-card-scenario" id="share-scenario">Power Grid Failure</div>
+      <div class="share-card-url">thepioneercache.com/survive</div>
+      <button class="screenshot-btn" onclick="screenshotCard()">📸 Screenshot &amp; Share</button>
+    </div>
+
+    <!-- Post-game paywall (free users) -->
+    <div class="postgame-paywall" id="postgame-paywall">
+      <div style="font-size:2rem;margin-bottom:1rem;">🔒</div>
+      <h3>Want to Play Again?</h3>
+      <p>Unlock all 6 scenarios, choose your difficulty, and see if you can beat your score — for just $2.99/month.</p>
+      <a href="https://buy.stripe.com/4gM4gA4vq2jvgk80vIcZa0k" class="paywall-cta-btn">Unlock All Scenarios — $2.99/mo</a>
+      <div class="free-replay-note">Or <a href="#" onclick="restartFree(); return false;" style="color:var(--gold);">play the free scenario again</a></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     PAYWALL MODAL
+════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="paywall-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-icon">⚔️</div>
+    <div class="modal-title">Unlock All 6 Scenarios</div>
+    <div class="modal-subtitle">Take on every threat. Your life may depend on it.</div>
+    <ul class="modal-perks">
+      <li><span class="check">✓</span> All 6 scenarios — hurricane, earthquake, pandemic &amp; more</li>
+      <li><span class="check">✓</span> Easy / Medium / Hard difficulty modes</li>
+      <li><span class="check">✓</span> Unlimited replays — improve your score</li>
+      <li><span class="check">✓</span> New scenarios added monthly</li>
+    </ul>
+    <a href="https://buy.stripe.com/4gM4gA4vq2jvgk80vIcZa0k" class="modal-stripe-btn">Unlock Now — $2.99/month</a>
+    <div class="modal-fine-print">Cancel anytime. Secure payment via Stripe.</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const STATE = {
+  groupSize: 4,
+  vulnerables: null,
+  state: '',
+  scenario: '',
+  scenarioName: '',
+  difficulty: 'easy',
+  round: 0,
+  score: 50,
+  history: [],
+  isTyping: false,
+  isUnlocked: false,
+};
+
+// ─── CHECK UNLOCK STATUS ───
+function checkUnlock() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('unlocked') === '1') {
+    localStorage.setItem('pioneer_survive_unlocked', '1');
+  }
+  STATE.isUnlocked = localStorage.getItem('pioneer_survive_unlocked') === '1';
+  return STATE.isUnlocked;
+}
+
+// ─── INIT ───
+(function init() {
+  checkUnlock();
+  updateScenarioCards();
+})();
+
+// ═══════════════════════════════════════════════
+//  SCREEN NAV
+// ═══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  if (el) { el.classList.add('active'); window.scrollTo(0, 0); }
+}
+
+// ═══════════════════════════════════════════════
+//  SCREEN 1: SETUP
+// ═══════════════════════════════════════════════
+let currentQ = 1;
+
+function adjustGroup(delta) {
+  STATE.groupSize = Math.max(1, Math.min(10, STATE.groupSize + delta));
+  document.getElementById('group-display').textContent = STATE.groupSize;
+}
+
+function selectVuln(btn) {
+  document.querySelectorAll('.vuln-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  STATE.vulnerables = btn.dataset.val;
+  document.getElementById('q2-next').disabled = false;
+}
+
+function nextQuestion(from) {
+  document.getElementById('q' + from).classList.remove('active');
+  document.getElementById('dot' + from).classList.add('done');
+  const next = from + 1;
+  if (next <= 3) {
+    document.getElementById('q' + next).classList.add('active');
+    document.getElementById('dot' + next).classList.add('done');
+  }
+  currentQ = next;
+}
+
+function beginStory() {
+  const sel = document.getElementById('state-select');
+  if (!sel.value) { sel.style.borderColor = 'var(--ember)'; return; }
+  STATE.state = sel.value;
+  if (!STATE.vulnerables) STATE.vulnerables = 'none';
+  showScreen('scenarios');
+}
+
+// ═══════════════════════════════════════════════
+//  SCREEN 2: SCENARIOS
+// ═══════════════════════════════════════════════
+function updateScenarioCards() {
+  const isUnlocked = STATE.isUnlocked;
+  document.querySelectorAll('.scenario-card').forEach(card => {
+    const locked = card.dataset.locked === 'true';
+    if (isUnlocked) {
+      card.classList.remove('locked');
+      card.dataset.locked = 'false';
+      const lockIcon = card.querySelector('.lock-icon');
+      if (lockIcon) lockIcon.remove();
+    }
+  });
+  if (isUnlocked) {
+    document.getElementById('difficulty-bar').classList.add('visible');
+    document.getElementById('scenario-subtitle').textContent = 'All scenarios unlocked. Choose your challenge.';
+  }
+}
+
+const SCENARIO_NAMES = {
+  power_grid: 'Power Grid Failure',
+  hurricane: 'Hurricane Evacuation',
+  earthquake: 'Earthquake',
+  wilderness: 'Wilderness Stranded',
+  financial_collapse: 'Financial Collapse',
+  pandemic: 'Pandemic Lockdown',
+};
+
+function selectScenario(card) {
+  const locked = card.dataset.locked === 'true';
+  if (locked) { openModal(); return; }
+  STATE.scenario = card.dataset.scenario;
+  STATE.scenarioName = SCENARIO_NAMES[STATE.scenario] || STATE.scenario;
+  startGame();
+}
+
+function selectDiff(btn) {
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  STATE.difficulty = btn.dataset.diff;
+}
+
+// ═══════════════════════════════════════════════
+//  SCREEN 3: GAME
+// ═══════════════════════════════════════════════
+let typewriterTimer = null;
+
+function startGame() {
+  STATE.round = 0;
+  STATE.score = 50;
+  STATE.history = [];
+  showScreen('game');
+  nextRound('');
+}
+
+function updateRoundUI() {
+  document.getElementById('round-label').textContent = `ROUND ${STATE.round} OF 5`;
+  for (let i = 1; i <= 5; i++) {
+    const pip = document.getElementById('pip' + i);
+    pip.classList.toggle('done', i < STATE.round);
+  }
+}
+
+async function nextRound(userResponse) {
+  STATE.round++;
+  updateRoundUI();
+  setActionVisible(false);
+  setLoading(true);
+  clearStory();
+
+  try {
+    const res = await callStoryAPI({
+      action: 'scene',
+      round: STATE.round,
+      scenario: STATE.scenario,
+      state: STATE.state,
+      groupSize: STATE.groupSize,
+      vulnerables: STATE.vulnerables,
+      history: STATE.history,
+      score: STATE.score,
+      userResponse: userResponse || '',
+    });
+
+    // Apply score change
+    if (res.scoreChange !== undefined) {
+      STATE.score = Math.max(0, Math.min(100, STATE.score + res.scoreChange));
+    }
+
+    // Push to history
+    STATE.history.push({
+      round: STATE.round,
+      scene: res.scene,
+      question: res.question,
+      userAction: userResponse,
+      scoreChange: res.scoreChange || 0,
+    });
+
+    setLoading(false);
+    typewriterText(res.scene, res.question, () => {
+      setActionVisible(true);
+    });
+
+  } catch (err) {
+    setLoading(false);
+    document.getElementById('story-text').textContent = 'Error loading story. Check your connection and try again.';
+    setActionVisible(true);
+  }
+}
+
+function makeMove() {
+  if (STATE.isTyping) return;
+  const input = document.getElementById('action-input');
+  const response = input.value.trim();
+  if (!response) { input.style.borderColor = 'var(--ember)'; return; }
+  input.style.borderColor = '';
+  input.value = '';
+
+  if (STATE.round >= 5) {
+    finishGame(response);
+  } else {
+    nextRound(response);
+  }
+}
+
+async function finishGame(lastResponse) {
+  // Record last action
+  STATE.history.push({ round: STATE.round, userAction: lastResponse });
+
+  setActionVisible(false);
+  setLoading(true);
+  clearStory();
+
+  try {
+    const res = await callStoryAPI({
+      action: 'ending',
+      scenario: STATE.scenario,
+      state: STATE.state,
+      groupSize: STATE.groupSize,
+      vulnerables: STATE.vulnerables,
+      history: STATE.history,
+      finalScore: STATE.score,
+    });
+
+    setLoading(false);
+    showResult(res);
+
+  } catch (err) {
+    setLoading(false);
+    // Fallback ending
+    showResult({
+      outcome: STATE.score >= 70 ? 'survived' : STATE.score >= 40 ? 'barely_survived' : STATE.score >= 20 ? 'didnt_make_it' : 'died',
+      insight: 'Your decisions throughout the crisis revealed critical gaps in survival knowledge.',
+      decisions: 'You made several key choices that shaped your group\'s fate under extreme pressure.',
+    });
+  }
+}
+
+// ─── TYPEWRITER ───
+function clearStory() {
+  if (typewriterTimer) { clearTimeout(typewriterTimer); typewriterTimer = null; }
+  document.getElementById('story-text').innerHTML = '';
+  document.getElementById('story-question').textContent = '';
+}
+
+function typewriterText(scene, question, onDone) {
+  const el = document.getElementById('story-text');
+  const qEl = document.getElementById('story-question');
+  el.innerHTML = '';
+  qEl.textContent = '';
+  STATE.isTyping = true;
+
+  // Add cursor
+  const cursor = document.createElement('span');
+  cursor.className = 'story-cursor';
+  el.appendChild(cursor);
+
+  const words = scene.split(' ');
+  let i = 0;
+
+  function next() {
+    if (i < words.length) {
+      el.insertBefore(document.createTextNode((i === 0 ? '' : ' ') + words[i]), cursor);
+      i++;
+      typewriterTimer = setTimeout(next, 40);
+    } else {
+      // Remove cursor from story, show question
+      cursor.remove();
+      STATE.isTyping = false;
+
+      // Typewriter the question too
+      if (question) {
+        qEl.textContent = '';
+        const qWords = question.split(' ');
+        let qi = 0;
+        function nextQ() {
+          if (qi < qWords.length) {
+            qEl.textContent += (qi === 0 ? '' : ' ') + qWords[qi];
+            qi++;
+            typewriterTimer = setTimeout(nextQ, 35);
+          } else {
+            if (onDone) onDone();
+          }
+        }
+        nextQ();
+      } else {
+        if (onDone) onDone();
+      }
+    }
+  }
+  next();
+}
+
+// ─── UI HELPERS ───
+function setLoading(visible) {
+  document.getElementById('loading-indicator').classList.toggle('visible', visible);
+}
+function setActionVisible(visible) {
+  document.getElementById('action-panel').style.display = visible ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════
+//  API CALL
+// ═══════════════════════════════════════════════
+async function callStoryAPI(body) {
+  const resp = await fetch('/api/story', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) throw new Error('API error: ' + resp.status);
+  return await resp.json();
+}
+
+// ═══════════════════════════════════════════════
+//  SCREEN 4: RESULT
+// ═══════════════════════════════════════════════
+const OUTCOME_CONFIG = {
+  survived: {
+    cls: 'survived',
+    icon: '⚔',
+    title: 'YOU SURVIVED',
+    shareText: 'YOU SURVIVED',
+  },
+  barely_survived: {
+    cls: 'barely',
+    icon: '⚠',
+    title: 'YOU BARELY MADE IT',
+    shareText: 'BARELY SURVIVED',
+  },
+  didnt_make_it: {
+    cls: 'didnt',
+    icon: '✖',
+    title: "YOU DIDN'T MAKE IT",
+    shareText: "DIDN'T MAKE IT",
+  },
+  died: {
+    cls: 'died',
+    icon: '☠',
+    title: 'YOU DIED',
+    shareText: 'YOU DIED',
+  },
+};
+
+function showResult(data) {
+  const cfg = OUTCOME_CONFIG[data.outcome] || OUTCOME_CONFIG['barely_survived'];
+  const outcomeEl = document.getElementById('result-outcome');
+  outcomeEl.className = 'result-outcome ' + cfg.cls;
+  document.getElementById('outcome-icon').textContent = cfg.icon;
+  document.getElementById('outcome-title').textContent = cfg.title;
+  document.getElementById('score-reveal').textContent = STATE.score;
+  document.getElementById('result-insight').textContent = data.insight || '';
+  document.getElementById('result-decisions').textContent = data.decisions || '';
+
+  // Share card
+  document.getElementById('share-outcome').textContent = cfg.shareText;
+  document.getElementById('share-score').textContent = STATE.score + '/100';
+  document.getElementById('share-scenario').textContent = STATE.scenarioName;
+
+  // Post-game paywall for free users
+  const paywall = document.getElementById('postgame-paywall');
+  paywall.classList.toggle('visible', !STATE.isUnlocked);
+
+  showScreen('result');
+}
+
+function screenshotCard() {
+  alert('📸 Take a screenshot of this card and share it!\n\nTip: On iPhone use Side + Volume Up. On Android use Power + Volume Down. On desktop use your screenshot tool.');
+}
+
+function restartFree() {
+  STATE.isUnlocked = false;
+  STATE.scenario = 'power_grid';
+  STATE.scenarioName = SCENARIO_NAMES['power_grid'];
+  startGame();
+}
+
+// ═══════════════════════════════════════════════
+//  PAYWALL MODAL
+// ═══════════════════════════════════════════════
+function openModal() {
+  document.getElementById('paywall-modal').classList.add('active');
+}
+function closeModal() {
+  document.getElementById('paywall-modal').classList.remove('active');
+}
+// Close modal on overlay click
+document.getElementById('paywall-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
