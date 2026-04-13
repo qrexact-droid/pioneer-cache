@@ -1176,6 +1176,27 @@ const STATE = {
   isUnlocked: false,
 };
 
+// ─── USED SCENES MEMORY ───
+const USED_SCENES_KEY = 'pioneer_used_scenes';
+
+function getUsedScenes() {
+  try { return JSON.parse(localStorage.getItem(USED_SCENES_KEY) || '{}'); } catch(e) { return {}; }
+}
+
+function saveUsedScene(scenario, summary) {
+  const used = getUsedScenes();
+  if (!used[scenario]) used[scenario] = [];
+  used[scenario].push(summary);
+  // Keep last 50 per scenario to avoid localStorage bloat
+  if (used[scenario].length > 50) used[scenario] = used[scenario].slice(-50);
+  localStorage.setItem(USED_SCENES_KEY, JSON.stringify(used));
+}
+
+function getUsedSummaries(scenario) {
+  const used = getUsedScenes();
+  return used[scenario] || [];
+}
+
 // ─── CHECK UNLOCK STATUS ───
 function checkUnlock() {
   const params = new URLSearchParams(window.location.search);
@@ -1315,11 +1336,18 @@ async function nextRound(userResponse) {
       history: STATE.history,
       score: STATE.score,
       userResponse: userResponse || '',
+      usedScenes: getUsedSummaries(STATE.scenario),
     });
 
     // Apply score change
     if (res.scoreChange !== undefined) {
       STATE.score = Math.max(0, Math.min(100, STATE.score + res.scoreChange));
+    }
+
+    // Save scene summary to used memory (first 12 words as fingerprint)
+    if (res.scene && STATE.round === 1) {
+      const summary = res.scene.split(' ').slice(0, 12).join(' ');
+      saveUsedScene(STATE.scenario, summary);
     }
 
     // Push to history

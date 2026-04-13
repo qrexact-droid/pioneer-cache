@@ -5,14 +5,17 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { action, round, scenario, state, groupSize, vulnerables, history, score, userResponse, finalScore } = req.body || {};
+  const { action, round, scenario, state, groupSize, vulnerables, history, score, userResponse, finalScore, usedScenes } = req.body || {};
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'Not configured' });
 
   let systemPrompt, userMessage;
 
   if (action === 'scene') {
-    systemPrompt = `You are a survival thriller narrator. Write vivid, dark, cinematic scenes like a published thriller novel. Personalize every detail to the group (${groupSize} people, ${vulnerables}, in ${state}). Make it feel real and desperate. CRITICAL: The "scene" field MUST be exactly 105-115 words. Write slowly, dramatically, with sensory detail to reach that count. Do NOT write a short scene. Aim for 110 words minimum. End the scene with ONE urgent question offering exactly 3 labeled options: A) option one, B) option two, or C) option three. Escalate danger each round. If userResponse is provided, evaluate it and set scoreChange (great: +15 to +20, good: +5 to +15, neutral: -5 to +5, bad: -15 to -5, dangerous: -20 to -10). Return ONLY valid JSON no markdown: {"scene":"...","question":"...","scoreChange":0,"scoreReason":"..."}`;
+    const usedList = Array.isArray(usedScenes) && usedScenes.length > 0
+      ? `NEVER repeat or resemble these previously used opening situations: ${usedScenes.slice(-10).map((s,i) => `${i+1}) "${s}..."`).join(' ')} — Use a completely different location, time of day, and situation opener each game.`
+      : 'This is the first game — make it memorable.';
+    systemPrompt = `You are a survival thriller narrator. Write vivid, dark, cinematic scenes like a published thriller novel. Personalize every detail to the group (${groupSize} people, ${vulnerables}, in ${state}). Make it feel real and desperate. CRITICAL: The "scene" field MUST be exactly 105-115 words. Write slowly, dramatically, with sensory detail to reach that count. Do NOT write a short scene. Aim for 110 words minimum. End the scene with ONE urgent question offering exactly 3 labeled options: A) option one, B) option two, or C) option three. Escalate danger each round. If userResponse is provided, evaluate it and set scoreChange (great: +15 to +20, good: +5 to +15, neutral: -5 to +5, bad: -15 to -5, dangerous: -20 to -10). ${usedList} Return ONLY valid JSON no markdown: {"scene":"...","question":"...","scoreChange":0,"scoreReason":"..."}`;
     userMessage = `Round ${round} of 5. Scenario: ${scenario}. Previous history: ${JSON.stringify(history)}. Current score: ${score}. User's last action: "${userResponse || 'none - this is round 1'}". Write the next scene.`;
   } else {
     systemPrompt = `You are a survival thriller narrator delivering a dramatic conclusion. Write powerfully based on their journey. Return ONLY valid JSON with no markdown: {"outcome":"survived|barely_survived|didnt_make_it|died","insight":"2-3 sentences on exactly what knowledge saved or killed them referencing The Pioneer Cache guide","decisions":"2-3 sentences summarizing their key choices throughout"}`;
