@@ -1492,12 +1492,24 @@ function clearStory() {
   document.getElementById('story-question').textContent = '';
 }
 
+function stripOptionsFromQuestion(question) {
+  // Remove everything from the first A) onward
+  let stripped = question.replace(/[\u2014\-\u2013,]?\s*A\).*$/i, '').trim().replace(/[,;\s]+$/, '').trim();
+  // Ensure it ends with a question mark
+  if (!stripped.endsWith('?')) {
+    // If it ends with a period, replace with question mark
+    stripped = stripped.replace(/\.+$/, '') + '?';
+  }
+  return stripped;
+}
+
 function typewriterText(scene, question, onDone) {
   const el = document.getElementById('story-text');
   const qEl = document.getElementById('story-question');
   el.innerHTML = '';
   qEl.textContent = '';
   STATE.isTyping = true;
+  const displayQuestion = stripOptionsFromQuestion(question);
 
   // Add cursor
   const cursor = document.createElement('span');
@@ -1517,10 +1529,10 @@ function typewriterText(scene, question, onDone) {
       cursor.remove();
       STATE.isTyping = false;
 
-      // Typewriter the question too
-      if (question) {
+      // Typewriter the question (stripped of A/B/C options)
+      if (displayQuestion) {
         qEl.textContent = '';
-        const qWords = question.split(' ');
+        const qWords = displayQuestion.split(' ');
         let qi = 0;
         function nextQ() {
           if (qi < qWords.length) {
