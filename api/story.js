@@ -40,6 +40,20 @@ module.exports = async function handler(req, res) {
     const data = await r.json();
     const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '{}';
     const parsed = JSON.parse(text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
+
+    if (action === 'scene') {
+      // Enforce 115 word max on scene
+      if (parsed.scene) {
+        const words = parsed.scene.split(' ');
+        if (words.length > 115) parsed.scene = words.slice(0, 115).join(' ');
+      }
+      // Enforce A/B/C options — inject if missing
+      if (parsed.question && !/\b[A-C]\)/.test(parsed.question)) {
+        parsed.question = parsed.question.replace(/[?.]*$/, '') +
+          ' — A) Shelter in place and conserve resources, B) Move immediately to find help or supplies, or C) Wait and assess the full situation before acting?';
+      }
+    }
+
     return res.status(200).json(parsed);
   } catch (e) {
     return res.status(500).json({ error: e.message });
