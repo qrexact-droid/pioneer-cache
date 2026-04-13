@@ -473,23 +473,83 @@
     .action-panel {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 1rem;
+      padding: 1.25rem;
+      background: rgba(15,11,6,0.6);
+      border: 1px solid rgba(184,133,42,0.2);
+      border-radius: 10px;
+      margin-top: 1rem;
     }
-    .action-textarea {
-      width: 100%;
-      padding: 1rem 1.2rem;
-      background: rgba(15,11,6,0.9);
-      border: 2px solid rgba(184,133,42,0.25);
+    /* Option buttons parsed from A) B) C) */
+    .choice-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .choice-btn {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: rgba(28,18,8,0.8);
+      border: 1.5px solid rgba(184,133,42,0.3);
       border-radius: 8px;
       color: var(--parchment);
       font-family: 'Source Serif 4', serif;
-      font-size: 1rem;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s;
+      width: 100%;
+    }
+    .choice-btn:hover { border-color: var(--gold); background: rgba(184,133,42,0.08); }
+    .choice-btn.selected { border-color: var(--gold); background: rgba(184,133,42,0.15); }
+    .choice-key {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: rgba(184,133,42,0.2);
+      border: 1px solid var(--gold);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--gold);
+      margin-top: 1px;
+    }
+    .choice-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--ash);
+      font-size: 0.8rem;
+      font-style: italic;
+    }
+    .choice-divider::before, .choice-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(184,133,42,0.2);
+    }
+    .action-textarea {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      background: rgba(15,11,6,0.9);
+      border: 1.5px solid rgba(184,133,42,0.25);
+      border-radius: 8px;
+      color: var(--parchment);
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.95rem;
       resize: none;
-      height: 90px;
+      height: 80px;
       transition: border-color 0.2s;
     }
     .action-textarea:focus { outline: none; border-color: var(--gold); }
-    .action-textarea::placeholder { color: var(--ash); }
+    .action-textarea::placeholder { color: var(--ash); font-style: italic; }
 
     .move-btn {
       padding: 1rem 1.5rem;
@@ -810,16 +870,22 @@
     .modal-fine-print { text-align: center; color: var(--ash); font-size: 0.75rem; margin-top: 0.75rem; }
 
     /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .game-main { padding: 1rem; gap: 1.25rem; }
+      .story-panel { padding: 1.25rem 1rem; }
+      .action-panel { padding: 1rem; gap: 0.85rem; }
+      .choice-btn { padding: 0.75rem 0.85rem; font-size: 0.88rem; }
+      .move-btn { padding: 0.9rem 1rem; font-size: 0.95rem; }
+    }
     @media (max-width: 600px) {
       .scenarios-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
       .scenario-card { padding: 1.2rem; min-height: 150px; }
       .card-emoji { font-size: 1.8rem; }
       .card-title { font-size: 1rem; }
-      .game-main { padding: 1rem; gap: 1rem; }
-      .story-panel { padding: 1.25rem; }
     }
     @media (max-width: 400px) {
       .scenarios-grid { grid-template-columns: 1fr; }
+      .choice-btn { font-size: 0.85rem; }
     }
   </style>
 </head>
@@ -1013,6 +1079,8 @@
     </div>
 
     <div class="action-panel" id="action-panel">
+      <div class="choice-options" id="choice-options"></div>
+      <div class="choice-divider" id="choice-divider" style="display:none;">or type your own</div>
       <textarea class="action-textarea" id="action-input" placeholder="What do you do? Describe your action..."></textarea>
       <button class="move-btn" id="move-btn" onclick="makeMove()">MAKE YOUR MOVE →</button>
     </div>
@@ -1265,6 +1333,7 @@ async function nextRound(userResponse) {
 
     setLoading(false);
     typewriterText(res.scene, res.question, () => {
+      renderChoices(res.question);
       setActionVisible(true);
     });
 
@@ -1275,6 +1344,65 @@ async function nextRound(userResponse) {
   }
 }
 
+function parseChoices(question) {
+  // Match patterns like A) ... B) ... C) ... or (A) ... (B) ...
+  const pattern = /\b([A-C])\)\s*([^A-C\(]+?)(?=\s+[B-C]\)|$)/gi;
+  const pattern2 = /\(([A-C])\)\s*([^\(]+?)(?=\s*\([B-C]\)|$)/gi;
+  let matches = [];
+  let m;
+  const re = /\b([A-C])\)\s*(.*?)(?=\s+[B-C]\)|[,]\s+or\s+[B-C]\)|$)/gi;
+  // Simple split approach
+  const parts = question.split(/,\s*(?:or\s+)?\b([A-C])\)/i);
+  // Fallback: regex all A) B) C) occurrences
+  const simple = /([A-C])\)\s*([^A-Z]{10,}?)(?=\s*[B-C]\)|$)/gi;
+  while ((m = simple.exec(question)) !== null) {
+    matches.push({ key: m[1].toUpperCase(), text: m[2].trim().replace(/[,.]$/, '') });
+  }
+  return matches;
+}
+
+function renderChoices(question) {
+  const container = document.getElementById('choice-options');
+  const divider = document.getElementById('choice-divider');
+  container.innerHTML = '';
+  const choices = parseChoices(question);
+  if (choices.length < 2) { divider.style.display = 'none'; return; }
+  divider.style.display = 'flex';
+  choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-key">${choice.key}</span><span>${choice.text}</span>`;
+    btn.addEventListener('click', () => selectChoice(choice.key, choice.text, btn));
+    container.appendChild(btn);
+  });
+}
+
+function selectChoice(key, text, btn) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const input = document.getElementById('action-input');
+  input.value = `${key}) ${text}`;
+  input.style.borderColor = 'var(--gold)';
+}
+
+// Keyboard shortcut: press A/B/C to select that choice
+document.addEventListener('keydown', function(e) {
+  const panel = document.getElementById('action-panel');
+  const input = document.getElementById('action-input');
+  if (panel.style.display === 'none' || document.activeElement === input) return;
+  const key = e.key.toUpperCase();
+  if (['A','B','C'].includes(key)) {
+    const btns = document.querySelectorAll('.choice-btn');
+    btns.forEach(btn => {
+      const k = btn.querySelector('.choice-key');
+      if (k && k.textContent.trim() === key) {
+        btn.click();
+        e.preventDefault();
+      }
+    });
+  }
+});
+
 function makeMove() {
   if (STATE.isTyping) return;
   const input = document.getElementById('action-input');
@@ -1282,6 +1410,8 @@ function makeMove() {
   if (!response) { input.style.borderColor = 'var(--ember)'; return; }
   input.style.borderColor = '';
   input.value = '';
+  document.getElementById('choice-options').innerHTML = '';
+  document.getElementById('choice-divider').style.display = 'none';
 
   if (STATE.round >= 5) {
     finishGame(response);
