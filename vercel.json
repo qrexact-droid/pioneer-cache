@@ -1,10 +1,5 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "api/*.js", "use": "@vercel/node" },
-    { "src": "*.html", "use": "@vercel/static" },
-    { "src": "*.png", "use": "@vercel/static" },
-    { "src": "*.mp4", "use": "@vercel/static" },
-    { "src": "og-image.png", "use": "@vercel/static" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/$1" }
   ]
 }
