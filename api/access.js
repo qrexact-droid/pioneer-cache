@@ -31,7 +31,11 @@ module.exports = async function handler(req, res) {
     .digest('hex')
     .slice(0, 48);
 
-  if (!crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expected))) {
+  // Pad/truncate to same length before constant-time compare (prevent length oracle)
+  const tokenBuf = Buffer.alloc(48, 0);
+  const expectedBuf = Buffer.from(expected);
+  Buffer.from(token.slice(0, 48)).copy(tokenBuf);
+  if (token.length !== expected.length || !crypto.timingSafeEqual(tokenBuf, expectedBuf)) {
     return res.status(403).json({ ok: false, reason: 'invalid_token' });
   }
 
