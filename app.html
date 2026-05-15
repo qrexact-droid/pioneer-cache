@@ -255,18 +255,42 @@ select:focus{border-color:var(--gold)}
 </div>
 <script>
 
-// Payment gate — verify ref param or redirect to sales page
+// Payment gate — server-side token validation
 (function() {
   var params = new URLSearchParams(window.location.search);
-  var ref = params.get('ref');
-  var session = params.get('session_id');
-  // Allow access if coming from Stripe (ref=paid or session_id present) or if already stored in session
-  if (!ref && !session && !sessionStorage.getItem('pc_access')) {
-    window.location.replace('https://thepioneercache.com/?blocked=1');
+  var e = params.get('e');   // customer email
+  var t = params.get('t');   // HMAC token
+
+  // Already validated this session
+  if (sessionStorage.getItem('pc_access') === '1') return;
+
+  // No token params at all → redirect to sales page
+  if (!e || !t) {
+    window.location.replace('https://www.thepioneercache.com/?blocked=1');
+    return;
   }
-  if (ref === 'paid' || session) {
-    sessionStorage.setItem('pc_access', '1');
-  }
+
+  // Hide content while validating
+  document.documentElement.style.visibility = 'hidden';
+
+  fetch('/api/access', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({e: e, t: t})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      sessionStorage.setItem('pc_access', '1');
+      document.documentElement.style.visibility = '';
+    } else {
+      window.location.replace('https://www.thepioneercache.com/?blocked=1');
+    }
+  })
+  .catch(function() {
+    // Network error — fail closed
+    window.location.replace('https://www.thepioneercache.com/?blocked=1');
+  });
 })();
 
 function downloadGuide() {
@@ -279,7 +303,7 @@ function downloadGuide() {
   setTimeout(function(){ if(banner) banner.style.display = 'none'; }, 2000);
   // Strip payment gate and download banner from offline file
   var content = document.documentElement.outerHTML;
-  content = content.replace(/\/\/ Payment gate[\s\S]*?\}\)\(\);/m, '// Offline edition — no gate');
+  content = content.replace(/\/\/ Payment gate[\.\s\S]*?\}\)\(\);/m, '// Offline edition — no gate');
   content = content.replace('</head>', '<style>#dl-banner{display:none!important}</style></head>');
   var blob = new Blob([content], {type: 'text/html'});
   var url = URL.createObjectURL(blob);
